@@ -881,6 +881,15 @@ function compute(){
   const t0 = P.startMin;
   const endMin = t0 + P.total*60;
   const levWord = S.lev==="fresco"?"lievito di birra fresco":S.lev==="secco"?"lievito secco":S.lev==="lm"?"lievito madre":"licoli";
+  /* confronto esplicito: senza frigo, una notte, due notti (stessa farina e cucina) */
+  const cmpDays = [0,1,2].map(d => { const keep = S.endDay; S.endDay = d; const Q = makePlan("fresco", A, overheadH); S.endDay = keep; return Q; });
+  const cmpG = Q => fmt(A.F * Q.fresh / 100, 1);
+  const cmpBox = (S.lev === "fresco" || S.lev === "secco") ? `<div class="tbl-wrap"><table class="cmp">
+      <tr><th>Lievito di birra per ${fmt(A.F)} g di farina, cucina a ${T} °C</th><th>Fresco</th><th>Secco istantaneo</th></tr>
+      <tr><td>Senza frigo (pane oggi, circa ${hm(cmpDays[0].use)} di lievitazione)</td><td>${cmpG(cmpDays[0])} g</td><td>${fmt(A.F*cmpDays[0].fresh/100*0.35,1)} g</td></tr>
+      <tr><td>Una notte in frigo (${hm(cmpDays[1].bulk)} fuori + ${hm(cmpDays[1].fh||0)} a ${fridgeT()} °C)</td><td>${cmpG(cmpDays[1])} g</td><td>${fmt(A.F*cmpDays[1].fresh/100*0.35,1)} g</td></tr>
+      <tr><td>Due notti in frigo${cmpDays[2].mode==="fridge" ? ` (${hm(cmpDays[2].fh)} a ${fridgeT()} °C)` : " (questa farina non le regge)"}</td><td>${cmpG(cmpDays[2])} g</td><td>${fmt(A.F*cmpDays[2].fresh/100*0.35,1)} g</td></tr>
+    </table></div>` : "";
   $("#plan-box").innerHTML = `<div class="plan">
     <div class="plan-grid">
       <div><span>${S.lev==="fresco"||S.lev==="secco"?"Lievito":"Lievito madre"}</span><b>${S.lev==="fresco"||S.lev==="secco" ? fmt(yG,1)+" g" : fmt(starter)+" g"}</b></div>
@@ -890,6 +899,7 @@ function compute(){
       ${P.mode==="fridge" ? `<div><span>In frigo (${fridgeT()} °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
       <div><span>Inforni</span><b>${at(endMin)}</b></div>
     </div>
+    ${cmpBox}
     <p class="small"><b>Quanto tempo serve.</b> Dal momento in cui inizi a impastare a quando metti in forno, con ${levWord} e la cucina a ${T} °C servono <b>almeno ${hm(P.minH)}</b>: è il tempo più breve in cui il lievito riesce a far crescere l'impasto. Il tempo <b>consigliato è ${hm(P.recH)}</b> o più: una lievitazione più lenta dà più sapore e una mollica migliore. </p>
     ${P.mode==="fridge" ? `<p class="small"><b>Perché col frigo il lievito non cala di molto.</b> A ${fridgeT()} °C il lievito lavora pochissimo: ${hm(P.fh)} di frigo valgono solo circa ${hm(fridgeEq(P.fh))} a 24 °C. Il frigo serve a dare sapore e a fermare l'impasto fino all'ora giusta, non a farlo crescere: quasi tutta la crescita avviene prima, a temperatura ambiente, e poi in forno. Per questo la dose è solo un po' più bassa che in giornata (${fmt(levDose("fresco", {fresh: freshFor(5)}, A.F),1)} g col lievito fresco). La regola "meno lievito" vale per le lievitazioni lunghe a temperatura ambiente, o per due notti in frigo.</p>` : ""}
     <p class="small"><b>Perché l'acqua a ${wT} °C.</b> ${wExplain}</p>
@@ -1074,6 +1084,7 @@ function compute(){
       <p><b>Programma.</b> <b>Oggi</b>: tutto a temperatura ambiente, con il tempo consigliato per il tuo lievito e la tua cucina. <b>Domani</b>: puntata breve (2,5 h equivalenti a 24 °C col birra, 4 col madre), circa 14 ore in frigo e infornata alle 10 (alle 19 per focacce e pizze). <b>Dopodomani</b>: come domani ma fino a circa 38 ore di frigo, se la farina le regge. In frigo uso la temperatura che metti tu (misurala con un termometro in un bicchiere d'acqua lasciato una notte in frigo): le prime 3 ore l'impasto si sta ancora raffreddando e conto la media tra cucina e frigo, poi la temperatura del frigo, sempre con lo stesso 9% per grado. È una mia approssimazione.</p>
       <p><b>Quanto è affidabile la dose.</b> Nessun ente certifica la dose di lievito per un dato tempo: ci sono tabelle di manuali e di panificatori, e per la notte in frigo danno numeri anche 2–3 volte diversi tra loro. Per questo la prova che conta è l'impasto: il volume indicato a fine puntata e il dito infarinato all'appretto. Se usi una tua dose che sai che funziona, scrivila in "Uso già una mia dose": tengo i tuoi grammi e ricalcolo le ore, così dose e tempi restano coerenti.</p>
       <p><b>Lievito.</b> Il tempo si accorcia di circa il 9% per ogni grado in più. Il modello è tarato sulla tabella dei lieviti per poolish del manuale Zanichelli (15 g/kg per 4–5 h, 3 g/kg per 10–12 h). Secco istantaneo = 35% del fresco, secco attivo = 50% (American Society of Baking). Il lievito madre parte dal 20% per circa 8 ore (Giorilli e Bonci su Dissapore).</p>
+      <p><b>Frigo: confronto con le fonti.</b> Harold McGee: in frigo il lievito impiega circa 10 volte di più che a temperatura ambiente calda; il mio modello dà un rapporto simile (a 4 °C circa 1/6 di un'ora a 24 °C, circa 1/8 rispetto a 27 °C). Dan DiMuzio (<i>Bread Baking</i>, riportato su The Fresh Loaf) scende dallo 0,7% allo 0,2–0,4% di lievito istantaneo quando l'appretto si fa in frigo; King Arthur consiglia circa 1 cucchiaino di istantaneo al posto di una bustina (2¼) per una lievitazione lunga o notturna. Mike Avery (Sourdough Home), panificatore professionista, invece usa dosi anche più alte per l'appretto in frigo a 3–4 °C. Le fonti non sono d'accordo tra loro: le mie dosi per una notte in frigo (circa 0,6% di fresco, cioè 0,2% di istantaneo) stanno nella fascia di DiMuzio, la più prudente. Rispetto a un impasto diretto classico in giornata (2–3 ore, circa 2% di fresco) sono circa un terzo; rispetto al mio "oggi", che è già una lievitazione lenta di 6–7 ore, la differenza è più piccola.</p>
       <p><b>Temperatura dell'acqua.</b> Formula King Arthur Baking: temperatura voluta × 3 (× 4 con lievito madre) meno farina, ambiente, lievito e attrito. L'attrito a mano (3 °C) è una mia stima.</p>
       <p><b>Forza e tempi.</b> Altroconsumo indica W 250–320 per lievitazioni lunghe; il manuale Zanichelli W &gt; 270 per il frigo. Le ore "sopportate" per fascia di W sono una mia interpolazione.</p>
     </div>
