@@ -1,4 +1,4 @@
-# Banco del Pane
+# Banco del Pane di Mario Mingione
 
 Calcolatore e guide per pane, focacce e pizze in teglia. App web installabile (PWA).
 
