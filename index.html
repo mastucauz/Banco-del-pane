@@ -385,6 +385,7 @@ const SOURCES = {
   dis_lm:{t:"Dissapore, Lievito madre solido e liquido (A. Trezzi, con P. Giorilli, G. Bonci)", u:"https://www.dissapore.com/ricette/lievito-madre-la-ricetta-perfetta/", k:"Rivista"},
   altro_lm:{t:"Altroconsumo, Lievito madre: come farlo e conservarlo", u:"https://www.altroconsumo.it/alimentazione/pane/consigli/lievito-madre", k:"Associazione consumatori"},
   ka_steam:{t:"King Arthur Baking, Baking bread with steam at home (metodi per il vapore)", u:"https://www.kingarthurbaking.com/blog/2024/04/26/baking-bread-with-steam-at-home", k:"Mulino / scuola"},
+  malto_att:{t:"Malto Attivo, Super Diastasico: estratto di malto d'orzo, circa 12.000 unità Pollak, dose consigliata 0,5–3,5% sulla farina (scheda prodotto)", u:"https://www.youdreamitaly.com/en/Active-Barley-Malt-Extract-350-Gr.xhtml?id=3284", k:"Produttore"},
   ka_malt:{t:"King Arthur Baking, Malto diastasico, non diastasico e sciroppo (con J. Hamelman)", u:"https://www.kingarthurbaking.com/blog/2022/03/14/difference-between-diastatic-malt-non-diastatic-malt-barley-malt-syrup", k:"Mulino / scuola"},
   cbaker:{t:"Understanding Ingredients for the Canadian Baker, cap. Malt (go2HR, manuale per la formazione dei panificatori)", u:"https://ecampusontario.pressbooks.pub/ingredients/chapter/malt/", k:"Manuale"},
   altamura:{t:"Disciplinare di produzione Pane di Altamura DOP", u:"https://www.quattrocalici.it/wp-content/uploads/2021/05/pane_di_altamura_dop.pdf", k:"Disciplinare DOP"},
@@ -597,8 +598,9 @@ const LEVELS = [["principiante","Principiante",-4],["intermedio","Intermedio",0]
 const LEVS = [["fresco","Birra fresco"],["secco","Birra secco"],["lm","Lievito madre"],["licoli","Licoli"]];
 const MIXERS = [["mano","A mano"],["planetaria","Planetaria"]];
 const ENDDAYS = [[0,"Oggi"],[1,"Domani (notte in frigo)"],[2,"Dopodomani (2 notti in frigo)"]];
-const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["nodia","Non diastasico o sciroppo"]];
-const MALT_DEF = {dia:0.2, nodia:1};
+const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["estr","Estratto diastasico (liquido)"],["nodia","Non diastasico o sciroppo"]];
+const MALT_DEF = {dia:0.2, estr:0.5, nodia:1};
+const MALT_NAME = {dia:"Malto d'orzo diastasico in polvere", estr:"Estratto di malto diastasico (liquido)", nodia:"Malto d'orzo non diastasico / sciroppo"};
 
 function segButtons(el, list, key, after){
   el.innerHTML = list.map(([v,l]) => `<button type="button" data-v="${v}" aria-pressed="${String(S[key])===String(v)}">${l}</button>`).join("");
@@ -807,7 +809,7 @@ function compute(){
   const extras = teg && R.extra ? R.extra(A.F).filter(x => !(S.malt !== "no" && /[Mm]alto/.test(x[0]))) : [];
   const maltPct = S.malt === "no" ? 0 : (S.maltPct ?? MALT_DEF[S.malt]);
   $("#malt-box").hidden = S.malt === "no"; if (S.malt !== "no" && document.activeElement !== $("#in-malt")) $("#in-malt").value = maltPct;
-  if (maltPct) extras.push([S.malt==="dia" ? "Malto d'orzo diastasico in polvere" : "Malto d'orzo non diastasico / sciroppo", A.F*maltPct/100, fmt(maltPct,1)+"%"]);
+  if (maltPct) extras.push([MALT_NAME[S.malt], A.F*maltPct/100, fmt(maltPct,1)+"%"]);
   const extraIn = extras.filter(x => !/superficie|teglia/.test(x[0])).reduce((a,x) => a + x[1], 0);
   const total = A.F + water + salt + yG + starter + extraIn;
   const hold = H >= 70 ? Math.round(A.F * 0.05 / 5) * 5 : 0;
@@ -867,6 +869,8 @@ function compute(){
   if (S.hOver != null && Math.abs(S.hOver - rec) >= 6) notes.push(["warn", `<b>Hai impostato ${S.hOver}% invece di ${rec}%.</b> L'impasto sarà ${S.hOver > rec ? "più difficile da gestire: più pieghe, mani bagnate, formatura veloce" : "più rigido: alveolatura più fitta"}.`]);
   if (S.malt === "dia" && maltPct > 1) notes.push(["warn", `<b>Malto diastasico al ${fmt(maltPct,1)}%.</b> Hamelman (citato da King Arthur) consiglia di partire da 0,1–0,2% e salire a piccoli passi: troppo malto attivo rende la mollica gommosa e appiccicosa.`]);
   else if (S.malt === "dia") notes.push(["info", `<b>Malto diastasico.</b> Gli enzimi trasformano parte dell'amido in zuccheri: lievitazione più vivace, crosta più colorata. Utile con farine povere di enzimi o lievitazioni lunghe; con buone farine spesso non serve.`]);
+  if (S.malt === "estr" && maltPct > 2) notes.push(["warn", `<b>Estratto di malto al ${fmt(maltPct,1)}%.</b> Il produttore (Malto Attivo, 12.000 unità Pollak) indica 0,5–3,5% sulla farina, ma con una farina forte e una lievitazione lunga conviene restare in basso: gli enzimi lavorano per tutte le ore di lievitazione e un eccesso dà mollica appiccicosa e crosta molto scura. Sali di 0,5% alla volta.`]);
+  else if (S.malt === "estr") notes.push(["info", `<b>Estratto di malto diastasico (liquido).</b> È malto con gli enzimi vivi, come quello in polvere, ma sciolto in una pasta densa che contiene anche zuccheri e acqua: per questo la dose è più alta (il produttore indica 0,5–3,5% sulla farina). Partire da 0,5% e salire solo se la crosta resta pallida o la lievitazione è lenta. Scioglilo nell'acqua dell'impasto.`]);
   if (S.malt === "nodia") notes.push(["info", `<b>Malto non diastasico.</b> Non ha enzimi attivi: dà sapore, colore alla crosta e aiuta a trattenere umidità, ma non accelera la lievitazione.`]);
   if (T >= 28) notes.push(["warn", `<b>Cucina calda (${T} °C).</b> Tutto corre: usa acqua fredda e controlla l'impasto più che l'orologio.`]);
   if (T <= 18) notes.push(["info", `<b>Cucina fresca (${T} °C).</b> Tempi lunghi: la ciotola nel forno spento con la luce accesa guadagna qualche grado.`]);
@@ -1419,17 +1423,17 @@ const G_LIEV = [
     <li><b>Nell'impasto:</b> i semi che assorbono molto, come il lino, vanno messi in ammollo prima. King Arthur usa 1 parte di lino e 3 d'acqua, preparati insieme al lievito la sera prima. Girasole e sesamo invece si tostano e si aggiungono a fine impasto.</li></ul>` + src("altro","zani","altamura","ka_dark","ka_seeds","ka_seedf")},
   {id:"malto", t:"Malto d'orzo", s:"Diastasico o no, quanto metterne, cosa cambia", body:`
     <div class="tbl-wrap"><table class="cmp">
-      <tr><th></th><th>Diastasico (polvere)</th><th>Non diastasico / sciroppo</th></tr>
-      <tr><td><b>Cos'è</b></td><td>Orzo germinato essiccato a bassa temperatura: gli enzimi sono vivi</td><td>Essiccato ad alta temperatura: enzimi inattivi, colore più scuro</td></tr>
-      <tr><td><b>Cosa fa</b></td><td>Trasforma parte dell'amido in maltosio: più cibo per il lievito, lievitazione più vivace, crosta più colorata</td><td>Sapore, dolcezza e colore della crosta. Non accelera la lievitazione</td></tr>
-      <tr><td><b>Quanto</b></td><td>Partire da 0,1–0,2% sulla farina e salire piano (Hamelman)</td><td>Per pane francese e italiano 0,5–2% sulla farina; integrale 5–9% (manuale canadese)</td></tr>
-      <tr><td><b>Se esageri</b></td><td>Mollica gommosa e appiccicosa</td><td>Crosta troppo scura, sapore dolce</td></tr>
+      <tr><th></th><th>Diastasico (polvere)</th><th>Estratto diastasico (liquido)</th><th>Non diastasico / sciroppo</th></tr>
+      <tr><td><b>Cos'è</b></td><td>Orzo germinato essiccato a bassa temperatura: gli enzimi sono vivi</td><td>Estratto di malto in pasta densa, con enzimi vivi (es. Malto Attivo Super Diastasico, 12.000 unità Pollak)</td><td>Essiccato ad alta temperatura: enzimi inattivi, colore più scuro</td></tr>
+      <tr><td><b>Cosa fa</b></td><td>Trasforma parte dell'amido in maltosio: più cibo per il lievito, lievitazione più vivace, crosta più colorata</td><td>Come il diastasico in polvere, in più porta zuccheri già pronti</td><td>Sapore, dolcezza e colore della crosta. Non accelera la lievitazione</td></tr>
+      <tr><td><b>Quanto</b></td><td>Partire da 0,1–0,2% sulla farina e salire piano (Hamelman)</td><td>0,5–3,5% sulla farina (produttore). Con farine forti e frigo, 0,5–1%</td><td>Per pane francese e italiano 0,5–2% sulla farina; integrale 5–9% (manuale canadese)</td></tr>
+      <tr><td><b>Se esageri</b></td><td>Mollica gommosa e appiccicosa</td><td>Mollica appiccicosa, crosta troppo scura</td><td>Crosta troppo scura, sapore dolce</td></tr>
     </table></div>
     <ul><li><b>Quando serve:</b> con farine povere di enzimi, lievitazioni lunghe in frigo, quando la crosta resta pallida. Il manuale canadese ricorda che una buona farina spesso ha già enzimi a sufficienza.</li>
     <li><b>Conservazione:</b> il malto trattiene umidità e aiuta il pane a restare morbido più a lungo.</li>
     <li><b>Sostituzioni:</b> 1 g di sciroppo di malto ≈ 0,8 g di malto diastasico in polvere (King Arthur). Per rendere inattivo il diastasico, tostalo 5 minuti a 175 °C.</li>
     <li>Nella focaccia genovese di Tesauro: 0,5% di malto diastasico in polvere.</li>
-    <li>Nel calcolatore puoi aggiungerlo dalla scheda Impasto, alla voce "Malto d'orzo".</li></ul>` + src("ka_malt","cbaker","dis_foc")},
+    <li>Nel calcolatore puoi aggiungerlo dalla scheda Impasto, alla voce "Malto d'orzo".</li></ul>` + src("ka_malt","cbaker","dis_foc","malto_att")},
   {id:"strumenti", t:"Strumenti", s:"Quelli che servono davvero", body:() => `
     <div class="panels">${[
       [`<rect class="tool" x="22" y="40" width="76" height="34" rx="6"/><rect class="tool" x="30" y="26" width="60" height="14" rx="4"/><rect x="44" y="50" width="32" height="12" rx="2" class="accent-fill"/>`, "<b>Bilancia digitale</b> al grammo, meglio una di precisione a 0,1 g per sale e lievito"],
