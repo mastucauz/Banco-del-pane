@@ -281,10 +281,12 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
       <h3>Lievito e tempi</h3>
       <p class="muted small">Tu scegli il lievito e quando vuoi il pane. Orari, ore a temperatura ambiente, ore in frigo e dose di lievito li calcolo io.</p>
       <div class="field"><span class="lbl">Lievito (la dose sotto cambia da sola)</span><div class="seg lev-seg" id="seg-lev"></div></div>
+      <div class="field" id="own-field"><label for="in-own">Uso già una mia dose (facoltativo)</label><div class="unit" data-u="g"><input id="in-own" type="text" inputmode="decimal" autocomplete="off"></div><p class="muted small">Lascia vuoto e la dose la calcolo io. Se scrivi i tuoi grammi, tengo la tua dose e adatto le ore, così dose e tempi tornano.</p></div>
       <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
       <div class="grid2">
         <div class="field"><label for="in-temp">Temperatura della cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="number" min="12" max="34" step="1" inputmode="numeric"></div></div>
         <div class="field"><label for="in-ftemp">Temperatura della farina</label><div class="unit" data-u="°C"><input id="in-ftemp" type="number" min="2" max="34" step="1" inputmode="numeric"></div></div>
+        <div class="field" id="fridge-field"><label for="in-fridge">Temperatura del frigo</label><div class="unit" data-u="°C"><input id="in-fridge" type="number" min="1" max="10" step="1" inputmode="numeric"></div></div>
         <div class="field" id="pieces-field"><label for="in-pieces">Numero di pezzi</label><input id="in-pieces" type="number" min="1" max="30" step="1" inputmode="numeric"></div>
         <div class="field"><label for="in-salt">Sale (% sulla farina)</label><div class="unit" data-u="%"><input id="in-salt" type="number" min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
       </div>
@@ -586,7 +588,7 @@ const DEFAULT = {
   rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
   style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
   start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
-  pieces:1, salt:2.0, mixer:"mano", hOver:null, example:true, panW:30, panL:40, panN:1
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, example:true, panW:30, panL:40, panN:1
 };
 let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
 if (!RECIPES[S.style]) S.style = "pagnotta";
@@ -650,7 +652,8 @@ function bindNum(id, key, isFloat){
   const el = $(id); el.value = S[key];
   el.addEventListener("input", () => { const v = isFloat ? parseFloat(el.value) : parseInt(el.value,10); if (!isNaN(v)) { S[key] = v; markEdited(); compute(); } });
 }
-bindNum("#in-temp","temp"); bindNum("#in-pieces","pieces"); bindNum("#in-salt","salt",true);
+bindNum("#in-temp","temp"); bindNum("#in-fridge","fridgeT");
+$("#in-own").value = S.myDose ?? ""; $("#in-own").addEventListener("input", e => { const v = parseFloat(String(e.target.value).replace(",", ".")); S.myDose = isNaN(v) || v <= 0 ? null : v; markEdited(); compute(); }); bindNum("#in-pieces","pieces"); bindNum("#in-salt","salt",true);
 $("#in-ftemp").value = S.ftemp ?? ""; $("#in-ftemp").addEventListener("input", e => { const v = parseInt(e.target.value,10); S.ftemp = isNaN(v) ? null : v; markEdited(); compute(); });
 $("#in-malt").addEventListener("input", e => { const v = parseFloat(e.target.value); if (!isNaN(v)) { S.maltPct = v; markEdited(); compute(); } });
 function nowStart(){ const d = new Date(); let m = d.getHours()*60 + d.getMinutes(); m = Math.ceil(m/15)*15; return String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
@@ -685,8 +688,15 @@ const hm = h => { const t = Math.round(h*60/5)*5; const H = Math.floor(t/60), M 
 const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60+m; };
 
 /* Programma automatico. eq = ore equivalenti a 24 °C. Il giorno scelto decide il metodo. */
-/* frigo: le prime 3 ore l'impasto si sta ancora raffreddando (circa 14 °C di media), poi 4 °C */
-const fridgeEq = h => Math.min(h,3)*0.42 + Math.max(0,h-3)*0.18;
+/* frigo: le prime 3 ore l'impasto si sta ancora raffreddando (media tra cucina e frigo), poi è alla temperatura del frigo */
+const fRate = T => Math.pow(1.09, T - 24);
+const fridgeT = () => clamp(S.fridgeT ?? 4, 1, 10);
+const coolRate = () => fRate(((S.temp||22) + fridgeT())/2);
+const fridgeEq = h => Math.min(h,3)*coolRate() + Math.max(0,h-3)*fRate(fridgeT());
+const fridgeHoursFor = e => { const c3 = 3*coolRate(); return e <= c3 ? e/coolRate() : 3 + (e - c3)/fRate(fridgeT()); };
+/* dose di lievito fresco (% sulla farina) per un certo numero di ore equivalenti, e viceversa */
+const freshFor = eq => Math.pow(4.2 / eq, 1/0.6);
+const eqFor = pct => 4.2 / Math.pow(pct, 0.6);
 function makePlan(lev, A, overheadH){
   const T = clamp(S.temp || 22, 10, 36), f = Math.pow(1.09, T - 24);
   const starter = lev === "lm" || lev === "licoli";
@@ -710,10 +720,11 @@ function makePlan(lev, A, overheadH){
   }
   /* domani / dopodomani: puntata breve, poi frigo, infornata a un'ora comoda */
   const target = S.endDay*1440 + (teg ? 19*60 : 10*60);
+  res.target = target;
   const rb = (starter ? 4 : 2.5) / f;
   const post = teg ? R.post : 0;
   const room = tol - rb*f - post*f;
-  const maxFh = room <= 1.26 ? room/0.42 : clamp(3 + (room - 1.26)/0.18, 0, 72);
+  const maxFh = room <= 0 ? 0 : clamp(fridgeHoursFor(room), 0, 72);
   const wantFh = S.endDay === 1 ? 14 : 38;
   if (maxFh < 8){
     roomPlan(target - (overheadH + Math.max(recEq/f, minEq/f))*60);
@@ -730,6 +741,40 @@ function makePlan(lev, A, overheadH){
   Object.assign(res, {mode:"fridge", bulk: rb, fh, post, app: post, eq: rb*f + fridgeEq(fh) + post*f, startMin, total: overheadH + rb + fh + post});
   if (S.endDay === 2 && fh < 30) res.why = `La farina regge circa ${hm(maxFh)} di frigo, non due notti intere: inizi ${startMin >= 1440 ? "domani" : "più tardi"} e la qualità resta la stessa.`;
   return finish();
+}
+/* "Uso già una mia dose": tengo la dose e adatto i tempi, in modo che dose e tempi siano coerenti */
+function adaptToDose(P, pct, overheadH){
+  const need = eqFor(pct), f = P.f, now = P.startMin;
+  const out = Object.assign({}, P, {fresh: pct, own: true, ownNeed: need, ownMsg: ""});
+  if (P.starter) return P;
+  if (P.mode === "room"){
+    const use = need / f;
+    out.use = use; out.eq = need; out.bulk = use * (RECIPES[S.style].kind==="teglia" ? 0.6 : 0.65); out.app = use - out.bulk;
+    out.total = overheadH + use;
+    if (S.endDay > 0 && P.target != null) out.startMin = Math.max(now, P.target - out.total*60);
+    if (need > P.tol) out.ownMsg = `Con questa dose servono circa ${fmt(need,0)} ore equivalenti a 24 °C, ma la tua farina ne regge circa ${P.tol}: rischi un impasto sfinito. Aumenta un po' la dose.`;
+    else if (use < 1.5) out.ownMsg = `Con questa dose l'impasto sarebbe pronto in meno di 1 ora e mezza: troppo in fretta per avere sapore. Riduci la dose.`;
+    return out;
+  }
+  /* frigo: la differenza la sposto sul tempo fuori frigo (o sulla puntata) */
+  let diff = need - P.eq, bulk = P.bulk, post = P.post || 0, fh = P.fh;
+  if (diff > 0){ post += diff / f; }
+  else {
+    const cut = -diff / f;
+    const canBulk = Math.max(0, bulk - 0.75);
+    const fromBulk = Math.min(cut, canBulk); bulk -= fromBulk;
+    let rest = (cut - fromBulk) * f;
+    if (rest > 0 && post > 0){ const fp = Math.min(post, rest / f); post -= fp; rest -= fp * f; }
+    if (rest > 0.05){ const newF = Math.max(0, fridgeEq(fh) - rest); fh = Math.max(4, fridgeHoursFor(newF)); }
+  }
+  out.bulk = bulk; out.post = post; out.app = post; out.fh = fh;
+  out.eq = bulk*f + fridgeEq(fh) + post*f;
+  out.total = overheadH + bulk + fh + post;
+  out.startMin = P.target != null ? Math.max(now, P.target - out.total*60) : P.startMin;
+  if (out.eq < need*0.9) out.ownMsg = `Questa dose è troppo alta anche accorciando i tempi al minimo: l'impasto arriverebbe in forno troppo lievitato. Riduci la dose o lascia che la calcoli io.`;
+  if (need > P.tol) out.ownMsg = `Con questa dose servono circa ${fmt(need,0)} ore equivalenti a 24 °C, ma la tua farina ne regge circa ${P.tol}: rischi un impasto sfinito. Aumenta un po' la dose.`;
+  if (post > 5) out.ownMsg = `Con questa dose dopo il frigo servono ${hm(post)} a temperatura ambiente: è tanto. Se vuoi infornare prima, aumenta la dose.`;
+  return out;
 }
 function levDose(lev, P, F){
   if (lev === "fresco") return F * P.fresh / 100;
@@ -794,7 +839,15 @@ function compute(){
   const plans = {}; LEVS.forEach(([k]) => plans[k] = makePlan(k, A, overheadH));
   $("#seg-lev").innerHTML = LEVS.map(([k,l]) => `<button type="button" data-v="${k}" aria-pressed="${S.lev===k}">${l}<small>${fmt(levDose(k, plans[k], A.F), k==="lm"||k==="licoli"?0:1)} g${plans[k].short?" · tempo stretto":""}</small></button>`).join("");
   $("#seg-lev").onclick = e => { const b = e.target.closest("button"); if (!b) return; S.lev = b.dataset.v; markEdited(); compute(); };
-  const P = plans[S.lev];
+  let P = plans[S.lev];
+  const yeastLev = S.lev === "fresco" || S.lev === "secco";
+  $("#own-field").hidden = !yeastLev; $("#fridge-field").hidden = S.endDay === 0;
+  const autoG = yeastLev ? levDose(S.lev, P, A.F) : 0;
+  $("#in-own").placeholder = yeastLev ? fmt(autoG,1) : "";
+  if (yeastLev && S.myDose > 0){
+    const pct = (S.lev === "secco" ? S.myDose/0.35 : S.myDose) / A.F * 100;
+    P = adaptToDose(P, pct, overheadH);
+  }
   const usesStarter = P.starter;
   S.start = "00:00";
 
@@ -833,12 +886,13 @@ function compute(){
       <div><span>Acqua a</span><b>${wT} °C</b></div>
       <div><span>Inizia</span><b>${at(t0)}</b></div>
       <div><span>Prima lievitazione</span><b>${hm(P.bulk)}</b></div>
-      ${P.mode==="fridge" ? `<div><span>In frigo (4 °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
+      ${P.mode==="fridge" ? `<div><span>In frigo (${fridgeT()} °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
       <div><span>Inforni</span><b>${at(endMin)}</b></div>
     </div>
     <p class="small"><b>Quanto tempo serve.</b> Dal momento in cui inizi a impastare a quando metti in forno, con ${levWord} e la cucina a ${T} °C servono <b>almeno ${hm(P.minH)}</b>: è il tempo più breve in cui il lievito riesce a far crescere l'impasto. Il tempo <b>consigliato è ${hm(P.recH)}</b> o più: una lievitazione più lenta dà più sapore e una mollica migliore. ${P.mode==="fridge"?"Con la notte in frigo il tempo è più lungo ma lavori pochissimo: il freddo rallenta il lievito.":""}</p>
     <p class="small"><b>Perché l'acqua a ${wT} °C.</b> ${wExplain}</p>
     ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
+    ${P.own ? `<p class="small"><b>Con la tua dose (${fmt(S.myDose,1)} g).</b> Per il mio programma standard userei ${fmt(autoG,1)} g. Ho tenuto i tuoi grammi e ho adattato le ore: ${P.mode==="fridge" ? `prima lievitazione ${hm(P.bulk)}, frigo ${hm(P.fh)}${P.post>0.1?`, poi ${hm(P.post)} fuori frigo prima di infornare`:", poi in forno direttamente dal frigo"}` : `in tutto ${hm(P.use)} di lievitazione a ${T} °C`}.${P.ownMsg ? ` <b>${P.ownMsg}</b>` : ""}</p>` : ""}
   </div>`;
 
   /* tecnica pieghe */
@@ -919,7 +973,7 @@ function compute(){
     steps.push({t, h:"Staglio", p: "Lo <b>staglio</b> è la divisione dell'impasto in pezzi. " +  S.style==="genovese" ? `Dividi in ${nPieces} ${nPieces>1?"pezzi":"pezzo"} da circa ${fmt(each)} g, adagia nella teglia unta d'olio e allarga appena.` : `Dividi in ${nPieces} ${nPieces>1?"panetti":"panetto"} da circa ${fmt(each)} g, arrotonda delicatamente e metti in contenitori unti d'olio e chiusi.`, g:"preforma"});
     t += 15;
     if (P.mode === "fridge"){
-      steps.push({t, h:`In frigo · ${hm(P.fh)}`, p:"A 4 °C, ben coperto. Qui l'impasto matura: aroma e digeribilità.", g:"appretto", cold:true});
+      steps.push({t, h:`In frigo · ${hm(P.fh)}`, p:`A ${fridgeT()} °C, ben coperto.` + " Qui l'impasto matura: aroma e digeribilità.", g:"appretto", cold:true});
       t += P.fh*60;
       steps.push({t, h:`Fuori dal frigo · ${hm(P.post)}`, p:"A temperatura ambiente, coperto, finché l'impasto torna morbido e gonfio.", g:"appretto"});
       t += P.post*60;
@@ -947,6 +1001,10 @@ function compute(){
     if (P.mode === "fridge"){
       steps.push({t, h:`Appretto in frigo · ${hm(P.fh)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Cestino coperto in frigo a 4 °C: il freddo la rallenta e l'impasto prende aroma. Si cuoce direttamente dal frigo: freddo si taglia meglio.", g:"appretto", cold:true});
       t += P.fh*60;
+      if (P.post > 0.1){
+        steps.push({t, h:`Fuori dal frigo · ${hm(P.post)}`, p:"Cestino coperto a temperatura ambiente, finché premendo con un dito infarinato il buco risale lentamente e non del tutto.", g:"appretto"});
+        t += P.post*60;
+      }
     } else {
       steps.push({t, h:`Appretto · ${hm(P.app)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Coperto a temperatura ambiente. È pronto quando, premendo con un dito infarinato, il buco risale lentamente e non del tutto.", g:"appretto"});
       t += P.app*60;
@@ -1011,7 +1069,8 @@ function compute(){
     <div class="g-body">
       <p><b>Dati delle farine.</b> Proteine e W vengono dalle schede dei mulini, dalle etichette o dai loro distributori (vedi la scheda di ogni farina). Dove manca il W lo stimo dalle proteine.</p>
       <p><b>Acqua.</b> Nessun ente pubblica una tabella "W → acqua per il pane di casa": l'assorbimento al farinografo misura un impasto standard. Per il pane uso una regola pratica (più forza e più crusca = più acqua; semola e segale bevono di più, farro e grani antichi meno). Per focacce e pizze parto dall'idratazione della ricetta citata e la correggo in base alla tua miscela.</p>
-      <p><b>Programma.</b> <b>Oggi</b>: tutto a temperatura ambiente, con il tempo consigliato per il tuo lievito e la tua cucina. <b>Domani</b>: puntata breve (2,5 h equivalenti a 24 °C col birra, 4 col madre), circa 14 ore in frigo e infornata alle 10 (alle 19 per focacce e pizze). <b>Dopodomani</b>: come domani ma fino a circa 38 ore di frigo, se la farina le regge. In frigo le prime 3 ore valgono circa il 42% di un'ora a 24 °C (l'impasto si sta ancora raffreddando), poi il 18% (4 °C, con lo stesso 9% per grado): è una mia approssimazione, per questo la dose col frigo è più bassa.</p>
+      <p><b>Programma.</b> <b>Oggi</b>: tutto a temperatura ambiente, con il tempo consigliato per il tuo lievito e la tua cucina. <b>Domani</b>: puntata breve (2,5 h equivalenti a 24 °C col birra, 4 col madre), circa 14 ore in frigo e infornata alle 10 (alle 19 per focacce e pizze). <b>Dopodomani</b>: come domani ma fino a circa 38 ore di frigo, se la farina le regge. In frigo uso la temperatura che metti tu (misurala con un termometro in un bicchiere d'acqua lasciato una notte in frigo): le prime 3 ore l'impasto si sta ancora raffreddando e conto la media tra cucina e frigo, poi la temperatura del frigo, sempre con lo stesso 9% per grado. È una mia approssimazione.</p>
+      <p><b>Quanto è affidabile la dose.</b> Nessun ente certifica la dose di lievito per un dato tempo: ci sono tabelle di manuali e di panificatori, e per la notte in frigo danno numeri anche 2–3 volte diversi tra loro. Per questo la prova che conta è l'impasto: il volume indicato a fine puntata e il dito infarinato all'appretto. Se usi una tua dose che sai che funziona, scrivila in "Uso già una mia dose": tengo i tuoi grammi e ricalcolo le ore, così dose e tempi restano coerenti.</p>
       <p><b>Lievito.</b> Il tempo si accorcia di circa il 9% per ogni grado in più. Il modello è tarato sulla tabella dei lieviti per poolish del manuale Zanichelli (15 g/kg per 4–5 h, 3 g/kg per 10–12 h). Secco istantaneo = 35% del fresco, secco attivo = 50% (American Society of Baking). Il lievito madre parte dal 20% per circa 8 ore (Giorilli e Bonci su Dissapore).</p>
       <p><b>Temperatura dell'acqua.</b> Formula King Arthur Baking: temperatura voluta × 3 (× 4 con lievito madre) meno farina, ambiente, lievito e attrito. L'attrito a mano (3 °C) è una mia stima.</p>
       <p><b>Forza e tempi.</b> Altroconsumo indica W 250–320 per lievitazioni lunghe; il manuale Zanichelli W &gt; 270 per il frigo. Le ore "sopportate" per fascia di W sono una mia interpolazione.</p>
