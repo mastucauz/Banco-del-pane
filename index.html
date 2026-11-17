@@ -119,7 +119,7 @@ input[type="range"]{width:100%;accent-color:var(--accent);min-height:32px}
 .recipe{width:100%;border-collapse:collapse}
 .recipe td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
 .recipe td:last-child{text-align:right;white-space:nowrap}
-.recipe td.pct{color:var(--muted);text-align:right;width:64px;font-size:.85rem}
+.recipe td.pct{color:var(--muted);text-align:right;width:64px;font-size:.85rem;padding-right:10px}
 .recipe tr.sum td{border-bottom:0;font-weight:700}
 .recipe .g{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:1.05rem}
 .recipe small{display:block;color:var(--muted);font-size:.8rem}
@@ -231,6 +231,36 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
 .small{font-size:.85rem}
 .empty{border:1px dashed var(--line);border-radius:var(--r);padding:14px;color:var(--muted);font-size:.92rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== v2: risultato in evidenza, impostazioni compatte ===== */
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px}
+.more{border-top:1px solid var(--line);padding-top:10px}
+.more summary{cursor:pointer;font-weight:600;font-size:.92rem;color:var(--accent);list-style:none;display:flex;gap:8px;align-items:baseline;min-height:36px;align-items:center}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:"+";display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);font-weight:700}
+.more[open] summary::before{content:"−"}
+.more-body{display:grid;gap:14px;padding-top:10px}
+.plan{background:linear-gradient(160deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 78%,#000) 100%);color:var(--on-accent);border-radius:18px;padding:16px;gap:12px;box-shadow:0 10px 30px -14px color-mix(in srgb,var(--accent) 70%,transparent)}
+.plan-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.plan-grid div{background:color-mix(in srgb,var(--on-accent) 12%,transparent);border-radius:12px;padding:10px 12px}
+.plan-grid div.key{background:var(--on-accent);color:var(--accent)}
+.plan-grid span{color:inherit;opacity:.78}
+.plan-grid b{font-size:1.25rem;display:block;line-height:1.2}
+.plan-grid div.key b{font-size:1.6rem;font-weight:600}
+.plan p.small{color:inherit;opacity:.92;margin:0}
+.doses{background:color-mix(in srgb,var(--on-accent) 10%,transparent);border-radius:12px;padding:10px 12px;display:grid;gap:2px}
+.doses-h{font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.8;margin-bottom:4px}
+.doses-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 8px;border-radius:8px;font-size:.92rem}
+.doses-row b{font-family:var(--f-num);font-weight:500}
+.doses-row.on{background:var(--on-accent);color:var(--accent);font-weight:700}
+.hero{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.hero .eyebrow{color:var(--muted);opacity:1}
+.hero .big .num{color:var(--accent)}
+.hero .hydro-bar{background:var(--sunken)}
+.hero .hydro-bar i{background:var(--accent-soft)}
+.hero .hydro-bar b{background:var(--accent)}
+.hero input[type="range"]{accent-color:var(--accent)}
+.hero .hydro-scale,.hero .ovr label{color:var(--muted)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -256,7 +286,7 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
   <section class="view" id="v-impasto" aria-labelledby="h-impasto">
     <div>
       <h2 id="h-impasto">Il tuo impasto</h2>
-      <p class="lede">Scegli le farine e i grammi. Ti dico quanta acqua, sale e lievito usare, perché, e come organizzare la giornata.</p>
+      <p class="lede">Farine e grammi: al resto penso io.</p>
     </div>
 
     <div class="card">
@@ -279,23 +309,28 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
 
     <div class="card">
       <h3>Lievito e tempi</h3>
-      <p class="muted small">Tu scegli il lievito e quando vuoi il pane. Orari, ore a temperatura ambiente, ore in frigo e dose di lievito li calcolo io.</p>
-      <div class="field"><span class="lbl">Lievito (la dose sotto cambia da sola)</span><div class="seg lev-seg" id="seg-lev"></div></div>
-      <div class="field" id="own-field"><label for="in-own">Uso già una mia dose (facoltativo)</label><div class="unit" data-u="g"><input id="in-own" type="text" inputmode="decimal" autocomplete="off"></div><p class="muted small">Lascia vuoto e la dose la calcolo io. Se scrivi i tuoi grammi, tengo la tua dose e adatto le ore, così dose e tempi tornano.</p></div>
+      <div class="field"><span class="lbl">Lievito</span><div class="seg lev-seg" id="seg-lev"></div></div>
       <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
-      <div class="grid2">
-        <div class="field"><label for="in-temp">Temperatura della cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="number" min="12" max="34" step="1" inputmode="numeric"></div></div>
-        <div class="field"><label for="in-ftemp">Temperatura della farina</label><div class="unit" data-u="°C"><input id="in-ftemp" type="number" min="2" max="34" step="1" inputmode="numeric"></div></div>
-        <div class="field" id="fridge-field"><label for="in-fridge">Temperatura del frigo</label><div class="unit" data-u="°C"><input id="in-fridge" type="number" min="1" max="10" step="1" inputmode="numeric"></div></div>
-        <div class="field" id="pieces-field"><label for="in-pieces">Numero di pezzi</label><input id="in-pieces" type="number" min="1" max="30" step="1" inputmode="numeric"></div>
-        <div class="field"><label for="in-salt">Sale (% sulla farina)</label><div class="unit" data-u="%"><input id="in-salt" type="number" min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
+      <div class="nums">
+        <div class="field"><label for="in-temp">Cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="number" min="12" max="34" step="1" inputmode="numeric"></div></div>
+        <div class="field" id="fridge-field"><label for="in-fridge">Frigo</label><div class="unit" data-u="°C"><input id="in-fridge" type="number" min="1" max="10" step="1" inputmode="numeric"></div></div>
       </div>
-      <p class="muted small">La farina è di solito alla temperatura della stanza in cui la tieni. Se sta in cantina o in garage, misurala o mettila a mano.</p>
-      <div class="field"><span class="lbl">Impasto</span><div class="seg" id="seg-mixer"></div></div>
-      <div class="field"><span class="lbl">Malto d'orzo</span><div class="seg" id="seg-malt"></div></div>
-      <div class="grid2" id="malt-box" hidden>
-        <div class="field"><label for="in-malt">Quantità (% sulla farina)</label><div class="unit" data-u="%"><input id="in-malt" type="number" min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
-      </div>
+      <details class="more">
+        <summary>Altre impostazioni<span class="muted small" id="more-sum"></span></summary>
+        <div class="more-body">
+          <div class="field" id="own-field"><label for="in-own">Uso già una mia dose di lievito (g)</label><div class="unit" data-u="g"><input id="in-own" type="text" inputmode="decimal" autocomplete="off"></div></div>
+          <div class="nums">
+            <div class="field"><label for="in-ftemp">Farina</label><div class="unit" data-u="°C"><input id="in-ftemp" type="number" min="2" max="34" step="1" inputmode="numeric"></div></div>
+            <div class="field"><label for="in-salt">Sale</label><div class="unit" data-u="%"><input id="in-salt" type="number" min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
+            <div class="field" id="pieces-field"><label for="in-pieces">Pezzi</label><input id="in-pieces" type="number" min="1" max="30" step="1" inputmode="numeric"></div>
+          </div>
+          <div class="field"><span class="lbl">Impasto</span><div class="seg" id="seg-mixer"></div></div>
+          <div class="field"><span class="lbl">Malto d'orzo</span><div class="seg" id="seg-malt"></div></div>
+          <div class="nums" id="malt-box" hidden>
+            <div class="field"><label for="in-malt">Malto</label><div class="unit" data-u="%"><input id="in-malt" type="number" min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
+          </div>
+        </div>
+      </details>
       <div id="plan-box"></div>
     </div>
 
@@ -412,6 +447,7 @@ const SOURCES = {
   qs_div:{t:"Divella Semola rimacinata, proteine da etichetta", u:"https://www.qualescegliere.it/farina/divella-semola-di-grano-duro-rimacinata/", k:"Etichetta"},
   qs_spam:{t:"Molino Spadoni Farina d'America (Manitoba), proteine da etichetta", u:"https://www.qualescegliere.it/farina/molino-spadoni-farina-d-america/", k:"Etichetta"},
   off_spa00:{t:"Molino Spadoni Farina 00, proteine da etichetta (Open Food Facts)", u:"https://world.openfoodfacts.org/product/8002213000398/farina-tipo-00-molino-spadoni", k:"Etichetta"},
+  ross_lme:{t:"Molino Rossetto, Lievito madre essiccato (confezione da 35 g): ingredienti 84% lievito naturale di farina tipo 0 e lievito di birra secco; 35 g = 1 cubetto di lievito di birra fresco = 7 g di secco, fino a 1 kg di farina", u:"https://www.molinorossetto.com", k:"Etichetta"},
   off_ros:{t:"Molino Rossetto Manitoba tipo 0, proteine da etichetta (Open Food Facts)", u:"https://world.openfoodfacts.org/product/8018211901148/farina-manitoba-di-grano-tenero-tipo-0-molino-rossetto", k:"Etichetta"},
   qs_cas:{t:"Selezione Casillo Manitoba: W 400 dichiarato in confezione (QualeScegliere)", u:"https://www.qualescegliere.it/farina/selezione-casillo-manitoba", k:"Etichetta"},
   qs_bong:{t:"Bongiovanni Manitoba 00: W 390 dichiarato in confezione (QualeScegliere)", u:"https://www.qualescegliere.it/farina/bongiovanni-farina-manitoba-tipo-00/", k:"Etichetta"}
@@ -597,7 +633,9 @@ if (!S.rows.length) S.rows = DEFAULT.rows.map(r => ({...r}));
 const save = () => store.set("bdp_state", S);
 
 const LEVELS = [["principiante","Principiante",-4],["intermedio","Intermedio",0],["esperto","Esperto",4]];
-const LEVS = [["fresco","Birra fresco"],["secco","Birra secco"],["lm","Lievito madre"],["licoli","Licoli"]];
+const LEVS = [["fresco","Birra fresco"],["secco","Birra secco"],["essic","Madre essiccato"],["lm","Lievito madre"],["licoli","Licoli"]];
+/* lievito madre essiccato con lievito secco (es. Molino Rossetto): 35 g = 1 cubetto da 25 g di fresco */
+const ESSIC_K = 35/25;
 const MIXERS = [["mano","A mano"],["planetaria","Planetaria"]];
 const ENDDAYS = [[0,"Oggi"],[1,"Domani (notte in frigo)"],[2,"Dopodomani (2 notti in frigo)"]];
 const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["estr","Estratto diastasico (liquido)"],["nodia","Non diastasico o sciroppo"]];
@@ -780,6 +818,7 @@ function adaptToDose(P, pct, overheadH){
 function levDose(lev, P, F){
   if (lev === "fresco") return F * P.fresh / 100;
   if (lev === "secco") return F * P.fresh / 100 * 0.35;
+  if (lev === "essic") return F * P.fresh / 100 * ESSIC_K;
   return F * P.lmPct / 100;
 }
 
@@ -841,12 +880,12 @@ function compute(){
   $("#seg-lev").innerHTML = LEVS.map(([k,l]) => `<button type="button" data-v="${k}" aria-pressed="${S.lev===k}">${l}<small>${fmt(levDose(k, plans[k], A.F), k==="lm"||k==="licoli"?0:1)} g${plans[k].short?" · tempo stretto":""}</small></button>`).join("");
   $("#seg-lev").onclick = e => { const b = e.target.closest("button"); if (!b) return; S.lev = b.dataset.v; markEdited(); compute(); };
   let P = plans[S.lev];
-  const yeastLev = S.lev === "fresco" || S.lev === "secco";
+  const yeastLev = ["fresco","secco","essic"].includes(S.lev);
   $("#own-field").hidden = !yeastLev; $("#fridge-field").hidden = S.endDay === 0;
   const autoG = yeastLev ? levDose(S.lev, P, A.F) : 0;
   $("#in-own").placeholder = yeastLev ? fmt(autoG,1) : "";
   if (yeastLev && S.myDose > 0){
-    const pct = (S.lev === "secco" ? S.myDose/0.35 : S.myDose) / A.F * 100;
+    const pct = (S.lev === "secco" ? S.myDose/0.35 : S.lev === "essic" ? S.myDose/ESSIC_K : S.myDose) / A.F * 100;
     P = adaptToDose(P, pct, overheadH);
   }
   const usesStarter = P.starter;
@@ -859,7 +898,7 @@ function compute(){
   const flourTot = A.F + stFlour;
   const water = Math.max(0, flourTot * H/100 - stWater);
   const salt = flourTot * saltPct / 100;
-  const yG = S.lev === "fresco" || S.lev === "secco" ? levDose(S.lev, P, A.F) : 0;
+  const yG = yeastLev ? levDose(S.lev, P, A.F) : 0;
   const extras = teg && R.extra ? R.extra(A.F).filter(x => !(S.malt !== "no" && /[Mm]alto/.test(x[0]))) : [];
   const maltPct = S.malt === "no" ? 0 : (S.maltPct ?? MALT_DEF[S.malt]);
   $("#malt-box").hidden = S.malt === "no"; if (S.malt !== "no" && document.activeElement !== $("#in-malt")) $("#in-malt").value = maltPct;
@@ -880,29 +919,26 @@ function compute(){
   /* box programma */
   const t0 = P.startMin;
   const endMin = t0 + P.total*60;
-  const levWord = S.lev==="fresco"?"lievito di birra fresco":S.lev==="secco"?"lievito secco":S.lev==="lm"?"lievito madre":"licoli";
+  const levWord = S.lev==="fresco"?"lievito di birra fresco":S.lev==="secco"?"lievito secco":S.lev==="essic"?"lievito madre essiccato":S.lev==="lm"?"lievito madre":"licoli";
   /* confronto esplicito: senza frigo, una notte, due notti (stessa farina e cucina) */
   const cmpDays = [0,1,2].map(d => { const keep = S.endDay; S.endDay = d; const Q = makePlan("fresco", A, overheadH); S.endDay = keep; return Q; });
-  const cmpG = Q => fmt(A.F * Q.fresh / 100, 1);
-  const cmpBox = (S.lev === "fresco" || S.lev === "secco") ? `<div class="tbl-wrap"><table class="cmp">
-      <tr><th>Lievito di birra per ${fmt(A.F)} g di farina, cucina a ${T} °C</th><th>Fresco</th><th>Secco istantaneo</th></tr>
-      <tr><td>Senza frigo (pane oggi, circa ${hm(cmpDays[0].use)} di lievitazione)</td><td>${cmpG(cmpDays[0])} g</td><td>${fmt(A.F*cmpDays[0].fresh/100*0.35,1)} g</td></tr>
-      <tr><td>Una notte in frigo (${hm(cmpDays[1].bulk)} fuori + ${hm(cmpDays[1].fh||0)} a ${fridgeT()} °C)</td><td>${cmpG(cmpDays[1])} g</td><td>${fmt(A.F*cmpDays[1].fresh/100*0.35,1)} g</td></tr>
-      <tr><td>Due notti in frigo${cmpDays[2].mode==="fridge" ? ` (${hm(cmpDays[2].fh)} a ${fridgeT()} °C)` : " (questa farina non le regge)"}</td><td>${cmpG(cmpDays[2])} g</td><td>${fmt(A.F*cmpDays[2].fresh/100*0.35,1)} g</td></tr>
-    </table></div>` : "";
+  const cmpK = S.lev==="secco" ? 0.35 : S.lev==="essic" ? ESSIC_K : 1;
+  const cmpG = Q => fmt(A.F * Q.fresh / 100 * cmpK, 1);
+  const cmpBox = yeastLev ? `<div class="doses"><div class="doses-h">Dose di ${levWord} per ${fmt(A.F)} g di farina</div>
+      <div class="doses-row${S.endDay===0?" on":""}"><span>Senza frigo</span><b>${cmpG(cmpDays[0])} g</b></div>
+      <div class="doses-row${S.endDay===1?" on":""}"><span>Una notte in frigo</span><b>${cmpG(cmpDays[1])} g</b></div>
+      <div class="doses-row${S.endDay===2?" on":""}"><span>Due notti in frigo</span><b>${cmpG(cmpDays[2])} g</b></div>
+    </div>` : "";
   $("#plan-box").innerHTML = `<div class="plan">
     <div class="plan-grid">
-      <div><span>${S.lev==="fresco"||S.lev==="secco"?"Lievito":"Lievito madre"}</span><b>${S.lev==="fresco"||S.lev==="secco" ? fmt(yG,1)+" g" : fmt(starter)+" g"}</b></div>
-      <div><span>Acqua a</span><b>${wT} °C</b></div>
+      <div class="key"><span>${yeastLev?LEVS.find(l=>l[0]===S.lev)[1]:"Lievito madre"}</span><b>${yeastLev ? fmt(yG,1)+" g" : fmt(starter)+" g"}</b></div>
+      <div class="key"><span>Acqua a</span><b>${wT} °C</b></div>
       <div><span>Inizia</span><b>${at(t0)}</b></div>
       <div><span>Prima lievitazione</span><b>${hm(P.bulk)}</b></div>
       ${P.mode==="fridge" ? `<div><span>In frigo (${fridgeT()} °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
       <div><span>Inforni</span><b>${at(endMin)}</b></div>
     </div>
     ${cmpBox}
-    <p class="small"><b>Quanto tempo serve.</b> Dal momento in cui inizi a impastare a quando metti in forno, con ${levWord} e la cucina a ${T} °C servono <b>almeno ${hm(P.minH)}</b>: è il tempo più breve in cui il lievito riesce a far crescere l'impasto. Il tempo <b>consigliato è ${hm(P.recH)}</b> o più: una lievitazione più lenta dà più sapore e una mollica migliore. </p>
-    ${P.mode==="fridge" ? `<p class="small"><b>Perché col frigo il lievito non cala di molto.</b> A ${fridgeT()} °C il lievito lavora pochissimo: ${hm(P.fh)} di frigo valgono solo circa ${hm(fridgeEq(P.fh))} a 24 °C. Il frigo serve a dare sapore e a fermare l'impasto fino all'ora giusta, non a farlo crescere: quasi tutta la crescita avviene prima, a temperatura ambiente, e poi in forno. Per questo la dose è solo un po' più bassa che in giornata (${fmt(levDose("fresco", {fresh: freshFor(5)}, A.F),1)} g col lievito fresco). La regola "meno lievito" vale per le lievitazioni lunghe a temperatura ambiente, o per due notti in frigo.</p>` : ""}
-    <p class="small"><b>Perché l'acqua a ${wT} °C.</b> ${wExplain}</p>
     ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
     ${P.own ? `<p class="small"><b>Con la tua dose (${fmt(S.myDose,1)} g).</b> Per il mio programma standard userei ${fmt(autoG,1)} g. Ho tenuto i tuoi grammi e ho adattato le ore: ${P.mode==="fridge" ? `prima lievitazione ${hm(P.bulk)}, frigo ${hm(P.fh)}${P.post>0.1?`, poi ${hm(P.post)} fuori frigo prima di infornare`:", poi in forno direttamente dal frigo"}` : `in tutto ${hm(P.use)} di lievitazione a ${T} °C`}.${P.ownMsg ? ` <b>${P.ownMsg}</b>` : ""}</p>` : ""}
   </div>`;
@@ -940,6 +976,7 @@ function compute(){
   if (S.malt === "nodia") notes.push(["info", `<b>Malto non diastasico.</b> Non ha enzimi attivi: dà sapore, colore alla crosta e aiuta a trattenere umidità, ma non accelera la lievitazione.`]);
   if (T >= 28) notes.push(["warn", `<b>Cucina calda (${T} °C).</b> Tutto corre: usa acqua fredda e controlla l'impasto più che l'orologio.`]);
   if (T <= 18) notes.push(["info", `<b>Cucina fresca (${T} °C).</b> Tempi lunghi: la ciotola nel forno spento con la luce accesa guadagna qualche grado.`]);
+  if (S.lev === "essic") notes.push(["info", `<b>Lievito madre essiccato.</b> Quelli come il Molino Rossetto contengono anche lievito di birra secco: è quello che fa lievitare, il lievito madre essiccato dà soprattutto sapore. Per questo lo calcolo come il lievito di birra, con l'equivalenza della confezione (35 g = un cubetto da 25 g di fresco). Mescolalo alla farina. Se nella lista ingredienti del tuo <b>non</b> c'è lievito di birra, questa dose non vale.`]);
   if ((S.lev === "fresco" && yG < 1) || (S.lev === "secco" && yG < 0.5)) notes.push(["info", `<b>Lievito sotto il grammo.</b> Sciogli 1 g di lievito in 100 g dell'acqua della ricetta e usane ${fmt(yG*100,0)} g (togli la stessa quantità d'acqua).`]);
 
   /* ===== perché ===== */
@@ -964,7 +1001,7 @@ function compute(){
 
   /* ===== programma ===== */
   const steps = []; let t = t0;
-  const levName = S.lev==="fresco" ? fmt(yG,1)+" g di lievito fresco sbriciolato" : S.lev==="secco" ? fmt(yG,1)+" g di lievito secco" : fmt(starter)+" g di "+(S.lev==="licoli"?"licoli":"lievito madre");
+  const levName = S.lev==="fresco" ? fmt(yG,1)+" g di lievito fresco sbriciolato" : S.lev==="secco" ? fmt(yG,1)+" g di lievito secco" : S.lev==="essic" ? fmt(yG,1)+" g di lievito madre essiccato (mescolato alla farina)" : fmt(starter)+" g di "+(S.lev==="licoli"?"licoli":"lievito madre");
   const extraTxt = extras.filter(x => !/superficie|teglia/.test(x[0])).map(x => `${x[0].toLowerCase().replace(/ \(.*\)/,"")} (${fmt(x[1])} g)`);
   if (usesStarter) steps.push({t:-1, h:"Prima: rinfresca il lievito", p: S.lev==="licoli" ? "Licoli 1:1:1 (lievito:farina:acqua). Usalo quando è raddoppiato e pieno di bolle, di solito in 4–8 ore a 24–26 °C. Rinfrescalo in modo che sia al raddoppio all'ora d'inizio." : "Lievito madre solido 1:1:0,5. Usalo quando è raddoppiato, circa 3–4 ore a 26–28 °C.", g: S.lev==="licoli" ? "licoli" : "lm"});
   if (doAut){ steps.push({t, h:`Autolisi (${aut} min)`, p:`Mescola le farine con ${fmt(water - hold)} g di acqua a ${wT} °C${hold?`, tieni da parte ${hold} g`:""}. Copri e lascia riposare senza sale e senza lievito.`, g:"autolisi"}); t += aut; }
@@ -1011,7 +1048,7 @@ function compute(){
     steps.push({t, h:"Formatura", p: S.style==="cassetta" ? "Forma un cilindro e mettilo nello stampo unto, chiusura sotto." : S.style==="ciabatta" ? "Senza formare: rovescia sul banco infarinato e taglia a rettangoli, spostali su carta forno." : `Forma ${S.pieces>1? S.pieces+" pezzi da circa "+fmt(total/S.pieces)+" g":"la pagnotta"} e mettila nel cestino infarinato, chiusura in alto.`, g: S.style==="filone" ? "filone" : "pirlatura"});
     t += 10;
     if (P.mode === "fridge"){
-      steps.push({t, h:`Appretto in frigo · ${hm(P.fh)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Cestino coperto in frigo a 4 °C: il freddo la rallenta e l'impasto prende aroma. Si cuoce direttamente dal frigo: freddo si taglia meglio.", g:"appretto", cold:true});
+      steps.push({t, h:`Appretto in frigo · ${hm(P.fh)}`, p:`L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Cestino coperto in frigo a ${fridgeT()} °C: il freddo la rallenta e l'impasto prende aroma. Si cuoce direttamente dal frigo: freddo si taglia meglio.`, g:"appretto", cold:true});
       t += P.fh*60;
       if (P.post > 0.1){
         steps.push({t, h:`Fuori dal frigo · ${hm(P.post)}`, p:"Cestino coperto a temperatura ambiente, finché premendo con un dito infarinato il buco risale lentamente e non del tutto.", g:"appretto"});
@@ -1030,7 +1067,9 @@ function compute(){
 
   /* ===== render ===== */
   const pct = v => `${clamp((v-50)/50*100,0,100).toFixed(1)}%`;
-  const levRow = S.lev==="fresco"||S.lev==="secco"
+  const levRow = S.lev==="essic"
+    ? `<tr><td>Lievito madre essiccato<small>con lievito di birra secco; equivale a ${fmt(A.F*P.fresh/100,1)} g di fresco</small></td><td class="pct">${fmt(P.fresh*ESSIC_K,2)}%</td><td class="g">${fmt(yG,1)} g</td></tr>`
+    : S.lev==="fresco"||S.lev==="secco"
     ? `<tr><td>${S.lev==="fresco"?"Lievito di birra fresco":"Lievito di birra secco istantaneo"}${S.lev==="secco"?"<small>se è secco attivo (da sciogliere): "+fmt(A.F*P.fresh/100*0.5,1)+" g</small>":"<small>equivale a "+fmt(yG*0.35,1)+" g di secco istantaneo</small>"}</td><td class="pct">${fmt(S.lev==="fresco"?P.fresh:P.fresh*0.35,2)}%</td><td class="g">${fmt(yG,1)} g</td></tr>`
     : `<tr><td>${S.lev==="licoli"?"Licoli (100% acqua)":"Lievito madre solido (50% acqua)"}<small>rinfrescato e al raddoppio</small></td><td class="pct">${fmt(P.lmPct)}%</td><td class="g">${fmt(starter)} g</td></tr>`;
   out.innerHTML = `
@@ -1057,15 +1096,10 @@ function compute(){
     ${R.brine ? `<p class="small">${R.brine(A.F, total / (S.panN||1))}</p>` : ""}
   </section>
 
-  <section class="card" aria-labelledby="h-why">
-    <h3 id="h-why">Perché questa acqua</h3>
-    <ul class="why">${why.map(w => `<li><span>${w}</span></li>`).join("")}</ul>
-  </section>
-
-  <section class="card" aria-labelledby="h-cons">
+  ${notes.some(n => n[0] !== "good") ? `<section class="card" aria-labelledby="h-cons">
     <h3 id="h-cons">Consigli sulla tua miscela</h3>
-    <div class="notes">${notes.map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>
-  </section>
+    <div class="notes">${notes.filter(n => n[0] !== "good").map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>
+  </section>` : ""}
 
   <section class="card" aria-labelledby="h-prog">
     <div class="sect-h"><h3 id="h-prog">La tua giornata</h3><span class="muted small">a ${T} °C${P.mode==="fridge"?` + ${hm(P.fh)} in frigo`:""}</span></div>
@@ -1077,7 +1111,7 @@ function compute(){
   </section>
 
   <details class="g">
-    <summary><span><span class="s1">Come calcolo questi numeri</span><span class="s2">Cosa viene dai mulini e cosa è una stima</span></span>${ICON.chev}</summary>
+    <summary><span><span class="s1">Fonti e metodo</span><span class="s2">Da dove vengono i numeri</span></span>${ICON.chev}</summary>
     <div class="g-body">
       <p><b>Dati delle farine.</b> Proteine e W vengono dalle schede dei mulini, dalle etichette o dai loro distributori (vedi la scheda di ogni farina). Dove manca il W lo stimo dalle proteine.</p>
       <p><b>Acqua.</b> Nessun ente pubblica una tabella "W → acqua per il pane di casa": l'assorbimento al farinografo misura un impasto standard. Per il pane uso una regola pratica (più forza e più crusca = più acqua; semola e segale bevono di più, farro e grani antichi meno). Per focacce e pizze parto dall'idratazione della ricetta citata e la correggo in base alla tua miscela.</p>
@@ -1465,6 +1499,12 @@ const G_LIEV = [
     <ul><li><b>Pronto:</b> raddoppiato, pieno di bolle, con il centro che inizia ad abbassarsi.</li>
     <li><b>Quanto usarne:</b> anche qui un buon inizio è un terzo della farina totale.</li></ul>
     <p class="small">Valori tra il manuale Zanichelli (per kg) e la tabella riportata da Dissapore (in %): dove differiscono ho indicato l'intervallo.</p>` + src("zani","dis_bp")},
+  {id:"essiccato", t:"Lievito madre essiccato", s:"Cos'è davvero e quanto usarne", body:`
+    <p>Il lievito madre essiccato in bustina <b>non è lievito madre vivo</b>: è lievito madre seccato, che dà soprattutto sapore e un po' di acidità. Quasi sempre contiene anche <b>lievito di birra secco</b>, ed è quello che fa lievitare. Leggi sempre gli ingredienti.</p>
+    <ul><li><b>Molino Rossetto:</b> 84% lievito naturale essiccato più lievito di birra secco. La confezione dice che 35 g valgono 1 cubetto di lievito fresco (25 g) o 7 g di secco, per un massimo di 1 kg di farina.</li>
+    <li><b>Come lo calcolo:</b> come il lievito di birra fresco, moltiplicato per 35/25 (cioè 1,4). Per esempio 6 g di fresco = circa 8,4 g di essiccato.</li>
+    <li><b>Come si usa:</b> mescolalo alla farina prima di aggiungere l'acqua. Tempi e segni dell'impasto sono quelli del lievito di birra.</li>
+    <li><b>Se nel tuo non c'è lievito di birra</b> tra gli ingredienti, la dose della confezione è diversa e la lievitazione molto più lenta: segui le istruzioni del produttore.</li></ul>` + src("ross_lme")},
   {id:"confronto", t:"Quale metodo scegliere", s:"Diretto, biga, poolish, lievito madre", body:`
     <div class="tbl-wrap"><table class="cmp">
       <tr><th>Metodo</th><th>Organizzazione</th><th>Risultato</th></tr>
