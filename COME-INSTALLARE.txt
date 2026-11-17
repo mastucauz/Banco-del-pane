@@ -1,0 +1,7 @@
+BANCO DEL PANE - come installarlo come app
+
+1) Metti online questa cartella (tutti i file insieme) su un hosting con indirizzo https:
+   GitHub Pages, Netlify o Cloudflare Pages.
+2) iPhone / iPad: apri l indirizzo con Safari > tasto Condividi > "Aggiungi alla schermata Home".
+3) Android: apri con Chrome > menu > "Installa app".
+Dopo la prima apertura funziona anche senza internet.

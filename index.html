@@ -1,0 +1,1465 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Banco del Pane</title><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#3E5A29"><meta name="color-scheme" content="light dark"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Banco Pane"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="format-detection" content="telephone=no"><style>:root{padding-top:env(safe-area-inset-top,0px)}[hidden]{display:none!important}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}input,select,textarea{font-size:16px}</style></head><body>
+<title>Banco del Pane</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: app a schede con barra in basso (stile telefono), colonna unica max 720px, schede "banco" per i risultati */
+:root{
+  --bg:#F3F2ED; --surface:#FFFFFF; --sunken:#E9E7DF; --ink:#1E1C18; --muted:#66625A; --line:#DCD9CF;
+  --accent:#3E5A29; --accent-soft:#E3EAD6; --on-accent:#FFFFFF;
+  --crust:#A4531B; --crust-soft:#F6E6D8;
+  --warn:#8A5300; --warn-bg:#FBEFD6; --bad:#9B2C1F; --bad-bg:#F9E1DC; --good:#2E6A39; --good-bg:#DFF0E1;
+  --dough:#EEDFC2; --dough-line:#B49B6C; --dough-shade:#DCC69C; --bowl:#7D838C; --hand:#F2CFB0; --hand-line:#A87B5A;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-num:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#13140F; --surface:#1C1D17; --sunken:#24251E; --ink:#ECEAE1; --muted:#A39F94; --line:#34352C;
+  --accent:#A7C47B; --accent-soft:#2A3320; --on-accent:#13140F;
+  --crust:#E79A5E; --crust-soft:#3A2617;
+  --warn:#EBB65B; --warn-bg:#2F2613; --bad:#F08A7A; --bad-bg:#371B17; --good:#8FD19B; --good-bg:#17301C;
+  --dough:#5A4E3A; --dough-line:#A88F63; --dough-shade:#463C2C; --bowl:#8F959E; --hand:#C99B7A; --hand-line:#7A5640;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#13140F; --surface:#1C1D17; --sunken:#24251E; --ink:#ECEAE1; --muted:#A39F94; --line:#34352C;
+  --accent:#A7C47B; --accent-soft:#2A3320; --on-accent:#13140F;
+  --crust:#E79A5E; --crust-soft:#3A2617;
+  --warn:#EBB65B; --warn-bg:#2F2613; --bad:#F08A7A; --bad-bg:#371B17; --good:#8FD19B; --good-bg:#17301C;
+  --dough:#5A4E3A; --dough-line:#A88F63; --dough-shade:#463C2C; --bowl:#8F959E; --hand:#C99B7A; --hand-line:#7A5640;
+  color-scheme:dark }
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:1.55rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+h4{font-size:1rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--crust);outline-offset:2px;border-radius:6px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{max-width:760px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:10px}
+.logo{width:34px;height:34px;flex:none}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.25rem;letter-spacing:-.02em}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:.72rem;color:var(--muted);letter-spacing:.02em}
+
+main{max-width:760px;margin:0 auto;padding-top:18px;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{display:grid;gap:18px}
+.lede{color:var(--muted);max-width:62ch}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs-in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{appearance:none;border:0;background:none;padding:8px 4px 10px;display:grid;justify-items:center;gap:2px;font-size:.74rem;font-weight:600;color:var(--muted);cursor:pointer}
+.tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--accent)}
+.tab[aria-current="page"] svg{stroke-width:2.2}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card > * + *{margin-top:12px}
+.sect-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* farine nell'impasto */
+.flour-row{display:grid;grid-template-columns:1fr 96px 36px;gap:8px;align-items:center}
+.flour-row + .flour-row{margin-top:8px}
+.flour-row select,.flour-row input{min-width:0}
+select,input[type="number"],input[type="text"],input[type="time"],input[type="search"],textarea{width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:10px 10px;min-height:44px}
+input[type="number"]{font-family:var(--f-num);text-align:right}
+.unit{position:relative}
+.unit input{padding-right:26px}
+.unit::after{content:attr(data-u);position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
+.icon-btn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;width:36px;height:44px;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 14px;font-weight:600;font-size:.92rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.ghost{border-style:dashed}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+.total-line{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;border-top:1px dashed var(--line);padding-top:10px}
+
+.field{display:grid;gap:6px;min-width:0}
+.field > label,.lbl{font-size:.82rem;font-weight:600;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{appearance:none;border:1px solid var(--line);background:var(--sunken);border-radius:999px;padding:8px 12px;font-size:.88rem;font-weight:600;cursor:pointer;min-height:38px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.lev-seg button{display:grid;text-align:left;line-height:1.2;padding:8px 12px}
+.lev-seg button small{font-family:var(--f-num);font-size:.78rem;font-weight:500;opacity:.85}
+.plan{background:var(--sunken);border-radius:12px;padding:12px;display:grid;gap:8px}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.plan-grid div{background:var(--surface);border-radius:10px;padding:8px 10px}
+.plan-grid span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.plan-grid b{font-family:var(--f-num);font-weight:500;font-size:1.05rem}
+.rinfo{background:var(--crust-soft);border-radius:12px;padding:12px;display:grid;gap:8px;font-size:.93rem}
+.rinfo .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.switch{display:flex;align-items:center;gap:10px;font-weight:600;font-size:.92rem;cursor:pointer}
+.switch input{width:22px;height:22px;accent-color:var(--accent)}
+input[type="range"]{width:100%;accent-color:var(--accent);min-height:32px}
+
+/* risultato */
+.hero{background:var(--accent);color:var(--on-accent);border-radius:var(--r);padding:18px 16px;display:grid;gap:14px}
+.hero .eyebrow{color:inherit;opacity:.8}
+.big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big .num{font-size:3.2rem;line-height:1;font-weight:500;letter-spacing:-.03em}
+.big .sub{font-size:.95rem;opacity:.9}
+.hydro-bar{position:relative;height:10px;border-radius:99px;background:color-mix(in srgb,var(--on-accent) 22%,transparent)}
+.hydro-bar i{position:absolute;top:0;bottom:0;border-radius:99px;background:color-mix(in srgb,var(--on-accent) 55%,transparent)}
+.hydro-bar b{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--on-accent);transform:translateX(-2px)}
+.hydro-scale{display:flex;justify-content:space-between;font-size:.75rem;opacity:.85}
+.ovr{display:grid;gap:4px}
+.ovr label{font-size:.82rem;opacity:.9}
+.hero input[type="range"]{accent-color:var(--on-accent)}
+
+.recipe{width:100%;border-collapse:collapse}
+.recipe td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+.recipe td:last-child{text-align:right;white-space:nowrap}
+.recipe td.pct{color:var(--muted);text-align:right;width:64px;font-size:.85rem}
+.recipe tr.sum td{border-bottom:0;font-weight:700}
+.recipe .g{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:1.05rem}
+.recipe small{display:block;color:var(--muted);font-size:.8rem}
+
+.why{display:grid;gap:10px;padding:0;margin:0;list-style:none}
+.why li{display:grid;grid-template-columns:22px 1fr;gap:8px}
+.why li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--crust);margin:8px 0 0 6px}
+.contrib{display:grid;gap:8px}
+.contrib-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:.9rem}
+.contrib-row .bar{grid-column:1/-1;height:6px;border-radius:99px;background:var(--sunken);position:relative;overflow:hidden}
+.contrib-row .bar i{position:absolute;inset:0 auto 0 0;background:var(--crust);border-radius:99px}
+
+.notes{display:grid;gap:8px}
+.note{border-radius:12px;padding:10px 12px;font-size:.93rem;display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start}
+.note svg{width:18px;height:18px;margin-top:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.note.info{background:var(--accent-soft)}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.warn p,.note.bad p{color:var(--ink)}
+.note.bad{background:var(--bad-bg);color:var(--bad)}
+.note.good{background:var(--good-bg);color:var(--good)}
+.note.good p{color:var(--ink)}
+.note b{font-weight:700}
+
+.timeline{list-style:none;margin:0;padding:0;display:grid}
+.tl{display:grid;grid-template-columns:64px 18px 1fr;gap:0 10px}
+.tl .t{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:.95rem;padding-top:1px;text-align:right}
+.tl .t small{display:block;color:var(--muted);font-size:.7rem;font-family:var(--f-body)}
+.tl .dot{position:relative}
+.tl .dot::before{content:"";position:absolute;left:50%;top:4px;width:12px;height:12px;border-radius:50%;transform:translateX(-50%);background:var(--surface);border:3px solid var(--crust)}
+.tl .dot::after{content:"";position:absolute;left:50%;top:18px;bottom:-4px;width:2px;transform:translateX(-50%);background:var(--line)}
+.tl:last-child .dot::after{display:none}
+.tl .b{padding-bottom:16px;min-width:0}
+.tl .b h4{font-size:.98rem}
+.tl .b p{color:var(--muted);font-size:.9rem}
+.tl.cold .dot::before{border-color:#4F86B8}
+.tl.fold .dot::before{border-color:var(--accent);width:9px;height:9px;top:5px;border-width:2px}
+.linkish{appearance:none;background:none;border:0;padding:0;color:var(--accent);font-weight:600;font-size:.88rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* farine */
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.filters button{flex:none}
+.flist{display:grid;gap:10px}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:8px}
+.fcard-h{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.fcard-h .m{font-size:.8rem;color:var(--muted);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;font-weight:600;border-radius:999px;padding:3px 9px;background:var(--sunken);white-space:nowrap}
+.chip.est{background:var(--warn-bg);color:var(--warn)}
+.chip.dec{background:var(--good-bg);color:var(--good)}
+.chip.mine{background:var(--crust-soft);color:var(--crust)}
+.fstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fstat{background:var(--sunken);border-radius:10px;padding:8px}
+.fstat b{display:block;font-family:var(--f-num);font-weight:500;font-size:1.05rem}
+.fstat span{font-size:.72rem;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.fcard p{font-size:.92rem;color:var(--muted)}
+.fcard .btn-row .btn{font-size:.85rem;padding:7px 12px;min-height:36px}
+
+/* guide */
+.toc{display:flex;flex-wrap:wrap;gap:6px}
+.toc a{text-decoration:none;font-size:.86rem;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:6px 11px;color:var(--ink);background:var(--surface)}
+details.g{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+details.g > summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:1fr 20px;gap:10px;align-items:center}
+details.g > summary::-webkit-details-marker{display:none}
+details.g > summary .s1{font-family:var(--f-display);font-weight:700;font-size:1.08rem}
+details.g > summary .s2{display:block;font-size:.85rem;color:var(--muted)}
+details.g > summary svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;transition:transform .2s}
+details.g[open] > summary svg{transform:rotate(180deg)}
+.g-body{padding:0 16px 16px;display:grid;gap:12px}
+.g-body p,.g-body li{font-size:.95rem}
+.g-body ul,.g-body ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.when{font-size:.88rem;background:var(--accent-soft);border-radius:10px;padding:8px 10px}
+.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:620px){.panels{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.panel{background:var(--sunken);border-radius:12px;padding:6px 6px 8px;display:grid;gap:4px;align-content:start}
+.panel svg{width:100%;height:auto;display:block}
+.panel figcaption{font-size:.8rem;line-height:1.3;padding:0 4px}
+.panel figcaption b{font-family:var(--f-num);color:var(--crust);margin-right:4px}
+figure{margin:0}
+.tbl-wrap{overflow-x:auto}
+table.cmp{border-collapse:collapse;width:100%;font-size:.88rem;min-width:460px}
+table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.day{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.day b{font-family:var(--f-num);font-weight:500;color:var(--crust);font-size:.9rem}
+
+/* svg illustrazioni */
+.ill .bowl{fill:none;stroke:var(--bowl);stroke-width:3;stroke-linecap:round}
+.ill .bowl-in{fill:var(--sunken);stroke:var(--bowl);stroke-width:2.5}
+.ill .bowl-b{fill:color-mix(in srgb,var(--bowl) 22%,transparent);stroke:var(--bowl);stroke-width:2.5;stroke-linejoin:round}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.ill .bench{stroke:var(--bowl);stroke-width:2.5;stroke-linecap:round}
+.ill .dough{fill:var(--dough);stroke:var(--dough-line);stroke-width:1.6;stroke-linejoin:round}
+.ill .shade{fill:var(--dough-shade);stroke:var(--dough-line);stroke-width:1.2}
+.ill .hand{fill:var(--hand);stroke:var(--hand-line);stroke-width:1.4;stroke-linejoin:round}
+.ill .arr{fill:none;stroke:var(--crust);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ill .thin{fill:none;stroke:var(--dough-line);stroke-width:1.2;stroke-linecap:round}
+.ill .dash{fill:none;stroke:var(--dough-line);stroke-width:1.2;stroke-dasharray:3 3}
+.ill .cut{fill:none;stroke:var(--crust);stroke-width:2.6;stroke-linecap:round}
+.ill .open{fill:var(--sunken);stroke:var(--dough-line);stroke-width:1}
+.ill text{font-family:var(--f-num);font-size:9px;fill:var(--muted)}
+.ill .tool{fill:var(--surface);stroke:var(--bowl);stroke-width:1.6;stroke-linejoin:round}
+.ill .accent-fill{fill:var(--crust)}
+
+/* form farina personalizzata */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;z-index:40;max-width:calc(100% - 32px)}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:14px;color:var(--muted);font-size:.92rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" style="fill:var(--crust)"/>
+    </marker>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="top-in">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+      <ellipse cx="20" cy="23" rx="17" ry="12" style="fill:var(--crust)"/>
+      <path d="M11 19 q4 -5 8 0 M17 17 q4 -5 8 0 M23 19 q4 -5 8 0" style="fill:none;stroke:var(--crust-soft);stroke-width:2.2;stroke-linecap:round"/>
+    </svg>
+    <div class="brand">Banco del Pane<small>Farine, impasti e tecnica, su misura</small></div>
+  </div>
+</header>
+
+<main id="main">
+  <!-- IMPASTO -->
+  <section class="view" id="v-impasto" aria-labelledby="h-impasto">
+    <div>
+      <h2 id="h-impasto">Il tuo impasto</h2>
+      <p class="lede">Scegli le farine e i grammi. Ti dico quanta acqua, sale e lievito usare, perché, e come organizzare la giornata.</p>
+    </div>
+
+    <div class="card">
+      <div class="sect-h"><h3>Farine</h3><span class="eyebrow" id="ex-flag">Esempio, cambialo</span></div>
+      <div id="flour-rows"></div>
+      <div class="btn-row">
+        <button class="btn ghost" id="add-flour" type="button">+ Aggiungi farina</button>
+        <button class="btn ghost" id="go-custom" type="button">Non trovo la mia farina</button>
+      </div>
+      <div class="total-line"><span>Farina totale</span><span class="num" id="flour-total">0 g</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Cosa vuoi fare</h3>
+      <div class="field"><span class="lbl">Pane</span><div class="seg" id="seg-style-pane"></div></div>
+      <div class="field"><span class="lbl">Focacce e pizze</span><div class="seg" id="seg-style-teglia"></div></div>
+      <div id="recipe-info"></div>
+      <div class="field"><span class="lbl">La tua esperienza con impasti umidi</span><div class="seg" id="seg-level"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Lievito e tempi</h3>
+      <p class="muted small">Tu scegli il lievito e quando vuoi il pane. Orari, ore a temperatura ambiente, ore in frigo e dose di lievito li calcolo io.</p>
+      <div class="field"><span class="lbl">Lievito (la dose sotto cambia da sola)</span><div class="seg lev-seg" id="seg-lev"></div></div>
+      <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
+      <div class="grid2">
+        <div class="field"><label for="in-temp">Temperatura della cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="number" min="12" max="34" step="1" inputmode="numeric"></div></div>
+        <div class="field"><label for="in-ftemp">Temperatura della farina</label><div class="unit" data-u="°C"><input id="in-ftemp" type="number" min="2" max="34" step="1" inputmode="numeric"></div></div>
+        <div class="field" id="pieces-field"><label for="in-pieces">Numero di pezzi</label><input id="in-pieces" type="number" min="1" max="30" step="1" inputmode="numeric"></div>
+        <div class="field"><label for="in-salt">Sale (% sulla farina)</label><div class="unit" data-u="%"><input id="in-salt" type="number" min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
+      </div>
+      <p class="muted small">La farina è di solito alla temperatura della stanza in cui la tieni. Se sta in cantina o in garage, misurala o mettila a mano.</p>
+      <div class="field"><span class="lbl">Impasto</span><div class="seg" id="seg-mixer"></div></div>
+      <div class="field"><span class="lbl">Malto d'orzo</span><div class="seg" id="seg-malt"></div></div>
+      <div class="grid2" id="malt-box" hidden>
+        <div class="field"><label for="in-malt">Quantità (% sulla farina)</label><div class="unit" data-u="%"><input id="in-malt" type="number" min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
+      </div>
+      <div id="plan-box"></div>
+    </div>
+
+    <div id="out"></div>
+  </section>
+
+  <!-- FARINE -->
+  <section class="view" id="v-farine" aria-labelledby="h-farine" hidden>
+    <div>
+      <h2 id="h-farine">Farine</h2>
+      <p class="lede">Proteine e forza (W) delle farine più comuni. Dove il mulino non dichiara il W ho messo una stima: controlla sempre la confezione e correggi i valori se li hai.</p>
+    </div>
+    <input type="search" id="f-search" placeholder="Cerca: Caputo, manitoba, tipo 1, segale…" aria-label="Cerca farina">
+    <div class="filters" id="f-filters"></div>
+    <div class="flist" id="f-list"></div>
+
+    <div class="card" id="custom-card">
+      <h3 id="custom-title">Aggiungi la tua farina</h3>
+      <p class="muted small">Copia i valori dalla confezione. Le proteine sono nella tabella nutrizionale (g per 100 g). Il W a volte è scritto sul sacco o sul sito del mulino.</p>
+      <form id="custom-form" class="form-grid">
+        <div class="field"><label for="c-name">Nome</label><input id="c-name" type="text" required placeholder="es. Tipo 1 macinata a pietra"></div>
+        <div class="field"><label for="c-brand">Marca</label><input id="c-brand" type="text" placeholder="es. Mulino del paese"></div>
+        <div class="field"><label for="c-cat">Tipo di farina</label><select id="c-cat"></select></div>
+        <div class="field"><label for="c-prot">Proteine</label><div class="unit" data-u="%"><input id="c-prot" type="number" min="4" max="20" step="0.1" required inputmode="decimal"></div></div>
+        <div class="field"><label for="c-w">W (se lo sai)</label><input id="c-w" type="number" min="50" max="480" step="10" inputmode="numeric" placeholder="facoltativo"></div>
+        <div class="field" style="grid-column:1/-1"><label for="c-note">Note</label><input id="c-note" type="text" placeholder="es. macinata a pietra, bio"></div>
+        <div class="btn-row" style="grid-column:1/-1">
+          <button class="btn primary" type="submit" id="c-save">Salva farina</button>
+          <button class="btn" type="button" id="c-cancel" hidden>Annulla modifica</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- PIEGHE / TECNICA -->
+  <section class="view" id="v-tecnica" aria-labelledby="h-tecnica" hidden>
+    <div>
+      <h2 id="h-tecnica">Tecnica</h2>
+      <p class="lede">Come si lavora l'impasto, passo per passo: impastare, pieghe, formatura, tagli e cottura.</p>
+    </div>
+    <nav class="toc" id="toc-tecnica" aria-label="Indice tecnica"></nav>
+    <p class="legend"><span><i style="background:var(--crust)"></i>freccia arancione = il movimento da fare</span><span><i style="background:var(--dough-line)"></i>impasto</span><span><i style="background:var(--bowl)"></i>ciotola, banco, forno</span></p>
+    <div class="view" id="g-tecnica"></div>
+  </section>
+
+  <!-- LIEVITI -->
+  <section class="view" id="v-lieviti" aria-labelledby="h-lieviti" hidden>
+    <div>
+      <h2 id="h-lieviti">Lieviti, ingredienti e strumenti</h2>
+      <p class="lede">Birra fresco o secco, lievito madre e licoli: differenze, conversioni e come farli nascere da zero. In fondo, gli strumenti che servono davvero.</p>
+    </div>
+    <nav class="toc" id="toc-lieviti" aria-label="Indice lieviti"></nav>
+    <div class="view" id="g-lieviti"></div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Sezioni">
+  <div class="tabs-in">
+    <button class="tab" data-view="impasto" type="button"><svg viewBox="0 0 24 24"><path d="M4 15c0-4 3.6-7 8-7s8 3 8 7c0 2-1.5 3-3 3H7c-1.5 0-3-1-3-3z"/><path d="M8 11.5c1-1.2 2-1.2 3 0M13 11.5c1-1.2 2-1.2 3 0"/></svg>Impasto</button>
+    <button class="tab" data-view="farine" type="button"><svg viewBox="0 0 24 24"><path d="M12 21V8"/><path d="M12 12c-2-0.5-3.5-2-3.5-4 2 .3 3.5 1.8 3.5 4zM12 12c2-.5 3.5-2 3.5-4-2 .3-3.5 1.8-3.5 4zM12 16.5c-2-.5-3.5-2-3.5-4 2 .3 3.5 1.8 3.5 4zM12 16.5c2-.5 3.5-2 3.5-4-2 .3-3.5 1.8-3.5 4zM12 7.5c-1-1-1-2.6 0-4.5 1 1.9 1 3.5 0 4.5z"/></svg>Farine</button>
+    <button class="tab" data-view="tecnica" type="button"><svg viewBox="0 0 24 24"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9a1.5 1.5 0 0 1 3 0v4.5a7 7 0 0 1-7 7h-.5a6 6 0 0 1-5-2.7L4 14.5a1.5 1.5 0 0 1 2.4-1.8L7 13.5"/></svg>Tecnica</button>
+    <button class="tab" data-view="lieviti" type="button"><svg viewBox="0 0 24 24"><path d="M8 3h8M9 3v3.5a6 6 0 0 0-3 5.2V19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-7.3a6 6 0 0 0-3-5.2V3"/><circle cx="10.5" cy="14" r="1.2"/><circle cx="14" cy="16.5" r="1"/><circle cx="13.5" cy="12" r=".8"/></svg>Lieviti</button>
+  </div>
+</nav>
+<div class="toast" id="toast" hidden></div>
+<script>
+/* ===== FONTI ===== */
+const SOURCES = {
+  dpr:   {t:"D.P.R. 9 febbraio 2001 n. 187, art. 1 e 2 (requisiti legali di farine e semole)", u:"https://edizionieuropee.it/law/html/24/zn4_03_057.html", k:"Legge"},
+  cap_pz:{t:"Mulino Caputo, scheda prodotto Pizzeria", u:"https://www.mulinocaputo.it/en/prodotti/pizzeria/", k:"Mulino"},
+  cap_mo:{t:"Mulino Caputo, scheda prodotto Manitoba Oro", u:"https://www.mulinocaputo.it/en/prodotti/manitoba-oro/", k:"Mulino"},
+  cap_t0:{t:"Mulino Caputo, \"Le nostre farine tipo 0\" (Nuvola, Aria, Manitoba Oro)", u:"https://www.mulinocaputo.it/en/Our-type-0-flours--the-excellence-of-the-Caputo-tradition/", k:"Mulino"},
+  cap_in:{t:"Mulino Caputo, scheda prodotto Integrale", u:"https://www.mulinocaputo.it/en/products/integral/", k:"Mulino"},
+  cap_cu:{t:"Caputo Cuoco, valori del mulino riportati dal rivenditore Piccantino", u:"https://www.piccantino.co.uk/caputo/cuoco-wheat-flour", k:"Rivenditore"},
+  petra: {t:"Scheda tecnica Petra 1111 (Molino Quaglia), pubblicata dal distributore", u:"https://cdn1.groweb.it/sibespa/wp-content/uploads/2020/12/Petra_1111.pdf", k:"Scheda tecnica"},
+  marino:{t:"Mulino Marino Buratto tipo 2, valori riportati dall'importatore BakeryBits", u:"https://www.bakerybits.co.uk/organic-buratto-type-2-flour-25kg", k:"Importatore"},
+  braga2:{t:"Molino Braga, Farina tipo 2 macinata a pietra (pane e focaccia)", u:"https://molinobraga.it/en/home/farina-type-2-for-bread-and-focaccia-grinded-in-stone-19", k:"Mulino"},
+  braga1:{t:"Molino Braga, Farina tipo 1 Rustica macinata a pietra", u:"https://molinobraga.it/en/home/farina-type-1-rustica-tradition-for-rustic-bread-grinded-in-stone-4", k:"Mulino"},
+  gmi:   {t:"Grandi Molini Italiani, brochure Linea GDO 2024 (farine per le marche dei supermercati)", u:"https://www.grandimolini.it/wp-content/uploads/2025/01/Brochure_LineaGDO_2024_compressed.pdf", k:"Mulino"},
+  barilla:{t:"Barilla Farina 00, proteine da etichetta (riportate da QualeScegliere)", u:"https://www.qualescegliere.it/farina/barilla-farina-tipo-00", k:"Etichetta"},
+  altro: {t:"Altroconsumo, Farine: come scegliere (W e usi)", u:"https://www.altroconsumo.it/alimentazione/farine/come-scegliere", k:"Associazione consumatori"},
+  zani:  {t:"Zanichelli, Aspetti tecnologici di panetteria e pasticceria (testo scolastico per istituti alberghieri)", u:"https://online.scuola.zanichelli.it/enogastronomiacucina/wp-content/uploads/Aspetti%20tecnologici%20di%20panetteria%20e%20pasticceria.pdf", k:"Manuale"},
+  asbe:  {t:"American Society of Baking, Dry Yeast (conversioni fresco / secco)", u:"https://asbe.org/?p=13960", k:"Ente tecnico"},
+  ka_ddt:{t:"King Arthur Baking (Pro), Dough Temperature: formula della temperatura dell'impasto", u:"https://www.kingarthurbaking.com/pro/reference/dough-temperature", k:"Mulino / scuola"},
+  ka_st: {t:"King Arthur Baking, Guida: creare il lievito naturale", u:"https://www.kingarthurbaking.com/guides/sourdough/create", k:"Mulino / scuola"},
+  ka_fr: {t:"King Arthur Baking, Sourdough feeding ratios (rapporti di rinfresco)", u:"https://www.kingarthurbaking.com/blog/2025/03/13/sourdough-feeding-ratios", k:"Mulino / scuola"},
+  ka_sc: {t:"King Arthur Baking, Bread scoring techniques (tagli)", u:"https://www.kingarthurbaking.com/blog/2017/10/20/bread-scoring-techniques", k:"Mulino / scuola"},
+  dis_bp:{t:"Dissapore, Biga e poolish (parametri del metodo Giorilli)", u:"https://www.dissapore.com/cucina/biga-e-poolish-fatti-in-casa-senza-errori/", k:"Rivista"},
+  dis_lm:{t:"Dissapore, Lievito madre solido e liquido (A. Trezzi, con P. Giorilli, G. Bonci)", u:"https://www.dissapore.com/ricette/lievito-madre-la-ricetta-perfetta/", k:"Rivista"},
+  altro_lm:{t:"Altroconsumo, Lievito madre: come farlo e conservarlo", u:"https://www.altroconsumo.it/alimentazione/pane/consigli/lievito-madre", k:"Associazione consumatori"},
+  ka_steam:{t:"King Arthur Baking, Baking bread with steam at home (metodi per il vapore)", u:"https://www.kingarthurbaking.com/blog/2024/04/26/baking-bread-with-steam-at-home", k:"Mulino / scuola"},
+  ka_malt:{t:"King Arthur Baking, Malto diastasico, non diastasico e sciroppo (con J. Hamelman)", u:"https://www.kingarthurbaking.com/blog/2022/03/14/difference-between-diastatic-malt-non-diastatic-malt-barley-malt-syrup", k:"Mulino / scuola"},
+  cbaker:{t:"Understanding Ingredients for the Canadian Baker, cap. Malt (go2HR, manuale per la formazione dei panificatori)", u:"https://ecampusontario.pressbooks.pub/ingredients/chapter/malt/", k:"Manuale"},
+  altamura:{t:"Disciplinare di produzione Pane di Altamura DOP", u:"https://www.quattrocalici.it/wp-content/uploads/2021/05/pane_di_altamura_dop.pdf", k:"Disciplinare DOP"},
+  ka_dark:{t:"King Arthur Baking, Ask the Bread Coach: quanto scura deve essere la crosta", u:"https://www.kingarthurbaking.com/blog/2021/11/03/ask-the-bread-coach-just-how-dark-should-i-be-baking-my-bread", k:"Mulino / scuola"},
+  ka_seeds:{t:"King Arthur Baking, Come ricoprire il pane di semi e fiocchi", u:"https://www.kingarthurbaking.com/blog/2023/01/23/how-to-coat-your-bread-with-seeds-oats-and-other-crust-treatments", k:"Mulino / scuola"},
+  ka_seedf:{t:"King Arthur Baking (Pro), Sourdough Seed Bread: ammollo dei semi di lino", u:"https://www.kingarthurbaking.com/pro/formulas/sourdough-seed-bread", k:"Mulino / scuola"},
+  ka_done:{t:"King Arthur Baking, Come capire se il pane è cotto", u:"https://www.kingarthurbaking.com/blog/2023/05/31/how-to-tell-if-bread-is-done", k:"Mulino / scuola"},
+  dis_foc:{t:"Dissapore, Focaccia genovese: ricetta del maestro Giovanni Tesauro", u:"https://www.dissapore.com/ricette/focaccia-genovese-la-ricetta-perfetta/", k:"Rivista"},
+  dis_sch:{t:"Dissapore, Schiacciata toscana", u:"https://www.dissapore.com/ricette/schiacciata-toscana/", k:"Rivista"},
+  sdg_pez:{t:"Scatti di Gusto, Focaccia romana in planetaria di Luca Pezzetta", u:"https://www.scattidigusto.it/lezioni-di-pizza-la-focaccia-romana-in-planetaria-di-luca-pezzetta/", k:"Rivista"},
+  sdg_teg:{t:"Scatti di Gusto, Lezioni di pizza: la teglia ad alta idratazione a casa", u:"https://www.scattidigusto.it/2020/05/31/lezioni-di-pizza-la-ricetta-della-teglia-ad-alta-idratazione-a-casa/", k:"Rivista"},
+  cap_alba:{t:"Mulino Caputo, scheda prodotto Alba", u:"https://www.mulinocaputo.it/en/products/1kg-white-flour/", k:"Mulino"},
+  cap_pzcat:{t:"Mulino Caputo, catalogo farine per pizza (Doppio Zero, Nuvola)", u:"https://www.mulinocaputo.it/en/categoria-prodotto/farina-per-pizza/", k:"Mulino"},
+  qs_capsem:{t:"Caputo Semola rimacinata, proteine da etichetta (QualeScegliere)", u:"https://www.qualescegliere.it/farina/caputo-semola-di-grano-duro-rimacinata/", k:"Etichetta"},
+  stag_oro:{t:"Agugiaro & Figna Molini, scheda tecnica Farina 00 Oro Le 5 Stagioni (rev. 0, 2023)", u:"https://mundomaisverde.com/wp-content/uploads/2024/07/FARINA_00_ORO_1_KG_5_STAGIONI_rev0_DF.pdf", k:"Scheda tecnica"},
+  stag_sup:{t:"Le 5 Stagioni 00 Superiore, valori riportati dal rivenditore Italicatessen", u:"https://www.italicatessen.ie/flour-yeast/flour/agugiaro-flour-00-blue-superior-25kg-fa040", k:"Rivenditore"},
+  qs_garw:{t:"Garofalo Il buono Farina W260: W nel nome del prodotto, proteine da etichetta", u:"https://www.qualescegliere.it/farina/garofalo-il-buono-farina-w260/", k:"Etichetta"},
+  qs_garint:{t:"Garofalo Farina integrale, proteine da etichetta (QualeScegliere)", u:"https://www.qualescegliere.it/farina/garofalo-tutto-il-buono-della-farina-integrale/", k:"Etichetta"},
+  qs_molint:{t:"La Molisana Semola integrale rimacinata, proteine da etichetta", u:"https://www.qualescegliere.it/farina/la-molisana-semola-integrale-rimacinata/", k:"Etichetta"},
+  qs_molita:{t:"La Molisana Semola di solo grano italiano, proteine da etichetta", u:"https://www.qualescegliere.it/farina/la-molisana-semola-di-solo-grano-italiano/", k:"Etichetta"},
+  cibi_molsem:{t:"La Molisana Semola rimacinata, valori nutrizionali (rivenditore Cibimarket)", u:"https://www.cibimarket.co.uk/products/molisana-semola-rimacinata-1-kg-12-in-a-box", k:"Etichetta"},
+  qs_div:{t:"Divella Semola rimacinata, proteine da etichetta", u:"https://www.qualescegliere.it/farina/divella-semola-di-grano-duro-rimacinata/", k:"Etichetta"},
+  qs_spam:{t:"Molino Spadoni Farina d'America (Manitoba), proteine da etichetta", u:"https://www.qualescegliere.it/farina/molino-spadoni-farina-d-america/", k:"Etichetta"},
+  off_spa00:{t:"Molino Spadoni Farina 00, proteine da etichetta (Open Food Facts)", u:"https://world.openfoodfacts.org/product/8002213000398/farina-tipo-00-molino-spadoni", k:"Etichetta"},
+  off_ros:{t:"Molino Rossetto Manitoba tipo 0, proteine da etichetta (Open Food Facts)", u:"https://world.openfoodfacts.org/product/8018211901148/farina-manitoba-di-grano-tenero-tipo-0-molino-rossetto", k:"Etichetta"},
+  qs_cas:{t:"Selezione Casillo Manitoba: W 400 dichiarato in confezione (QualeScegliere)", u:"https://www.qualescegliere.it/farina/selezione-casillo-manitoba", k:"Etichetta"},
+  qs_bong:{t:"Bongiovanni Manitoba 00: W 390 dichiarato in confezione (QualeScegliere)", u:"https://www.qualescegliere.it/farina/bongiovanni-farina-manitoba-tipo-00/", k:"Etichetta"}
+};
+
+/* ===== CATEGORIE ===== */
+const CATS = {
+  "00":{l:"Grano tenero 00", g:"tenero", leg:"Ceneri max 0,55%, proteine min 9%"},
+  "0": {l:"Grano tenero 0", g:"tenero", leg:"Ceneri max 0,65%, proteine min 11%"},
+  "man":{l:"Manitoba (tenero forte)", g:"tenero", leg:"Per legge è una 0 o 00: \"Manitoba\" indica grano forte, non un tipo legale"},
+  "1": {l:"Grano tenero tipo 1", g:"tenero", leg:"Ceneri max 0,80%, proteine min 12%"},
+  "2": {l:"Grano tenero tipo 2", g:"tenero", leg:"Ceneri max 0,95%, proteine min 12%"},
+  "int":{l:"Integrale di grano tenero", g:"tenero", leg:"Ceneri 1,30–1,70%, proteine min 12%"},
+  "sem":{l:"Semola rimacinata (grano duro)", g:"duro", leg:"Semola: ceneri max 0,90%, proteine min 10,5%"},
+  "semint":{l:"Semola integrale (grano duro)", g:"duro", leg:"Sfarinato integrale di grano duro"},
+  "seg":{l:"Segale", g:"segale", leg:"Non regolata dal DPR 187/2001"},
+  "farro":{l:"Farro spelta", g:"farro", leg:"Non regolato dal DPR 187/2001"},
+  "mono":{l:"Farro monococco", g:"mono", leg:"Non regolato dal DPR 187/2001"},
+  "antico":{l:"Grani antichi teneri", g:"antico", leg:"Sono farine di grano tenero: valgono i tipi 0/1/2/integrale"},
+  "sg":{l:"Senza glutine (riso, mais…)", g:"sg", leg:"Non forma maglia glutinica"}
+};
+
+/* ===== FARINE =====
+   W e prot: valori dichiarati. wSrc / pSrc: chiave fonte, oppure "stima".
+   P/L e ass (assorbimento al farinografo) solo dove dichiarati. */
+const FLOURS = [
+  {id:"cap-pizzeria", b:"Caputo", n:"Pizzeria (blu)", c:"00", p:12.5, pSrc:"cap_pz", w:[260,280], wSrc:"cap_pz", pl:"0,50–0,60", note:"Pensata per pizza napoletana, va bene per pane a lievitazione media."},
+  {id:"cap-cuoco", b:"Caputo", n:"Cuoco (Saccorosso)", c:"00", p:13, pSrc:"cap_cu", w:[300,320], wSrc:"cap_cu", pl:"0,50–0,60", note:"Forte ed estensibile, regge lievitazioni lunghe anche in frigo."},
+  {id:"cap-nuvola", b:"Caputo", n:"Nuvola", c:"0", p:12.5, pSrc:"cap_t0", w:[270,290], wSrc:"cap_t0", note:"Con lievito madre essiccato e germe di grano: alveolatura ampia."},
+  {id:"cap-aria", b:"Caputo", n:"Aria", c:"0", p:13, pSrc:"cap_t0", w:[300,320], wSrc:"cap_t0", note:"Tipo 0 forte del mulino, per impasti idratati."},
+  {id:"cap-manitoba", b:"Caputo", n:"Manitoba Oro", c:"man", p:14, pSrc:"cap_mo", w:[360,380], wSrc:"cap_mo", pl:"0,45–0,55", note:"Molto forte: ottima per rinforzare farine deboli o integrali."},
+  {id:"cap-integrale", b:"Caputo", n:"Integrale", c:"int", p:13, pSrc:"cap_in", w:[170,190], wSrc:"cap_in", pl:"0,80–0,90", note:"W basso e P/L alto: impasto tenace e poco estensibile, la crusca taglia la maglia."},
+  {id:"petra-1111", b:"Petra (Molino Quaglia)", n:"Petra 1111 bio", c:"1", p:13.2, pSrc:"petra", w:[300,320], wSrc:"petra", pl:"0,55–0,65", ass:"elevato, fino all'80% (dichiarato)", note:"Tipo 1 macinata a cilindri, molto assorbente."},
+  {id:"marino-buratto", b:"Mulino Marino", n:"Buratto tipo 2 bio", c:"2", p:15, pSrc:"marino", w:[270,290], wSrc:"marino", pl:"0,55–0,65", note:"Macinata a pietra, proteine 14,5–15,5% secondo l'importatore."},
+  {id:"braga-2", b:"Molino Braga", n:"Tipo 2 a pietra (pane e focaccia)", c:"2", p:null, pSrc:"stima", w:[240,270], wSrc:"braga2", ass:"alto (dichiarato, senza numero)", note:"Il mulino non dichiara le proteine: per legge una tipo 2 ne ha almeno il 12%."},
+  {id:"braga-1", b:"Molino Braga", n:"Tipo 1 Rustica a pietra", c:"1", p:null, pSrc:"stima", w:[300,320], wSrc:"braga1", ass:"57–58% al farinografo", note:"Proteine non dichiarate (minimo di legge 12%)."},
+  {id:"gmi-00dolci", b:"Supermercato (Grandi Molini)", n:"Tipo 00 per dolci", c:"00", p:null, pSrc:"stima", w:[170,170], wSrc:"gmi", note:"Linea che GMI produce per le marche dei supermercati. Debole: non adatta a pane lungo."},
+  {id:"gmi-00", b:"Supermercato (Grandi Molini)", n:"Tipo 00", c:"00", p:null, pSrc:"stima", w:[200,200], wSrc:"gmi", note:"Farina da tutti i giorni: pane in giornata, lievitazioni brevi."},
+  {id:"gmi-0pizza", b:"Supermercato (Grandi Molini)", n:"Tipo 0 per pizza", c:"0", p:null, pSrc:"stima", w:[250,250], wSrc:"gmi"},
+  {id:"gmi-0ita", b:"Supermercato (Grandi Molini)", n:"Tipo 0 100% grano italiano", c:"0", p:null, pSrc:"stima", w:[200,200], wSrc:"gmi"},
+  {id:"gmi-man", b:"Supermercato (Grandi Molini)", n:"Tipo 0 Manitoba", c:"man", p:null, pSrc:"stima", w:[350,350], wSrc:"gmi"},
+  {id:"gmi-1", b:"Supermercato (Grandi Molini)", n:"Tipo 1", c:"1", p:null, pSrc:"stima", w:[220,220], wSrc:"gmi"},
+  {id:"gmi-2", b:"Supermercato (Grandi Molini)", n:"Tipo 2", c:"2", p:null, pSrc:"stima", w:[295,295], wSrc:"gmi"},
+  {id:"gmi-int", b:"Supermercato (Grandi Molini)", n:"Integrale", c:"int", p:null, pSrc:"stima", w:[235,235], wSrc:"gmi"},
+  {id:"gmi-sem", b:"Supermercato (Grandi Molini)", n:"Semola rimacinata 100% italiana", c:"sem", p:null, pSrc:"stima", w:[185,185], wSrc:"gmi", note:"Il W della semola dice poco: il glutine del grano duro è tenace e poco estensibile."},
+  {id:"barilla-00", b:"Barilla", n:"Farina 00", c:"00", p:10, pSrc:"barilla", w:null, wSrc:"stima", note:"Barilla non dichiara il W. Con 10% di proteine è una farina debole-media."},
+  {id:"cap-alba", b:"Caputo", n:"Alba", c:"00", p:12.75, pSrc:"cap_alba", w:[260,280], wSrc:"cap_alba", pl:"0,50–0,60", note:"00 del mulino per uso generale, forza media."},
+  {id:"cap-doppio", b:"Caputo", n:"Doppio Zero", c:"00", p:null, pSrc:"stima", w:[220,240], wSrc:"cap_pzcat", note:"Più debole della Pizzeria: per pane in giornata."},
+  {id:"cap-semola", b:"Caputo", n:"Semola rimacinata", c:"sem", p:12.5, pSrc:"qs_capsem", w:null, wSrc:"stima", note:"Grano duro: per pane di semola o in miscela per mollica gialla e profumata."},
+  {id:"stag-oro", b:"Le 5 Stagioni (Agugiaro & Figna)", n:"00 Oro", c:"00", p:14, pSrc:"stag_oro", w:[390,390], wSrc:"stag_oro", pl:"0,60 ± 0,10", ass:"min. 58,5% al farinografo", note:"Il mulino la indica per lievitazioni di 18–21 ore. Proteine: minimo 14% sul secco."},
+  {id:"stag-sup", b:"Le 5 Stagioni (Agugiaro & Figna)", n:"00 Superiore (blu)", c:"00", p:13, pSrc:"stag_sup", w:[330,330], wSrc:"stag_sup", pl:"0,60"},
+  {id:"garofalo-w260", b:"Garofalo", n:"Il buono Farina W260", c:"00", p:13, pSrc:"qs_garw", w:[260,260], wSrc:"qs_garw"},
+  {id:"garofalo-int", b:"Garofalo", n:"Farina integrale", c:"int", p:12, pSrc:"qs_garint", w:null, wSrc:"stima"},
+  {id:"molisana-sem", b:"La Molisana", n:"Semola rimacinata", c:"sem", p:13, pSrc:"cibi_molsem", w:null, wSrc:"stima", note:"Il W non è dichiarato: per la semola conta più la tenacità (P/L alto) che la forza."},
+  {id:"molisana-semint", b:"La Molisana", n:"Semola integrale rimacinata", c:"semint", p:15, pSrc:"qs_molint", w:null, wSrc:"stima"},
+  {id:"molisana-semita", b:"La Molisana", n:"Semola di solo grano italiano", c:"sem", p:14, pSrc:"qs_molita", w:null, wSrc:"stima", note:"Semola decorticata a pietra (non indicata come rimacinata): più granulosa, assorbe più lentamente."},
+  {id:"molisana-pizza", b:"La Molisana", n:"Semola per pizza", c:"sem", p:null, pSrc:"stima", w:null, wSrc:"stima", note:"Proteine e W non trovati in fonti verificabili: leggi l'etichetta e correggi."},
+  {id:"divella-sem", b:"Divella", n:"Semola rimacinata", c:"sem", p:11.8, pSrc:"qs_div", w:null, wSrc:"stima"},
+  {id:"spadoni-america", b:"Molino Spadoni", n:"Farina d'America (Manitoba)", c:"man", p:13.5, pSrc:"qs_spam", w:null, wSrc:"stima"},
+  {id:"spadoni-00", b:"Molino Spadoni", n:"Farina 00", c:"00", p:10, pSrc:"off_spa00", w:null, wSrc:"stima"},
+  {id:"rossetto-man", b:"Molino Rossetto", n:"Manitoba tipo 0", c:"man", p:13.5, pSrc:"off_ros", w:null, wSrc:"stima"},
+  {id:"casillo-man", b:"Selezione Casillo", n:"Manitoba W 400", c:"man", p:10, pSrc:"qs_cas", w:[400,400], wSrc:"qs_cas", note:"Attenzione: la fonte riporta 10 g di proteine, poco coerente con W 400. Controlla l'etichetta del tuo pacco."},
+  {id:"bong-man", b:"Bongiovanni", n:"Manitoba tipo 00", c:"man", p:12.7, pSrc:"qs_bong", w:[390,390], wSrc:"qs_bong"},
+  {id:"loconte-man", b:"Lo Conte (Le Farine Magiche)", n:"Manitoba 100%", c:"man", p:null, pSrc:"stima", w:null, wSrc:"stima", note:"Non ho trovato una scheda verificabile: valori stimati sulla categoria. Correggili con l'etichetta."},
+  {id:"grassi-man", b:"Molino Grassi", n:"Manitoba", c:"man", p:null, pSrc:"stima", w:null, wSrc:"stima", note:"Il mulino non pubblica W e proteine online: valori stimati. Correggili con l'etichetta."},
+  {id:"grassi-1", b:"Molino Grassi", n:"Tipo 1 bio", c:"1", p:null, pSrc:"stima", w:null, wSrc:"stima", note:"Valori stimati sulla categoria: correggili con l'etichetta."},
+  /* generiche: nessun valore da scheda, solo indicazioni tipiche */
+  {id:"gen-seg-int", b:"Generica", n:"Segale integrale", c:"seg", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, note:"Poco glutine utile: struttura data da pentosani e amido. Serve acidità (lievito madre)."},
+  {id:"gen-seg", b:"Generica", n:"Segale chiara", c:"seg", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, light:true},
+  {id:"gen-farro", b:"Generica", n:"Farro spelta bianco", c:"farro", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, note:"Glutine abbondante ma fragile ed estensibile: impasta poco, lievitazioni non troppo lunghe."},
+  {id:"gen-farro-int", b:"Generica", n:"Farro spelta integrale", c:"farro", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, whole:true},
+  {id:"gen-mono", b:"Generica", n:"Farro monococco", c:"mono", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, note:"Glutine molto debole e appiccicoso. Meglio in miscela (max 30–40%) o in cassetta."},
+  {id:"gen-antico", b:"Generica", n:"Grani antichi teneri (Gentil Rosso, Verna…)", c:"antico", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, note:"Forza in genere bassa: chiedi il W al mulino. Acqua moderata, tempi brevi."},
+  {id:"gen-semint", b:"Generica", n:"Semola integrale di grano duro", c:"semint", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true},
+  {id:"gen-kamut", b:"Generica", n:"Khorasan (Kamut®) semola", c:"sem", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, note:"Grano duro antico: si comporta come la semola."},
+  {id:"gen-riso", b:"Generica", n:"Farina di riso", c:"sg", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true, note:"Senza glutine: usala solo per spolverare il cestino o in piccola parte."},
+  {id:"gen-mais", b:"Generica", n:"Farina di mais fioretto", c:"sg", p:null, pSrc:"stima", w:null, wSrc:"stima", gen:true}
+];
+/* ===== utilità ===== */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = (n, d=0) => Number(n).toLocaleString("it-IT", {minimumFractionDigits:d, maximumFractionDigits:d});
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const store = {
+  get(k, def){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }catch(e){ return def; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(()=>{ t.hidden = true; }, 2200); }
+const ICON = {
+  info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  warn:'<svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg>',
+  bad:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 8l8 8M16 8l-8 8"/></svg>',
+  good:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M7.5 12.5l3 3 6-6"/></svg>',
+  x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  chev:'<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>'
+};
+
+/* ===== farine: database + personalizzate ===== */
+let custom = store.get("bdp_custom", []);
+const allFlours = () => [...custom, ...FLOURS];
+const flourById = id => allFlours().find(f => f.id === id);
+
+const BASE_PROT = {"00":10.5,"0":12,"man":14,"1":12.5,"2":13,"int":13,"sem":12.5,"semint":13,"seg":8.5,"farro":13.5,"mono":15,"antico":11,"sg":7};
+const EFF_W = {sem:180, semint:160, seg:40, farro:150, mono:60, antico:130, sg:0};
+const TENERO = ["00","0","man","1","2","int"];
+
+function protOf(f){ return f.p != null ? f.p : BASE_PROT[f.c]; }
+function wOf(f){
+  if (f.w) return (f.w[0] + f.w[1]) / 2;
+  if (TENERO.includes(f.c)) return clamp(150 + (protOf(f) - 10) * 56, 120, 400);
+  return EFF_W[f.c] ?? 150;
+}
+function wIsEstimated(f){ return !f.w; }
+
+/* acqua consigliata per la farina da sola (pane da forno, % sulla farina) — modello del Banco */
+function hydroOf(f){
+  const W = wOf(f);
+  let mid;
+  if (TENERO.includes(f.c)){
+    mid = 63 + (clamp(W,120,400) - 180) * 0.055;
+    mid += ({ "1":3, "2":5, "int":9 })[f.c] || 0;
+  } else {
+    mid = ({sem:72, semint:76, seg: f.light ? 74 : 82, farro: f.whole ? 70 : 64, mono:60, antico:61, sg:60})[f.c] ?? 65;
+  }
+  const spread = (f.c === "int" || f.c === "seg" || f.c === "semint") ? 4 : 3;
+  return {mid, min: mid - spread, max: mid + spread};
+}
+/* ore "equivalenti a 24 °C" che la forza regge, indicativo */
+function toleranceOf(W){
+  if (W < 160) return 6; if (W < 220) return 9; if (W < 270) return 14;
+  if (W < 320) return 20; if (W < 360) return 30; return 40;
+}
+function srcChip(key){
+  if (key === "stima") return '<span class="chip est">stima</span>';
+  if (key === "mio") return '<span class="chip mine">tuo dato</span>';
+  const s = SOURCES[key]; if (!s) return "";
+  return `<span class="chip dec">${esc(s.k.toLowerCase())}</span>`;
+}
+
+/* ===== ricette ===== */
+const RECIPES = {
+  pagnotta:{l:"Pagnotta", kind:"pane", hAdj:0},
+  filone:{l:"Filone / baguette", kind:"pane", hAdj:0},
+  cassetta:{l:"Pan bauletto", kind:"pane", hAdj:-2},
+  ciabatta:{l:"Ciabatta", kind:"pane", hAdj:8},
+  genovese:{l:"Focaccia genovese", kind:"teglia", H:55, refMid:69.6, salt:2.5, oil:6, malt:0.5, dens:0.46, post:2.5, src:"dis_foc",
+    desc:"Fügassa: bassa, unta, con i buchi delle dita pieni di salamoia. Farina 00 forte (W ≈ 300), poca acqua nell'impasto: l'umidità arriva dalla salamoia.",
+    extra: F => [["Olio extravergine (impasto)", F*0.06, "6%"],["Malto diastasico in polvere", F*0.005, "0,5%"]],
+    brine: F => `Salamoia: ${fmt(F*0.225)} g di acqua tiepida, ${fmt(F*0.15)} g di olio EVO, ${fmt(F*0.018)} g di sale fino, sbattuti insieme.`,
+    bake:"240 °C statico, 14–15 minuti, teglia sul ripiano basso."},
+  schiacciata:{l:"Schiacciata toscana", kind:"teglia", H:70, refMid:69.9, salt:2, oil:0, dens:0.95, post:1.5, src:"dis_sch",
+    desc:"Pane schiacciato croccante, olio e sale grosso in superficie. Ricetta di partenza con farina tipo 1.",
+    extra: F => [["Olio EVO per teglia e superficie", F*0.06, "q.b."],["Sale grosso in superficie", F*0.01, "q.b."]],
+    bake:"Forno preriscaldato a 200 °C, 20–25 minuti (Dissapore). Per una crosta più croccante molti salgono a 220–230 °C."},
+  romana:{l:"Focaccia romana", kind:"teglia", H:65, refMid:70.7, salt:2, oil:8, sugar:4, dens:1.0, post:2.5, src:"sdg_pez",
+    desc:"Alta e morbida, metodo di Luca Pezzetta: farina 0, 1 o 2 con W 280–300, olio e zucchero nell'impasto, salamoia in teglia. Peso dell'impasto = lato × lato della teglia (30×30 → 900 g).",
+    extra: F => [["Olio EVO (impasto)", F*0.08, "8%"],["Zucchero", F*0.04, "4%"]],
+    brine: (F, dough) => `Salamoia per ogni ${fmt(dough)} g di impasto: ${fmt(dough/9)} g di olio EVO, ${fmt(dough/9)} g di olio di semi, ${fmt(dough/18)} g d'acqua, ${fmt(dough/45)} g di sale, emulsionati.`,
+    bake:"180 °C per 10–12 minuti con un pentolino d'acqua bollente in forno (indicazione di Pezzetta)."},
+  teglia:{l:"Pizza in teglia romana", kind:"teglia", H:80, refMid:66.3, salt:2, oil:3, malt:1, dens:0.55, post:2.5, src:"sdg_teg",
+    desc:"Alta idratazione, farina di media forza (W 220–300), maturazione in frigo 15–24 ore. Per una teglia 30×40 circa 660 g di impasto.",
+    extra: F => [["Olio EVO (impasto)", F*0.03, "≈3%"],["Malto d'orzo (facoltativo)", F*0.01, "≈1%"]],
+    bake:"Forno al massimo (240–250 °C): 10 minuti sul ripiano più basso, poi 2–3 minuti a metà. Condimenti umidi (mozzarella) a metà cottura."},
+  lingue:{l:"Lingue di pizza", kind:"teglia", H:80, refMid:66.3, salt:2, oil:3, dens:0.55, post:2.5, piece:230, src:null,
+    desc:"Stesso impasto della pizza in teglia, diviso in panetti da 200–250 g e steso lungo e stretto (circa 15×40 cm). Ricetta derivata: non ho una fonte specifica per le lingue.",
+    extra: F => [["Olio EVO (impasto)", F*0.03, "≈3%"]],
+    bake:"Su pietra o teglia rovesciata ben calda al massimo (250 °C), 8–12 minuti finché il fondo è dorato."}
+};
+const isTeglia = () => RECIPES[S.style].kind === "teglia";
+
+/* ===== stato ===== */
+const DEFAULT = {
+  rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
+  style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
+  start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, example:true, panW:30, panL:40, panN:1
+};
+let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
+if (!RECIPES[S.style]) S.style = "pagnotta";
+S.rows = (S.rows || []).filter(r => flourById(r.id));
+if (!S.rows.length) S.rows = DEFAULT.rows.map(r => ({...r}));
+const save = () => store.set("bdp_state", S);
+
+const LEVELS = [["principiante","Principiante",-4],["intermedio","Intermedio",0],["esperto","Esperto",4]];
+const LEVS = [["fresco","Birra fresco"],["secco","Birra secco"],["lm","Lievito madre"],["licoli","Licoli"]];
+const MIXERS = [["mano","A mano"],["planetaria","Planetaria"]];
+const ENDDAYS = [[0,"Oggi"],[1,"Domani (notte in frigo)"],[2,"Dopodomani (2 notti in frigo)"]];
+const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["nodia","Non diastasico o sciroppo"]];
+const MALT_DEF = {dia:0.2, nodia:1};
+
+function segButtons(el, list, key, after){
+  el.innerHTML = list.map(([v,l]) => `<button type="button" data-v="${v}" aria-pressed="${String(S[key])===String(v)}">${l}</button>`).join("");
+  el.onclick = e => { const b = e.target.closest("button"); if (!b) return;
+    S[key] = typeof list[0][0] === "number" ? +b.dataset.v : b.dataset.v;
+    if (key==="style"||key==="level") S.hOver = null;
+    markEdited(); segButtons(el, list, key, after); after && after(); compute(); };
+}
+function renderStyleSegs(){
+  const pane = Object.entries(RECIPES).filter(([k,r]) => r.kind==="pane").map(([k,r]) => [k,r.l]);
+  const tegl = Object.entries(RECIPES).filter(([k,r]) => r.kind==="teglia").map(([k,r]) => [k,r.l]);
+  const both = () => { segButtons($("#seg-style-pane"), pane, "style", both); segButtons($("#seg-style-teglia"), tegl, "style", both); };
+  both();
+}
+function markEdited(){ if (S.example){ S.example = false; $("#ex-flag").hidden = true; } save(); }
+
+function flourOptions(sel){
+  const groups = {};
+  allFlours().forEach(f => { const g = f.mine ? "Le mie farine" : f.b; (groups[g] = groups[g] || []).push(f); });
+  return Object.entries(groups).map(([g, list]) =>
+    `<optgroup label="${esc(g)}">${list.map(f => `<option value="${f.id}" ${f.id===sel?"selected":""}>${esc(f.n)}${f.mine?"":" · "+esc(CATS[f.c].l.replace("Grano tenero ",""))}</option>`).join("")}</optgroup>`).join("");
+}
+function renderRows(){
+  $("#flour-rows").innerHTML = S.rows.map((r,i) => `
+    <div class="flour-row">
+      <select aria-label="Farina ${i+1}" data-i="${i}" class="r-f">${flourOptions(r.id)}</select>
+      <div class="unit" data-u="g"><input type="number" class="r-g" data-i="${i}" min="0" step="10" inputmode="numeric" value="${r.g}" aria-label="Grammi farina ${i+1}"></div>
+      <button class="icon-btn r-x" data-i="${i}" type="button" aria-label="Togli farina" ${S.rows.length<2?"disabled":""}>${ICON.x}</button>
+    </div>`).join("");
+}
+$("#flour-rows").addEventListener("change", e => {
+  const i = +e.target.dataset.i;
+  if (e.target.classList.contains("r-f")) { S.rows[i].id = e.target.value; markEdited(); compute(); }
+});
+$("#flour-rows").addEventListener("input", e => {
+  const i = +e.target.dataset.i;
+  if (e.target.classList.contains("r-g")) { S.rows[i].g = Math.max(0, +e.target.value || 0); markEdited(); compute(); }
+});
+$("#flour-rows").addEventListener("click", e => {
+  const b = e.target.closest(".r-x"); if (!b || S.rows.length < 2) return;
+  S.rows.splice(+b.dataset.i, 1); markEdited(); renderRows(); compute();
+});
+$("#add-flour").onclick = () => { S.rows.push({id:"cap-manitoba", g:100}); markEdited(); renderRows(); compute(); };
+$("#go-custom").onclick = () => { go("farine"); setTimeout(()=>$("#custom-card").scrollIntoView({behavior:"smooth"}), 50); $("#c-name").focus({preventScroll:true}); };
+
+function bindNum(id, key, isFloat){
+  const el = $(id); el.value = S[key];
+  el.addEventListener("input", () => { const v = isFloat ? parseFloat(el.value) : parseInt(el.value,10); if (!isNaN(v)) { S[key] = v; markEdited(); compute(); } });
+}
+bindNum("#in-temp","temp"); bindNum("#in-pieces","pieces"); bindNum("#in-salt","salt",true);
+$("#in-ftemp").value = S.ftemp ?? ""; $("#in-ftemp").addEventListener("input", e => { const v = parseInt(e.target.value,10); S.ftemp = isNaN(v) ? null : v; markEdited(); compute(); });
+$("#in-malt").addEventListener("input", e => { const v = parseFloat(e.target.value); if (!isNaN(v)) { S.maltPct = v; markEdited(); compute(); } });
+function nowStart(){ const d = new Date(); let m = d.getHours()*60 + d.getMinutes(); m = Math.ceil(m/15)*15; return String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
+
+/* ===== calcolo ===== */
+function analyzeMix(){
+  const rows = S.rows.map(r => ({...r, f: flourById(r.id)})).filter(r => r.f && r.g > 0);
+  const F = rows.reduce((a,r) => a + r.g, 0);
+  if (!F) return null;
+  let mid=0, min=0, max=0, W=0, P=0, wEst=0;
+  const share = {};
+  rows.forEach(r => {
+    const h = hydroOf(r.f), k = r.g / F;
+    mid += h.mid*k; min += h.min*k; max += h.max*k; W += wOf(r.f)*k; P += protOf(r.f)*k;
+    if (wIsEstimated(r.f)) wEst += k;
+    share[r.f.c] = (share[r.f.c] || 0) + k;
+    r.h = h; r.k = k;
+  });
+  const sh = c => (Array.isArray(c) ? c : [c]).reduce((a,x) => a + (share[x]||0), 0);
+  const wholeShare = sh(["int","semint"]) + rows.filter(r => (r.f.c==="seg" && !r.f.light) || (r.f.c==="farro" && r.f.whole)).reduce((a,r)=>a+r.k,0);
+  return {rows, F, mid, min, max, W, P, wEst, sh, wholeShare};
+}
+function clock(startStr, mins){
+  const [h,m] = startStr.split(":").map(Number);
+  const t = h*60 + m + Math.round(mins);
+  const day = Math.floor(t / 1440), mm = ((t % 1440) + 1440) % 1440;
+  return {s: String(Math.floor(mm/60)).padStart(2,"0") + ":" + String(mm%60).padStart(2,"0"), day};
+}
+const DAYW = ["oggi","domani","dopodomani","fra 3 giorni"];
+const at = mins => { const c = clock(S.start, mins); return `${c.s}${c.day ? " di " + (DAYW[c.day]||`+${c.day} g`) : ""}`; };
+const hm = h => { const t = Math.round(h*60/5)*5; const H = Math.floor(t/60), M = t%60; return H ? (M ? `${H} h ${M} min` : `${H} h`) : `${M} min`; };
+const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60+m; };
+
+/* Programma automatico. eq = ore equivalenti a 24 °C. Il giorno scelto decide il metodo. */
+/* frigo: le prime 3 ore l'impasto si sta ancora raffreddando (circa 14 °C di media), poi 4 °C */
+const fridgeEq = h => Math.min(h,3)*0.42 + Math.max(0,h-3)*0.18;
+function makePlan(lev, A, overheadH){
+  const T = clamp(S.temp || 22, 10, 36), f = Math.pow(1.09, T - 24);
+  const starter = lev === "lm" || lev === "licoli";
+  const R = RECIPES[S.style], teg = R.kind === "teglia";
+  const tol = toleranceOf(A.W);
+  const minEq = starter ? 6 : 2.5, recEq = starter ? 9 : 5;
+  const now = toMin(nowStart());
+  const res = {T, f, starter, tol, minF: minEq/f, recF: recEq/f, minH: overheadH + minEq/f, recH: overheadH + recEq/f, short:false, why:"", startMin: now};
+  const finish = () => { res.fresh = clamp(Math.pow(4.2 / res.eq, 1/0.6), 0.05, 3); res.lmPct = clamp(20 * Math.pow(8 / res.eq, 2), 5, 40); return res; };
+  const roomPlan = (startMin) => {
+    const use = Math.min(Math.max(recEq/f, minEq/f), 12, Math.max(minEq/f, tol / f));
+    Object.assign(res, {mode:"room", use, eq: use*f, fh:0, post:0, startMin});
+    res.bulk = use * (teg ? 0.6 : 0.65); res.app = use - res.bulk;
+    res.total = overheadH + use;
+  };
+  if (S.endDay === 0){
+    roomPlan(now);
+    const endClock = (now + res.total*60) / 60;
+    if (endClock >= 23) res.why = "Iniziando adesso inforneresti a notte fonda: valuta \"Domani\", con la notte in frigo.";
+    return finish();
+  }
+  /* domani / dopodomani: puntata breve, poi frigo, infornata a un'ora comoda */
+  const target = S.endDay*1440 + (teg ? 19*60 : 10*60);
+  const rb = (starter ? 4 : 2.5) / f;
+  const post = teg ? R.post : 0;
+  const room = tol - rb*f - post*f;
+  const maxFh = room <= 1.26 ? room/0.42 : clamp(3 + (room - 1.26)/0.18, 0, 72);
+  const wantFh = S.endDay === 1 ? 14 : 38;
+  if (maxFh < 8){
+    roomPlan(target - (overheadH + Math.max(recEq/f, minEq/f))*60);
+    res.startMin = Math.max(now, target - res.total*60);
+    res.why = `Questa miscela (W ≈ ${fmt(A.W)}) non regge una notte in frigo: ti preparo il pane in giornata, ${S.endDay===1?"domani":"dopodomani"}.`;
+    return finish();
+  }
+  let fh = Math.min(wantFh, maxFh);
+  const totalH = overheadH + rb + fh + post;
+  let startMin = target - totalH*60;
+  if (startMin < now){ /* poco tempo: accorcio il frigo */
+    fh = Math.max(8, fh - (now - startMin)/60); startMin = now;
+  }
+  Object.assign(res, {mode:"fridge", bulk: rb, fh, post, app: post, eq: rb*f + fridgeEq(fh) + post*f, startMin, total: overheadH + rb + fh + post});
+  if (S.endDay === 2 && fh < 30) res.why = `La farina regge circa ${hm(maxFh)} di frigo, non due notti intere: inizi ${startMin >= 1440 ? "domani" : "più tardi"} e la qualità resta la stessa.`;
+  return finish();
+}
+function levDose(lev, P, F){
+  if (lev === "fresco") return F * P.fresh / 100;
+  if (lev === "secco") return F * P.fresh / 100 * 0.35;
+  return F * P.lmPct / 100;
+}
+
+function renderRecipeInfo(A, H, R){
+  const box = $("#recipe-info");
+  $("#pieces-field").hidden = R.kind === "teglia" && S.style !== "lingue";
+  if (R.kind !== "teglia"){ box.innerHTML = ""; return; }
+  const factor = 1 + H/100 + (R.salt||2)/100 + (R.oil||0)/100 + (R.sugar||0)/100 + (R.malt||0)/100 + 0.01;
+  const doughNeed = S.panW * S.panL * R.dens * S.panN;
+  const flourNeed = Math.round(doughNeed / factor / 10) * 10;
+  box.innerHTML = `<div class="rinfo">
+    <p>${R.desc}</p>
+    ${S.style === "lingue" ? `<p>Con ${fmt(A.F)} g di farina vengono circa ${Math.max(1, Math.round(A.F*factor/R.piece))} lingue da ${R.piece} g.</p>` : `
+    <div class="row3">
+      <div class="field"><label for="pan-w">Teglia cm</label><input id="pan-w" type="number" min="10" max="80" inputmode="numeric" value="${S.panW}"></div>
+      <div class="field"><label for="pan-l">× cm</label><input id="pan-l" type="number" min="10" max="80" inputmode="numeric" value="${S.panL}"></div>
+      <div class="field"><label for="pan-n">Teglie</label><input id="pan-n" type="number" min="1" max="10" inputmode="numeric" value="${S.panN}"></div>
+    </div>
+    <p>Per ${S.panN > 1 ? S.panN + " teglie" : "una teglia"} ${S.panW}×${S.panL} servono circa <b class="num">${fmt(doughNeed)} g</b> di impasto, cioè <b class="num">${fmt(flourNeed)} g</b> di farina. Ora ne hai ${fmt(A.F)} g.</p>
+    ${Math.abs(flourNeed - A.F) > 15 ? `<div><button class="btn primary" type="button" id="fit-pan">Adatta le farine alla teglia</button></div>` : ""}`}
+    ${R.src ? `<p class="small">Fonte della ricetta: <a href="${SOURCES[R.src].u}" target="_blank" rel="noopener">${esc(SOURCES[R.src].t)}</a></p>` : ""}
+  </div>`;
+  ["pan-w","pan-l","pan-n"].forEach(id => { const el = $("#"+id); if (!el) return; el.addEventListener("change", () => { const k = {"pan-w":"panW","pan-l":"panL","pan-n":"panN"}[id]; S[k] = Math.max(1, +el.value || 1); markEdited(); compute(); }); });
+  const fit = $("#fit-pan");
+  if (fit) fit.onclick = () => { const k = flourNeed / A.F; S.rows.forEach(r => r.g = Math.round(r.g * k / 5) * 5); markEdited(); renderRows(); compute(); toast("Farine adattate alla teglia"); };
+}
+
+function compute(){
+  const A = analyzeMix();
+  $("#flour-total").textContent = A ? fmt(A.F) + " g" : "0 g";
+  const out = $("#out");
+  if (!A){ out.innerHTML = '<div class="empty">Inserisci almeno una farina con i grammi per vedere la ricetta.</div>'; $("#plan-box").innerHTML = ""; return; }
+  const R = RECIPES[S.style], teg = R.kind === "teglia";
+
+  /* acqua */
+  const levelAdj = LEVELS.find(s => s[0]===S.level)[2];
+  let rec, lo, hi;
+  if (teg){
+    const shift = 0.5 * (A.mid - R.refMid);
+    rec = clamp(Math.round(R.H + shift + (S.style==="genovese" ? 0 : levelAdj/2)), 50, 95);
+    lo = Math.round(R.H + shift - 3); hi = Math.round(R.H + shift + 3);
+  } else {
+    rec = clamp(Math.round(A.mid + R.hAdj + levelAdj), 52, 95);
+    lo = Math.round(A.min + R.hAdj); hi = Math.round(A.max + R.hAdj);
+  }
+  const H = S.hOver ?? rec;
+  const saltPct = teg && S.salt === DEFAULT.salt ? (R.salt || 2) : (S.salt || 2);
+
+  /* tempi fissi (overhead) */
+  const ryeHeavy = A.sh("seg") >= 0.5;
+  const doAut = !ryeHeavy && H >= 64 && S.style !== "genovese";
+  const share = A.sh(["sem","semint"]), wh = A.wholeShare;
+  const aut = share >= 0.3 ? 60 : wh >= 0.3 ? 45 : 30;
+  const kneadMin = S.mixer === "planetaria" ? 10 : 15;
+  const overheadH = ((doAut ? aut : 0) + kneadMin + (teg ? 15 : 30)) / 60;
+
+  /* programma per ogni lievito (per i numeri sui pulsanti) */
+  const plans = {}; LEVS.forEach(([k]) => plans[k] = makePlan(k, A, overheadH));
+  $("#seg-lev").innerHTML = LEVS.map(([k,l]) => `<button type="button" data-v="${k}" aria-pressed="${S.lev===k}">${l}<small>${fmt(levDose(k, plans[k], A.F), k==="lm"||k==="licoli"?0:1)} g${plans[k].short?" · tempo stretto":""}</small></button>`).join("");
+  $("#seg-lev").onclick = e => { const b = e.target.closest("button"); if (!b) return; S.lev = b.dataset.v; markEdited(); compute(); };
+  const P = plans[S.lev];
+  const usesStarter = P.starter;
+  S.start = "00:00";
+
+  /* ingredienti */
+  let stFlour = 0, stWater = 0, starter = 0;
+  if (S.lev === "lm"){ starter = A.F * P.lmPct/100; stFlour = starter/1.5; stWater = starter - stFlour; }
+  if (S.lev === "licoli"){ starter = A.F * P.lmPct/100; stFlour = starter/2; stWater = starter/2; }
+  const flourTot = A.F + stFlour;
+  const water = Math.max(0, flourTot * H/100 - stWater);
+  const salt = flourTot * saltPct / 100;
+  const yG = S.lev === "fresco" || S.lev === "secco" ? levDose(S.lev, P, A.F) : 0;
+  const extras = teg && R.extra ? R.extra(A.F).filter(x => !(S.malt !== "no" && /[Mm]alto/.test(x[0]))) : [];
+  const maltPct = S.malt === "no" ? 0 : (S.maltPct ?? MALT_DEF[S.malt]);
+  $("#malt-box").hidden = S.malt === "no"; if (S.malt !== "no" && document.activeElement !== $("#in-malt")) $("#in-malt").value = maltPct;
+  if (maltPct) extras.push([S.malt==="dia" ? "Malto d'orzo diastasico in polvere" : "Malto d'orzo non diastasico / sciroppo", A.F*maltPct/100, fmt(maltPct,1)+"%"]);
+  const extraIn = extras.filter(x => !/superficie|teglia/.test(x[0])).reduce((a,x) => a + x[1], 0);
+  const total = A.F + water + salt + yG + starter + extraIn;
+  const hold = H >= 70 ? Math.round(A.F * 0.05 / 5) * 5 : 0;
+  renderRecipeInfo(A, H, R);
+
+  /* temperatura dell'acqua (formula DDT) */
+  const T = P.T, DDT = 25, fr = S.mixer === "planetaria" ? 12 : 3;
+  const FT = S.ftemp ?? T;
+  $("#in-ftemp").placeholder = String(T);
+  const wTraw = Math.round(usesStarter ? 4*DDT - FT - T - T - fr : 3*DDT - FT - T - fr);
+  const wT = clamp(wTraw, 2, 45);
+  const wExplain = `${usesStarter?"4":"3"} × 25 °C (impasto finito) = ${usesStarter?100:75}, meno farina ${FT} °C, cucina ${T} °C${usesStarter?`, lievito ${T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":"delle mani"} ${fr} °C = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
+
+  /* box programma */
+  const t0 = P.startMin;
+  const endMin = t0 + P.total*60;
+  const levWord = S.lev==="fresco"?"lievito di birra fresco":S.lev==="secco"?"lievito secco":S.lev==="lm"?"lievito madre":"licoli";
+  $("#plan-box").innerHTML = `<div class="plan">
+    <div class="plan-grid">
+      <div><span>${S.lev==="fresco"||S.lev==="secco"?"Lievito":"Lievito madre"}</span><b>${S.lev==="fresco"||S.lev==="secco" ? fmt(yG,1)+" g" : fmt(starter)+" g"}</b></div>
+      <div><span>Acqua a</span><b>${wT} °C</b></div>
+      <div><span>Inizia</span><b>${at(t0)}</b></div>
+      <div><span>Prima lievitazione</span><b>${hm(P.bulk)}</b></div>
+      ${P.mode==="fridge" ? `<div><span>In frigo (4 °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
+      <div><span>Inforni</span><b>${at(endMin)}</b></div>
+    </div>
+    <p class="small"><b>Quanto tempo serve.</b> Dal momento in cui inizi a impastare a quando metti in forno, con ${levWord} e la cucina a ${T} °C servono <b>almeno ${hm(P.minH)}</b>: è il tempo più breve in cui il lievito riesce a far crescere l'impasto. Il tempo <b>consigliato è ${hm(P.recH)}</b> o più: una lievitazione più lenta dà più sapore e una mollica migliore. ${P.mode==="fridge"?"Con la notte in frigo il tempo è più lungo ma lavori pochissimo: il freddo rallenta il lievito.":""}</p>
+    <p class="small"><b>Perché l'acqua a ${wT} °C.</b> ${wExplain}</p>
+    ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
+  </div>`;
+
+  /* tecnica pieghe */
+  let fold = H >= 75 ? "coil" : H >= 66 ? "stretch" : "lettera";
+  if (ryeHeavy) fold = "none";
+  const FOLD_NAMES = {coil:"Coil fold", stretch:"Stretch & fold in ciotola", lettera:"Pieghe a tre sul banco", none:"Niente pieghe"};
+
+  /* ===== consigli ===== */
+  const notes = [];
+  const tol = P.tol, eq = P.eq;
+  const strong = A.rows.filter(r => wOf(r.f) >= 340);
+
+  if (A.sh("sg") > 0.1) notes.push(["bad", `<b>${fmt(A.sh("sg")*100)}% di farina senza glutine.</b> Non forma la maglia che trattiene il gas: sopra il 10–15% il pane resta basso e compatto.`]);
+  if (ryeHeavy) notes.push(["bad", `<b>Segale oltre il 50%.</b> Non fare pieghe né incordare: mescola solo fino a pasta omogenea e cuoci in cassetta. La segale lavora bene con l'acidità del lievito madre.`]);
+  else if (A.sh("seg") >= 0.2) notes.push(["warn", `<b>Segale al ${fmt(A.sh("seg")*100)}%.</b> L'impasto sarà appiccicoso anche se ben fatto: lavora con mani bagnate e non aggiungere farina.`]);
+  if (A.wholeShare >= 0.3) notes.push(["info", `<b>Tanta crusca (${fmt(A.wholeShare*100)}% integrale).</b> La crusca assorbe acqua lentamente e taglia la maglia glutinica: autolisi, un po' d'acqua tenuta da parte, lievitazione non troppo lunga.`]);
+  if (A.sh(["sem","semint"]) >= 0.4) notes.push(["info", `<b>Semola al ${fmt(A.sh(["sem","semint"])*100)}%.</b> Il grano duro assorbe molto ma piano: autolisi lunga e acqua aggiunta a filo. Alveolatura più fitta, mollica gialla e profumata.`]);
+  if (A.sh(["farro","mono"]) >= 0.4) notes.push(["warn", `<b>Farro al ${fmt(A.sh(["farro","mono"])*100)}%.</b> Il glutine del farro si rompe se lavorato troppo: impasta poco e non allungare i tempi.`]);
+  if (A.sh("antico") >= 0.4) notes.push(["warn", `<b>Grani antichi al ${fmt(A.sh("antico")*100)}%.</b> In genere W basso: acqua moderata e lievitazione breve.`]);
+  if (S.endDay > 0 && P.mode === "room" && A.W < 300) {
+    const need = 300;
+    const x = Math.ceil(A.F * (need - A.W) / (370 - need) / 10) * 10;
+    notes.push(["info", `<b>Vuoi la notte in frigo?</b> La miscela (W ≈ ${fmt(A.W)}) è debole per il frigo. Aggiungendo circa ${fmt(x)} g di Manitoba (W ≈ 370) arriveresti verso W 300.`]);
+  } else notes.push(["good", `<b>Forza adeguata.</b> W medio ≈ ${fmt(A.W)}: regge circa ${tol} h equivalenti a 24 °C, il programma ne usa ${fmt(eq,1)}.`]);
+  if (teg && R.H >= 75 && A.W > 330) notes.push(["info", `<b>Farina molto forte per la teglia.</b> Le fonti indicano W 220–300: con W ≈ ${fmt(A.W)} l'impasto sarà più elastico e difficile da stendere. Taglia con una 0 o tipo 1 più debole.`]);
+  if (strong.length && strong.reduce((a,r)=>a+r.k,0) > 0.9 && !teg) notes.push(["info", `<b>Quasi tutta Manitoba.</b> Un pane solo Manitoba tende a venire gommoso e poco saporito: molti panificatori la usano al 20–40% per rinforzare tipo 1, tipo 2 o integrale.`]);
+  if (A.wEst > 0.3) notes.push(["warn", `<b>Il ${fmt(A.wEst*100)}% della farina non ha il W dichiarato.</b> L'ho stimato dalle proteine o dal tipo di cereale. Se lo trovi sul sacco, inserisci la farina come tua.`]);
+  if (S.hOver != null && Math.abs(S.hOver - rec) >= 6) notes.push(["warn", `<b>Hai impostato ${S.hOver}% invece di ${rec}%.</b> L'impasto sarà ${S.hOver > rec ? "più difficile da gestire: più pieghe, mani bagnate, formatura veloce" : "più rigido: alveolatura più fitta"}.`]);
+  if (S.malt === "dia" && maltPct > 1) notes.push(["warn", `<b>Malto diastasico al ${fmt(maltPct,1)}%.</b> Hamelman (citato da King Arthur) consiglia di partire da 0,1–0,2% e salire a piccoli passi: troppo malto attivo rende la mollica gommosa e appiccicosa.`]);
+  else if (S.malt === "dia") notes.push(["info", `<b>Malto diastasico.</b> Gli enzimi trasformano parte dell'amido in zuccheri: lievitazione più vivace, crosta più colorata. Utile con farine povere di enzimi o lievitazioni lunghe; con buone farine spesso non serve.`]);
+  if (S.malt === "nodia") notes.push(["info", `<b>Malto non diastasico.</b> Non ha enzimi attivi: dà sapore, colore alla crosta e aiuta a trattenere umidità, ma non accelera la lievitazione.`]);
+  if (T >= 28) notes.push(["warn", `<b>Cucina calda (${T} °C).</b> Tutto corre: usa acqua fredda e controlla l'impasto più che l'orologio.`]);
+  if (T <= 18) notes.push(["info", `<b>Cucina fresca (${T} °C).</b> Tempi lunghi: la ciotola nel forno spento con la luce accesa guadagna qualche grado.`]);
+  if ((S.lev === "fresco" && yG < 1) || (S.lev === "secco" && yG < 0.5)) notes.push(["info", `<b>Lievito sotto il grammo.</b> Sciogli 1 g di lievito in 100 g dell'acqua della ricetta e usane ${fmt(yG*100,0)} g (togli la stessa quantità d'acqua).`]);
+
+  /* ===== perché ===== */
+  const why = [];
+  if (teg) why.push(`La <b>${R.l.toLowerCase()}</b> parte da ${R.H}% d'acqua con una farina di riferimento${R.src?" (vedi fonte)":""}; la tua miscela ${Math.abs(A.mid - R.refMid) < 1 ? "è simile, quindi resto lì" : A.mid > R.refMid ? "assorbe di più, quindi salgo" : "assorbe di meno, quindi scendo"}.`);
+  [...A.rows].sort((a,b) => b.g - a.g).slice(0,3).forEach(r => {
+    const f = r.f, W = wOf(f), p = protOf(f);
+    let t = `<b>${esc(f.b !== "Generica" ? f.b + " " : "")}${esc(f.n)}</b>: ${esc(CATS[f.c].l.toLowerCase())}, proteine ${f.p!=null?fmt(p,1)+"%":"≈"+fmt(p,1)+"% (stima)"}, W ${f.w ? (f.w[0]===f.w[1]? f.w[0] : f.w[0]+"–"+f.w[1]) : "≈"+fmt(W)+" (stima)"}. Da sola, per il pane: ${fmt(r.h.min)}–${fmt(r.h.max)}%. `;
+    if (TENERO.includes(f.c)){
+      t += W >= 320 ? "Molto glutine e forte: la maglia trattiene parecchia acqua senza cedere." : W >= 250 ? "Glutine di buona qualità: regge un'idratazione media e lievitazioni di mezza giornata." : W >= 180 ? "Forza media: con troppa acqua l'impasto si siede." : "Debole: poca acqua e tempi brevi.";
+      if (f.c === "1" || f.c === "2") t += " Le parti esterne del chicco (crusca fine, germe) assorbono in più rispetto a una 00.";
+      if (f.c === "int") t += " La crusca assorbe molta acqua ma non la trattiene in rete: serve acqua in più, ma la struttura resta più debole.";
+    } else if (f.c === "sem" || f.c === "semint") t += "Il grano duro ha più amido danneggiato dalla macinazione e proteine tenaci: beve tanto, ma lentamente.";
+    else if (f.c === "seg") t += "La segale assorbe grazie ai pentosani (fibre gommose), non al glutine: l'impasto resta colloso.";
+    else if (f.c === "farro" || f.c === "mono") t += "Le proteine ci sono ma formano un glutine fragile: troppa acqua e l'impasto si allarga.";
+    else if (f.c === "antico") t += "Glutine debole: idratazione moderata.";
+    else if (f.c === "sg") t += "Non forma glutine: non contribuisce alla struttura.";
+    why.push(t);
+  });
+  if (!teg && R.hAdj) why.push(`Il formato <b>${R.l.toLowerCase()}</b> sposta l'acqua di ${R.hAdj>0?"+":""}${R.hAdj} punti${R.hAdj>0?": un impasto allargato non deve reggersi da solo.":": la mollica deve essere fitta e morbida."}`);
+  if (levelAdj && S.style !== "genovese") why.push(`Livello <b>${S.level}</b>: ${levelAdj<0?"tolgo qualche punto per un impasto più facile da gestire.":"aggiungo qualche punto, sei abituato a impasti umidi."}`);
+
+  /* ===== programma ===== */
+  const steps = []; let t = t0;
+  const levName = S.lev==="fresco" ? fmt(yG,1)+" g di lievito fresco sbriciolato" : S.lev==="secco" ? fmt(yG,1)+" g di lievito secco" : fmt(starter)+" g di "+(S.lev==="licoli"?"licoli":"lievito madre");
+  const extraTxt = extras.filter(x => !/superficie|teglia/.test(x[0])).map(x => `${x[0].toLowerCase().replace(/ \(.*\)/,"")} (${fmt(x[1])} g)`);
+  if (usesStarter) steps.push({t:-1, h:"Prima: rinfresca il lievito", p: S.lev==="licoli" ? "Licoli 1:1:1 (lievito:farina:acqua). Usalo quando è raddoppiato e pieno di bolle, di solito in 4–8 ore a 24–26 °C. Rinfrescalo in modo che sia al raddoppio all'ora d'inizio." : "Lievito madre solido 1:1:0,5. Usalo quando è raddoppiato, circa 3–4 ore a 26–28 °C.", g: S.lev==="licoli" ? "licoli" : "lm"});
+  if (doAut){ steps.push({t, h:`Autolisi (${aut} min)`, p:`Mescola le farine con ${fmt(water - hold)} g di acqua a ${wT} °C${hold?`, tieni da parte ${hold} g`:""}. Copri e lascia riposare senza sale e senza lievito.`, g:"autolisi"}); t += aut; }
+  steps.push({t, h:"Impasto", p:`${doAut?"Aggiungi":"Mescola farine, acqua a "+wT+" °C e"} ${levName}${extraTxt.find(x=>/malto|zucchero/.test(x)) ? " e "+extraTxt.filter(x=>/malto|zucchero/.test(x)).join(", ") : ""}. Lavora ${kneadMin} min, poi il sale (${fmt(salt,1)} g)${hold?" e a filo l'acqua tenuta da parte":""}${extraTxt.find(x=>/olio/.test(x)) ? ", per ultimo l'olio a filo ("+extraTxt.filter(x=>/olio/.test(x)).join(", ")+")" : ""}. ${S.mixer==="planetaria"?"Gancio a velocità bassa, poi media fino a incordatura.":S.style==="teglia"||S.style==="lingue"?"Con un cucchiaio o a mano: basta che sia omogeneo, la forza arriva con le pieghe.":"Slap & fold o in ciotola fino a pasta liscia."}`, g: S.mixer==="planetaria" ? "impasto" : "slap"});
+  t += kneadMin;
+  const bulkStart = t;
+  steps.push({t, h:`Puntata · ${hm(P.bulk)}`, p:`La <b>puntata</b> è la prima lievitazione: l'impasto intero riposa coperto nel contenitore, a ${T} °C, e cresce. Segna il livello di partenza sul contenitore.`, g:"bulk"});
+  if (fold !== "none"){
+    const gap = (S.style==="teglia"||S.style==="lingue") ? 15 : 30;
+    const n = P.bulk*60 >= gap*4 + 30 ? 4 : P.bulk*60 >= gap*3 + 20 ? 3 : 2;
+    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i} di ${n}`, p: i===1 && H>=75 && !teg ? "Se vuoi, al posto della prima serie fai una laminazione." : "", g: fold, fold:true});
+  }
+  t = bulkStart + P.bulk*60;
+  const dough = total;
+  if (teg){
+    const nPieces = S.style === "lingue" ? Math.max(1, Math.round(dough / R.piece)) : S.panN;
+    const each = dough / nPieces;
+    steps.push({t, h:"Staglio", p: "Lo <b>staglio</b> è la divisione dell'impasto in pezzi. " +  S.style==="genovese" ? `Dividi in ${nPieces} ${nPieces>1?"pezzi":"pezzo"} da circa ${fmt(each)} g, adagia nella teglia unta d'olio e allarga appena.` : `Dividi in ${nPieces} ${nPieces>1?"panetti":"panetto"} da circa ${fmt(each)} g, arrotonda delicatamente e metti in contenitori unti d'olio e chiusi.`, g:"preforma"});
+    t += 15;
+    if (P.mode === "fridge"){
+      steps.push({t, h:`In frigo · ${hm(P.fh)}`, p:"A 4 °C, ben coperto. Qui l'impasto matura: aroma e digeribilità.", g:"appretto", cold:true});
+      t += P.fh*60;
+      steps.push({t, h:`Fuori dal frigo · ${hm(P.post)}`, p:"A temperatura ambiente, coperto, finché l'impasto torna morbido e gonfio.", g:"appretto"});
+      t += P.post*60;
+    } else {
+      steps.push({t, h:`Lievitazione dei panetti · ${hm(P.app)}`, p:"Coperti, a temperatura ambiente, finché sono gonfi e morbidi.", g:"appretto"});
+      t += P.app*60;
+    }
+    const stesura = {
+      genovese:`Stendi l'impasto fino agli angoli, lascia riposare 1 ora, poi versa la salamoia e premi con i polpastrelli fino al fondo della teglia per fare i buchi. Lievitazione finale finché i buchi sono gonfi (90–150 min nella ricetta di Tesauro; il programma include già questo tempo).`,
+      schiacciata:"Rovescia in teglia unta, allarga con i polpastrelli, olio in superficie e sale grosso. Ultimo riposo di almeno 1 ora (già nel programma).",
+      romana:"Metti il panetto nella teglia con la salamoia, lascia raddoppiare, poi allarga fino ai bordi aiutandoti con la salamoia e lascia raddoppiare di nuovo.",
+      teglia:"Rovescia sul banco ben infarinato (semola), allarga con i polpastrelli dal centro verso i bordi senza schiacciare il cornicione, trasferisci nella teglia unta. Riposo 30 minuti.",
+      lingue:"Rovescia ogni panetto sul banco con semola, allarga con i polpastrelli in una lingua lunga e stretta (circa 15×40 cm), trasferisci su carta forno o pala."
+    }[S.style];
+    steps.push({t: t - 20, h:"Stesura", p: stesura + (R.brine ? " " + R.brine(A.F, each) : ""), g: null});
+    steps.push({t: t - 50, h:"Accendi il forno", p:`Al massimo con la teglia o la pietra dentro, per almeno 45 minuti.`, g:"cottura"});
+    steps.push({t, h:"Cottura", p: R.bake, g:"cottura"});
+    t += S.style === "schiacciata" ? 25 : 15;
+    steps.push({t, h:"Fuori dal forno", p: S.style==="genovese" ? "Spennella con un filo d'olio. Si mangia tiepida." : "Lascia intiepidire su una griglia: il fondo resta croccante.", g:null});
+  } else {
+    steps.push({t, h:"Fine puntata: preformatura", p:"La <b>preformatura</b> è una prima forma tonda e morbida, che serve a far riposare l'impasto prima della forma vera. Il volume è cresciuto di circa metà (con lievito madre fino a +75%), la superficie è bombata, ai bordi si vedono bolle. Arrotonda sul banco poco infarinato. Riposo 20 min.", g:"preforma"});
+    t += 20;
+    steps.push({t, h:"Formatura", p: S.style==="cassetta" ? "Forma un cilindro e mettilo nello stampo unto, chiusura sotto." : S.style==="ciabatta" ? "Senza formare: rovescia sul banco infarinato e taglia a rettangoli, spostali su carta forno." : `Forma ${S.pieces>1? S.pieces+" pezzi da circa "+fmt(total/S.pieces)+" g":"la pagnotta"} e mettila nel cestino infarinato, chiusura in alto.`, g: S.style==="filone" ? "filone" : "pirlatura"});
+    t += 10;
+    if (P.mode === "fridge"){
+      steps.push({t, h:`Appretto in frigo · ${hm(P.fh)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Cestino coperto in frigo a 4 °C: il freddo la rallenta e l'impasto prende aroma. Si cuoce direttamente dal frigo: freddo si taglia meglio.", g:"appretto", cold:true});
+      t += P.fh*60;
+    } else {
+      steps.push({t, h:`Appretto · ${hm(P.app)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Coperto a temperatura ambiente. È pronto quando, premendo con un dito infarinato, il buco risale lentamente e non del tutto.", g:"appretto"});
+      t += P.app*60;
+    }
+    steps.push({t: t-50, h:"Accendi il forno", p:"Al massimo (250 °C), con pentola di ghisa o pietra dentro, per almeno 45 minuti.", g:"cottura"});
+    steps.push({t, h:"Taglio e cottura", p:"Rovescia il pane, taglialo con la lametta e inforna. Circa 20 min con vapore (pentola chiusa o teglia d'acqua bollente), poi togli il vapore e cuoci finché la crosta è ben scura: in tutto 45–50 min secondo King Arthur. È cotto quando battendo sotto suona vuoto e pesa almeno il 15% in meno dell'impasto.", g:"cottura"});
+    t += 45;
+    steps.push({t, h:"Raffreddamento su griglia", p:"Almeno 1 ora prima di tagliare: la mollica finisce di assestarsi mentre l'umidità esce.", g:null});
+  }
+  steps.sort((a,b) => a.t - b.t);
+
+  /* ===== render ===== */
+  const pct = v => `${clamp((v-50)/50*100,0,100).toFixed(1)}%`;
+  const levRow = S.lev==="fresco"||S.lev==="secco"
+    ? `<tr><td>${S.lev==="fresco"?"Lievito di birra fresco":"Lievito di birra secco istantaneo"}${S.lev==="secco"?"<small>se è secco attivo (da sciogliere): "+fmt(A.F*P.fresh/100*0.5,1)+" g</small>":"<small>equivale a "+fmt(yG*0.35,1)+" g di secco istantaneo</small>"}</td><td class="pct">${fmt(S.lev==="fresco"?P.fresh:P.fresh*0.35,2)}%</td><td class="g">${fmt(yG,1)} g</td></tr>`
+    : `<tr><td>${S.lev==="licoli"?"Licoli (100% acqua)":"Lievito madre solido (50% acqua)"}<small>rinfrescato e al raddoppio</small></td><td class="pct">${fmt(P.lmPct)}%</td><td class="g">${fmt(starter)} g</td></tr>`;
+  out.innerHTML = `
+  <section class="hero" aria-label="Idratazione consigliata">
+    <div class="eyebrow">Acqua consigliata · ${esc(R.l)}</div>
+    <div class="big"><span class="num">${H}%</span><span class="sub">${fmt(water)} g di acqua${usesStarter?` (+${fmt(stWater)} g nel ${S.lev==="licoli"?"licoli":"lievito madre"})`:""} su ${fmt(flourTot)} g di farina</span></div>
+    <div>
+      <div class="hydro-bar" aria-hidden="true"><i style="left:${pct(lo)};width:calc(${pct(hi)} - ${pct(lo)})"></i><b style="left:${pct(H)}"></b></div>
+      <div class="hydro-scale"><span>50%</span><span>range consigliato: ${lo}–${hi}%</span><span>100%</span></div>
+    </div>
+    <div class="ovr"><label for="in-hover">Vuoi provare un'altra idratazione? ${S.hOver!=null?`<button class="linkish" id="reset-h" style="color:inherit">torna a ${rec}%</button>`:""}</label><input id="in-hover" type="range" min="50" max="95" step="1" value="${H}"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-ric">
+    <div class="sect-h"><h3 id="h-ric">La ricetta</h3><span class="muted small">${!teg && S.pieces>1?`${S.pieces} pezzi da ~${fmt(total/S.pieces)} g`:`impasto totale ${fmt(total)} g`}</span></div>
+    <table class="recipe">
+      ${A.rows.map(r => `<tr><td>${esc(r.f.n)}<small>${esc(r.f.b)}</small></td><td class="pct">${fmt(r.k*100)}%</td><td class="g">${fmt(r.g)} g</td></tr>`).join("")}
+      <tr><td>Acqua${hold?`<small>di cui ${hold} g da aggiungere dopo il sale</small>`:""}<small>a ${wT} °C per un impasto a ~25 °C</small></td><td class="pct">${H}%</td><td class="g">${fmt(water)} g</td></tr>
+      <tr><td>Sale fino</td><td class="pct">${fmt(saltPct,1)}%</td><td class="g">${fmt(salt,1)} g</td></tr>
+      ${levRow}
+      ${extras.map(x => `<tr><td>${x[0]}</td><td class="pct">${x[2]}</td><td class="g">${fmt(x[1])} g</td></tr>`).join("")}
+      <tr class="sum"><td>Totale impasto</td><td></td><td class="g">${fmt(total)} g</td></tr>
+    </table>
+    ${R.brine ? `<p class="small">${R.brine(A.F, total / (S.panN||1))}</p>` : ""}
+  </section>
+
+  <section class="card" aria-labelledby="h-why">
+    <h3 id="h-why">Perché questa acqua</h3>
+    <ul class="why">${why.map(w => `<li><span>${w}</span></li>`).join("")}</ul>
+  </section>
+
+  <section class="card" aria-labelledby="h-cons">
+    <h3 id="h-cons">Consigli sulla tua miscela</h3>
+    <div class="notes">${notes.map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>
+  </section>
+
+  <section class="card" aria-labelledby="h-prog">
+    <div class="sect-h"><h3 id="h-prog">La tua giornata</h3><span class="muted small">a ${T} °C${P.mode==="fridge"?` + ${hm(P.fh)} in frigo`:""}</span></div>
+    <ol class="timeline">
+      ${steps.map(s => { const c = s.t < 0 ? null : clock(S.start, s.t); return `<li class="tl ${s.cold?"cold":""} ${s.fold?"fold":""}">
+        <div class="t">${c ? c.s + (c.day ? `<small>${DAYW[c.day]||"+"+c.day+" g"}</small>` : "") : "prima"}</div><div class="dot"></div>
+        <div class="b"><h4>${s.h}</h4>${s.p?`<p>${s.p}</p>`:""}${s.g?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
+    </ol>
+  </section>
+
+  <details class="g">
+    <summary><span><span class="s1">Come calcolo questi numeri</span><span class="s2">Cosa viene dai mulini e cosa è una stima</span></span>${ICON.chev}</summary>
+    <div class="g-body">
+      <p><b>Dati delle farine.</b> Proteine e W vengono dalle schede dei mulini, dalle etichette o dai loro distributori (vedi la scheda di ogni farina). Dove manca il W lo stimo dalle proteine.</p>
+      <p><b>Acqua.</b> Nessun ente pubblica una tabella "W → acqua per il pane di casa": l'assorbimento al farinografo misura un impasto standard. Per il pane uso una regola pratica (più forza e più crusca = più acqua; semola e segale bevono di più, farro e grani antichi meno). Per focacce e pizze parto dall'idratazione della ricetta citata e la correggo in base alla tua miscela.</p>
+      <p><b>Programma.</b> <b>Oggi</b>: tutto a temperatura ambiente, con il tempo consigliato per il tuo lievito e la tua cucina. <b>Domani</b>: puntata breve (2,5 h equivalenti a 24 °C col birra, 4 col madre), circa 14 ore in frigo e infornata alle 10 (alle 19 per focacce e pizze). <b>Dopodomani</b>: come domani ma fino a circa 38 ore di frigo, se la farina le regge. In frigo le prime 3 ore valgono circa il 42% di un'ora a 24 °C (l'impasto si sta ancora raffreddando), poi il 18% (4 °C, con lo stesso 9% per grado): è una mia approssimazione, per questo la dose col frigo è più bassa.</p>
+      <p><b>Lievito.</b> Il tempo si accorcia di circa il 9% per ogni grado in più. Il modello è tarato sulla tabella dei lieviti per poolish del manuale Zanichelli (15 g/kg per 4–5 h, 3 g/kg per 10–12 h). Secco istantaneo = 35% del fresco, secco attivo = 50% (American Society of Baking). Il lievito madre parte dal 20% per circa 8 ore (Giorilli e Bonci su Dissapore).</p>
+      <p><b>Temperatura dell'acqua.</b> Formula King Arthur Baking: temperatura voluta × 3 (× 4 con lievito madre) meno farina, ambiente, lievito e attrito. L'attrito a mano (3 °C) è una mia stima.</p>
+      <p><b>Forza e tempi.</b> Altroconsumo indica W 250–320 per lievitazioni lunghe; il manuale Zanichelli W &gt; 270 per il frigo. Le ore "sopportate" per fascia di W sono una mia interpolazione.</p>
+    </div>
+  </details>`;
+
+  $("#in-hover").addEventListener("input", e => { const v = +e.target.value; $(".hero .big .num").textContent = v + "%"; $(".hero .hydro-bar b").style.left = pct(v); });
+  $("#in-hover").addEventListener("change", e => { S.hOver = +e.target.value; markEdited(); compute(); });
+  const rh = $("#reset-h"); if (rh) rh.onclick = () => { S.hOver = null; save(); compute(); };
+  $$("[data-guide]", out).forEach(b => b.onclick = () => openGuide(b.dataset.guide));
+  save();
+}
+
+/* ===== vista farine ===== */
+const FILTERS = [["tutte","Tutte"],["tenero","00 e 0"],["man","Manitoba"],["12","Tipo 1 e 2"],["int","Integrali"],["duro","Semola"],["altri","Altri cereali"],["mie","Le mie"]];
+let fFilter = "tutte";
+function matchFilter(f){
+  switch(fFilter){
+    case "tenero": return f.c==="00"||f.c==="0";
+    case "man": return f.c==="man";
+    case "12": return f.c==="1"||f.c==="2";
+    case "int": return f.c==="int"||f.c==="semint"||f.whole||(f.c==="seg"&&!f.light);
+    case "duro": return f.c==="sem"||f.c==="semint";
+    case "altri": return ["seg","farro","mono","antico","sg"].includes(f.c);
+    case "mie": return !!f.mine;
+    default: return true;
+  }
+}
+function renderFilters(){
+  $("#f-filters").innerHTML = FILTERS.map(([v,l]) => `<button type="button" class="btn" data-v="${v}" aria-pressed="${fFilter===v}" style="${fFilter===v?"background:var(--accent);color:var(--on-accent);border-color:var(--accent)":""}">${l}</button>`).join("");
+}
+$("#f-filters").onclick = e => { const b = e.target.closest("button"); if (!b) return; fFilter = b.dataset.v; renderFilters(); renderFlourList(); };
+$("#f-search").addEventListener("input", renderFlourList);
+
+function flourCard(f){
+  const h = hydroOf(f), W = wOf(f), p = protOf(f);
+  const wTxt = f.w ? (f.w[0]===f.w[1] ? f.w[0] : `${f.w[0]}–${f.w[1]}`) : (f.c==="sg" ? "—" : "≈" + fmt(Math.round(W/10)*10));
+  const pTxt = f.p != null ? fmt(p,1) + "%" : "≈" + fmt(p,1) + "%";
+  const src = [...new Set([f.wSrc, f.pSrc].filter(k => SOURCES[k]))];
+  return `<article class="fcard">
+    <div class="fcard-h"><div><div class="m">${esc(f.b)}</div><h4>${esc(f.n)}</h4></div>${f.mine?'<span class="chip mine">tua</span>':""}</div>
+    <div class="chips"><span class="chip">${esc(CATS[f.c].l)}</span></div>
+    <div class="fstats">
+      <div class="fstat"><span>Proteine</span><b>${pTxt}</b>${srcChip(f.pSrc)}</div>
+      <div class="fstat"><span>Forza W</span><b>${wTxt}</b>${f.c==="sg"?"":srcChip(f.wSrc)}</div>
+      <div class="fstat"><span>Acqua pane</span><b>${f.c==="sg"?"—":fmt(h.min)+"–"+fmt(h.max)+"%"}</b><span class="chip est">stima</span></div>
+    </div>
+    ${f.pl||f.ass ? `<p>${f.pl?"P/L "+esc(f.pl)+". ":""}${f.ass?"Assorbimento: "+esc(f.ass)+".":""}</p>`:""}
+    ${f.note ? `<p>${esc(f.note)}</p>` : ""}
+    <p class="small">Per legge: ${esc(CATS[f.c].leg)}${f.c!=="sg"&&TENERO.includes(f.c)?"":""}. ${f.c!=="sg"?`Lievitazione sopportata: circa ${toleranceOf(W)} h a 24 °C.`:""}</p>
+    ${src.length ? `<p class="small">Fonte: ${src.map(k => `<a href="${SOURCES[k].u}" target="_blank" rel="noopener">${esc(SOURCES[k].t)}</a>`).join(" · ")}</p>` : (f.gen ? `<p class="small">Valori tipici della categoria, non di un prodotto: inserisci la tua farina per dati precisi.</p>` : "")}
+    <div class="btn-row">
+      <button class="btn primary" type="button" data-use="${f.id}">Usa nell'impasto</button>
+      <button class="btn" type="button" data-edit="${f.id}">${f.mine?"Modifica":"Correggi i valori"}</button>
+      ${f.mine?`<button class="btn" type="button" data-del="${f.id}">Elimina</button>`:""}
+    </div>
+  </article>`;
+}
+function renderFlourList(){
+  const q = $("#f-search").value.trim().toLowerCase();
+  const list = allFlours().filter(matchFilter).filter(f => !q || (f.b+" "+f.n+" "+CATS[f.c].l+" "+(f.note||"")).toLowerCase().includes(q));
+  $("#f-list").innerHTML = list.length ? list.map(flourCard).join("") : `<div class="empty">${fFilter==="mie"?"Non hai ancora aggiunto farine. Usa il modulo qui sotto.":"Nessuna farina trovata. Aggiungila tu con il modulo qui sotto."}</div>`;
+}
+$("#f-list").addEventListener("click", e => {
+  const u = e.target.closest("[data-use]"), ed = e.target.closest("[data-edit]"), d = e.target.closest("[data-del]");
+  if (u){ const f = flourById(u.dataset.use); if (S.example){ S.rows = []; S.example = false; $("#ex-flag").hidden = true; } S.rows.push({id:f.id, g: S.rows.length ? 200 : 500}); save(); renderRows(); compute(); toast(`${f.n} aggiunta all'impasto`); go("impasto"); }
+  if (ed){ fillForm(flourById(ed.dataset.edit)); }
+  if (d){ const id = d.dataset.del; custom = custom.filter(f => f.id !== id); store.set("bdp_custom", custom); S.rows = S.rows.filter(r => r.id !== id); if (!S.rows.length) S.rows = DEFAULT.rows.map(r=>({...r})); save(); renderRows(); compute(); renderFlourList(); toast("Farina eliminata"); }
+});
+
+/* modulo farina personalizzata */
+$("#c-cat").innerHTML = Object.entries(CATS).map(([k,v]) => `<option value="${k}">${esc(v.l)}</option>`).join("");
+let editing = null;
+function fillForm(f){
+  editing = f.mine ? f.id : null;
+  $("#c-name").value = f.mine ? f.n : f.n + " (corretta)";
+  $("#c-brand").value = f.b === "Generica" ? "" : f.b;
+  $("#c-cat").value = f.c; $("#c-prot").value = f.p ?? "";
+  $("#c-w").value = f.w ? Math.round((f.w[0]+f.w[1])/2) : "";
+  $("#c-note").value = f.note || "";
+  $("#custom-title").textContent = f.mine ? "Modifica la tua farina" : "Correggi e salva come tua";
+  $("#c-cancel").hidden = false;
+  $("#custom-card").scrollIntoView({behavior:"smooth"});
+}
+function resetForm(){ editing = null; $("#custom-form").reset(); $("#custom-title").textContent = "Aggiungi la tua farina"; $("#c-cancel").hidden = true; }
+$("#c-cancel").onclick = resetForm;
+$("#custom-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const W = parseInt($("#c-w").value, 10), P = parseFloat($("#c-prot").value);
+  const f = { id: editing || "my-" + Date.now().toString(36), mine:true, b: $("#c-brand").value.trim() || "La mia farina", n: $("#c-name").value.trim(), c: $("#c-cat").value,
+    p: isNaN(P) ? null : P, pSrc: isNaN(P) ? "stima" : "mio", w: isNaN(W) ? null : [W,W], wSrc: isNaN(W) ? "stima" : "mio", note: $("#c-note").value.trim() };
+  if (f.c === "seg") f.light = /chiar|bianc/i.test(f.n);
+  if (f.c === "farro") f.whole = /integr/i.test(f.n);
+  custom = editing ? custom.map(x => x.id === editing ? f : x) : [f, ...custom];
+  store.set("bdp_custom", custom);
+  toast(editing ? "Farina aggiornata" : "Farina salvata");
+  resetForm(); renderRows(); compute(); fFilter = "mie"; renderFilters(); renderFlourList();
+  $("#f-list").scrollIntoView({behavior:"smooth"});
+});
+
+/* ===== navigazione ===== */
+const VIEWS = ["impasto","farine","tecnica","lieviti"];
+function go(v, noHash){
+  if (!VIEWS.includes(v)) v = "impasto";
+  VIEWS.forEach(x => { $("#v-"+x).hidden = x !== v; });
+  $$(".tab").forEach(t => t.setAttribute("aria-current", t.dataset.view === v ? "page" : "false"));
+  if (!noHash && location.hash !== "#"+v) { try{ history.replaceState(null, "", "#"+v); }catch(e){ location.hash = v; } }
+  window.scrollTo(0,0);
+}
+$$(".tab").forEach(t => t.onclick = () => go(t.dataset.view));
+window.addEventListener("hashchange", () => go(location.hash.slice(1), true));
+
+function openGuide(key){
+  const target = document.getElementById("g-" + key);
+  if (!target) return;
+  const view = target.closest(".view[id^='v-']").id.slice(2);
+  go(view);
+  if (target.tagName === "DETAILS") target.open = true;
+  setTimeout(() => target.scrollIntoView({behavior:"smooth", block:"start"}), 60);
+}
+
+/* ===== avvio ===== */
+function init(){
+  renderStyleSegs();
+  segButtons($("#seg-level"), LEVELS, "level");
+  segButtons($("#seg-mixer"), MIXERS, "mixer");
+  segButtons($("#seg-endday"), ENDDAYS, "endDay");
+  segButtons($("#seg-malt"), MALTS, "malt");
+  $("#ex-flag").hidden = !S.example;
+  renderRows(); renderFilters(); renderFlourList(); renderGuides(); compute();
+  go(location.hash.slice(1) || "impasto", true);
+}
+/* ===== disegni ===== */
+const sv = (inner, label) => `<svg class="ill" viewBox="0 0 120 90" role="img" aria-label="${label}">${inner}</svg>`;
+const BOWL = `<ellipse class="bowl-in" cx="60" cy="40" rx="52" ry="9"/><path class="bowl-b" d="M8 40 Q10 86 60 86 Q110 86 112 40 A52 9 0 0 1 8 40Z"/>`;
+const D_BOWL = `<path class="dough" d="M18 58 Q22 80 60 80 Q98 80 102 58 Q90 49 60 49 Q30 49 18 58Z"/>`;
+const BENCH = `<line class="bench" x1="6" y1="80" x2="114" y2="80"/>`;
+const hand = (x,y,r=0,s=1) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><rect class="hand" x="-10" y="-23" width="4.8" height="16" rx="2.4"/><rect class="hand" x="-5" y="-26" width="4.8" height="19" rx="2.4"/><rect class="hand" x="0" y="-25" width="4.8" height="18" rx="2.4"/><rect class="hand" x="5" y="-21" width="4.6" height="14" rx="2.3"/><rect class="hand" x="7" y="-6" width="5" height="13" rx="2.5" transform="rotate(-40 9 0)"/><rect class="hand" x="-10.5" y="-11" width="20.5" height="21" rx="7"/></g>`;
+const ar = d => `<path class="arr" d="${d}" marker-end="url(#ah)"/>`;
+const TOPBOWL = `<circle class="bowl" cx="60" cy="47" r="36"/>`;
+const ROT = ar("M60 5 A42 42 0 0 1 103 44");
+const fig = (svg, n, cap) => `<figure class="panel">${svg}<figcaption><b>${n}</b>${cap}</figcaption></figure>`;
+const panels = arr => `<div class="panels">${arr.map((p,i) => fig(sv(p[0], p[1]), i+1, p[1])).join("")}</div>`;
+const src = (...keys) => `<p class="small muted">Fonti: ${keys.map(k => `<a href="${SOURCES[k].u}" target="_blank" rel="noopener">${esc(SOURCES[k].t)}</a>`).join(" · ")}</p>`;
+const prat = `<p class="small muted">Tecnica di uso comune nei laboratori artigiani: i tempi sono indicativi, guarda l'impasto.</p>`;
+
+const ILL = {
+  stretch: [
+    [BOWL + D_BOWL + hand(92,50,-10) + ar("M104 40 V14"), "Mano bagnata: afferra un lembo dal bordo"],
+    [BOWL + `<path class="dough" d="M18 58 Q22 80 60 80 Q98 80 102 58 Q100 50 92 49 Q97 30 93 12 Q87 7 82 13 Q80 33 77 48 Q70 49 60 49 Q30 49 18 58Z"/>` + hand(88,14,0), "Tira verso l'alto finché resiste, senza strappare"],
+    [BOWL + D_BOWL + `<path class="shade" d="M84 52 Q82 30 60 30 Q38 31 34 52 Q46 47 58 46 Q72 46 84 52Z"/>` + ar("M98 34 Q74 4 40 26"), "Ripiegalo sopra, fino al lato opposto"],
+    [TOPBOWL + `<circle class="dough" cx="60" cy="47" r="27"/><path class="thin" d="M60 22 v14 M85 47 h-14 M60 72 v-14 M35 47 h14"/>` + ROT, "Ruota di 90° e ripeti: 4 lembi per serie"]
+  ],
+  coil: [
+    [BOWL + `<path class="dough" d="M16 60 Q20 80 60 80 Q100 80 104 60 Q90 54 60 54 Q30 54 16 60Z"/>` + hand(50,64,0,.8) + hand(70,64,0,.8) + ar("M60 46 V20"), "Mani bagnate sotto il centro dell'impasto"],
+    [BOWL + `<path class="dough" d="M60 18 Q45 20 40 44 Q36 64 44 72 Q52 62 60 60 Q68 62 76 72 Q84 64 80 44 Q75 20 60 18Z"/>` + hand(52,22,0,.8) + hand(68,22,0,.8), "Solleva: l'impasto si stacca e pende"],
+    [BOWL + `<path class="dough" d="M24 62 Q26 80 60 80 Q94 80 96 62 Q88 44 60 44 Q32 44 24 62Z"/><path class="thin" d="M30 70 q6-9 13 0 M77 70 q6-9 13 0"/>` + ar("M60 24 V40"), "Riappoggia: i lembi si arrotolano sotto"],
+    [TOPBOWL + `<ellipse class="dough" cx="60" cy="47" rx="18" ry="26"/>` + ROT, "Ruota di 90° e ripeti. 2 coil per serie"]
+  ],
+  lettera: [
+    [`<rect class="dough" x="30" y="8" width="60" height="72" rx="12"/><path class="dash" d="M30 32 H90 M30 56 H90"/>`, "Allarga l'impasto a rettangolo sul banco"],
+    [`<rect class="dough" x="30" y="32" width="60" height="48" rx="10"/><rect class="shade" x="30" y="32" width="60" height="24" rx="8"/>` + ar("M100 14 Q108 30 96 44"), "Porta il terzo superiore sul centro"],
+    [`<rect class="dough" x="30" y="32" width="60" height="24" rx="8"/><rect class="shade" x="32" y="34" width="56" height="20" rx="7"/>` + ar("M100 78 Q108 62 96 50"), "Porta il terzo inferiore sopra"],
+    [`<rect class="dough" x="22" y="34" width="76" height="24" rx="10"/>` + ar("M60 8 A40 40 0 0 1 100 30"), "Ruota di 90° e ripeti la piega"]
+  ],
+  laminazione: [
+    [BENCH + `<ellipse class="dough" cx="60" cy="58" rx="28" ry="16"/>` + `<path class="thin" d="M18 30 q4 4 0 8 M28 22 q4 4 0 8 M92 22 q4 4 0 8 M102 30 q4 4 0 8" style="stroke:var(--bowl)"/>`, "Banco leggermente bagnato, rovescia l'impasto"],
+    [`<rect class="dough" x="16" y="14" width="88" height="62" rx="10" style="opacity:.75"/><path class="dash" d="M24 22 H96 V68 H24Z"/>` + ar("M16 45 H5") + ar("M104 45 H115") + ar("M60 14 V4") + ar("M60 76 V86"), "Allarga piano fino a un velo quasi trasparente"],
+    [`<rect class="dough" x="16" y="14" width="88" height="62" rx="10"/><rect class="shade" x="16" y="14" width="30" height="62" rx="8"/>` + ar("M10 30 Q2 46 22 50"), "Piega un terzo da un lato (qui puoi mettere semi o olive)"],
+    [`<ellipse class="dough" cx="60" cy="46" rx="40" ry="16"/><path class="thin" d="M26 46 a6 6 0 1 1 6 6 a10 10 0 1 1 -2 -14"/>`, "Piega dall'altro lato e arrotola. Basta una volta"]
+  ],
+  slap: [
+    [BENCH + `<path class="dough" d="M50 16 Q38 22 38 44 Q38 62 52 70 Q58 62 60 54 Q62 62 68 70 Q82 62 82 44 Q82 22 70 16Z"/>` + hand(52,18,0,.8) + hand(68,18,0,.8), "Afferra l'impasto con le dita sotto"],
+    [BENCH + `<path class="dough" d="M14 79 Q18 66 52 66 Q96 67 106 79Z"/><path class="thin" d="M30 52 v8 M46 50 v8 M62 50 v8 M78 52 v8" style="stroke:var(--bowl)"/>`, "Lascialo cadere sul banco con un colpo deciso"],
+    [BENCH + `<path class="dough" d="M14 79 Q18 66 52 66 Q96 67 106 79Z"/>` + ar("M20 62 Q50 20 92 60"), "Ripiega la parte che tieni in mano in avanti"],
+    [BENCH + `<path class="dough" d="M26 79 Q26 46 60 46 Q94 46 94 79Z"/><path class="thin" d="M44 58 Q52 52 62 53"/>`, "Ripeti 5–10 minuti finché è liscio ed elastico"]
+  ],
+  pirlatura: [
+    [`<circle class="dough" cx="60" cy="46" r="30"/>` + ar("M60 6 V22") + ar("M100 46 H84") + ar("M60 86 V70") + ar("M20 46 H36"), "Porta i bordi verso il centro, tutt'intorno"],
+    [BENCH + `<path class="dough" d="M28 79 Q28 44 60 44 Q92 44 92 79Z"/><path class="thin" d="M50 79 q10 -6 20 0"/>`, "Rovescia: la chiusura va sotto"],
+    [BENCH + `<path class="dough" d="M30 79 Q30 44 60 44 Q90 44 90 79Z"/>` + hand(96,64,-30,.9) + ar("M80 30 Q56 22 34 32"), "Mani a coppa: trascina verso di te sul banco"],
+    [BENCH + `<path class="dough" d="M30 79 Q30 40 60 40 Q90 40 90 79Z"/><path class="thin" d="M40 56 Q60 46 80 56"/>` + ar("M22 70 A40 22 0 0 1 98 70"), "Ruota e ripeti: la superficie diventa tesa"]
+  ],
+  filone: [
+    [`<rect class="dough" x="22" y="18" width="76" height="56" rx="10"/>`, "Rettangolo, lato liscio verso il banco"],
+    [`<rect class="dough" x="22" y="38" width="76" height="36" rx="8"/><rect class="shade" x="22" y="38" width="76" height="16" rx="6"/>` + ar("M104 18 Q112 32 100 42"), "Porta il terzo superiore al centro e premi"],
+    [`<rect class="dough" x="22" y="48" width="76" height="22" rx="11"/><path class="thin" d="M30 59 a5 5 0 1 1 5 5"/>` + ar("M60 30 V44"), "Arrotola verso di te sigillando ogni giro"],
+    [`<ellipse class="tool" cx="60" cy="46" rx="48" ry="26"/><ellipse class="dough" cx="60" cy="46" rx="40" ry="17"/><path class="thin" d="M24 46 H96"/>`, "Nel cestino infarinato, chiusura verso l'alto"]
+  ],
+  poke: [
+    [`<path class="dough" d="M14 82 Q14 34 60 34 Q106 34 106 82Z"/><path class="open" d="M54 34 q6 10 12 0"/>` + ar("M60 30 V10"), "Risale subito e tutto: aspetta ancora"],
+    [`<path class="dough" d="M14 82 Q14 34 60 34 Q106 34 106 82Z"/><path class="open" d="M52 34 q8 14 16 0"/>` + `<path class="arr" d="M60 28 V16" style="stroke-dasharray:3 3" marker-end="url(#ah)"/>`, "Risale piano e lascia un segno: pronto"],
+    [`<path class="dough" d="M14 82 Q14 40 60 40 Q106 40 106 82Z"/><path class="open" d="M50 40 q10 22 20 0"/>`, "Non risale: è andato oltre, inforna subito"]
+  ],
+  bulk: [
+    [`<rect class="tool" x="34" y="8" width="52" height="76" rx="6"/><rect class="dough" x="37" y="50" width="46" height="31" rx="4"/><path class="cut" d="M30 50 H40"/>`, "Inizio: segna il livello sul contenitore"],
+    [`<rect class="tool" x="34" y="8" width="52" height="76" rx="6"/><path class="dough" d="M37 81 V36 Q60 26 83 36 V81Z"/><path class="cut" d="M30 50 H40"/><circle class="open" cx="46" cy="44" r="2.5"/><circle class="open" cx="72" cy="40" r="2"/><circle class="open" cx="60" cy="60" r="2"/>`, "Fine: +50% circa (+75% col madre), bombato, bolle ai lati"]
+  ],
+  velo: [
+    [`<path class="dough" d="M30 30 Q60 18 90 30 Q96 50 90 70 Q60 82 30 70 Q24 50 30 30Z" style="opacity:.55"/><path class="thin" d="M40 34 L80 66 M50 30 L86 58 M34 44 L70 74" style="opacity:.5"/>` + hand(22,50,-90,.9) + hand(98,50,90,.9), "Prova del velo: un pezzetto si allarga fino a far passare la luce senza strapparsi"]
+  ],
+  tagli: [
+    [`<ellipse class="dough" cx="60" cy="46" rx="48" ry="24"/><path class="cut" d="M22 50 Q60 30 98 42"/>`, "Taglio singolo lungo il filone: lama molto inclinata per l'orecchio"],
+    [`<circle class="dough" cx="60" cy="46" r="36"/><path class="cut" d="M60 18 V74 M32 46 H88"/>`, "Croce sulla pagnotta: centro un po' più profondo"],
+    [`<ellipse class="dough" cx="60" cy="46" rx="48" ry="24"/><path class="cut" d="M22 50 Q40 38 58 44 M52 50 Q72 38 98 42"/>`, "Doppio taglio sul filone: i tagli si sovrappongono"],
+    [`<ellipse class="dough" cx="60" cy="46" rx="48" ry="24"/><path class="cut" d="M26 46 H94"/><path class="cut" d="M34 46 l8 -10 M48 46 l8 -10 M62 46 l8 -10 M76 46 l8 -10 M34 46 l8 10 M48 46 l8 10 M62 46 l8 10 M76 46 l8 10" style="stroke-width:2"/>`, "Spiga: tanti tagli corti e leggeri"],
+    [`<path class="dough" d="M8 80 Q8 40 60 40 Q112 40 112 80Z"/><path class="tool" d="M40 22 L84 46 L80 50 L36 26Z"/><path class="arr" d="M30 46 A26 26 0 0 1 40 30" style="stroke-width:1.6"/><text x="12" y="38">30°</text>`, "Lama bassa (circa 30°) se vuoi l'orecchio"],
+    [`<path class="dough" d="M8 80 Q8 40 60 40 Q112 40 112 80Z"/><path class="tool" d="M57 6 L63 6 L63 44 L57 44Z"/><text x="68" y="20">90°</text>`, "Lama dritta (90°) per croce e tagli decorativi"]
+  ]
+};
+
+const OVEN = `<rect class="tool" x="6" y="6" width="108" height="80" rx="6"/><path class="thin" d="M12 66 H108" style="stroke:var(--bowl)"/><path class="thin" d="M12 36 H108" style="stroke:var(--bowl);stroke-dasharray:3 3"/>`;
+const steamW = (x,y) => `<path class="thin" d="M${x} ${y} q4-6 0-12 q-4-6 0-12 M${x+10} ${y} q4-6 0-12 q-4-6 0-12" style="stroke:var(--bowl)"/>`;
+ILL.oven = [
+  [OVEN + `<path class="tool" d="M30 62 V46 Q30 40 36 40 H84 Q90 40 90 46 V62Z"/><path class="tool" d="M26 40 H94 V35 H26Z"/><rect class="accent-fill" x="54" y="30" width="12" height="5" rx="2"/>`, "Pentola di ghisa con coperchio: il pane fa il vapore da solo. Coperchio via dopo circa 20 minuti"],
+  [OVEN + `<path class="dough" d="M38 64 Q38 46 60 46 Q82 46 82 64Z"/><rect class="tool" x="30" y="70" width="60" height="8" rx="2"/>` + steamW(42,70) + steamW(68,70), "Teglia sul fondo con acqua bollente (anche con pietre laviche o asciugamani bagnati): toglila dopo circa 20 minuti"],
+  [OVEN + `<path class="dough" d="M40 64 Q40 48 60 48 Q80 48 80 64Z"/><path class="tool" d="M30 64 Q30 30 60 30 Q90 30 90 64Z" style="fill:none"/>`, "Cupola: una ciotola o teglia rovesciata sopra il pane, su pietra o acciaio. Funziona come la pentola"],
+  [OVEN + `<path class="dough" d="M40 64 Q40 48 60 48 Q80 48 80 64Z"/><path class="thin" d="M96 20 l-10 8 M98 26 l-12 4 M96 32 l-10 0" style="stroke:var(--bowl)"/>`, "Spruzzino sulle pareti: facile ma il vapore dura poco, di solito sparisce a metà cottura"]
+];
+/* ===== guide: tecnica ===== */
+const G_TEC = [
+  {id:"glossario", t:"Le parole del pane", s:"Glossario per chi inizia", body:`
+    <div class="gloss">
+    ${[
+      ["Idratazione","Quanta acqua c'è rispetto alla farina, in percentuale. 700 g di acqua su 1000 g di farina = 70%. Più è alta, più l'impasto è morbido e appiccicoso."],
+      ["W (forza)","Quanto è forte la farina, misurato in laboratorio con l'alveografo. Più è alto, più acqua assorbe e più ore di lievitazione regge. 180 debole, 260 media, 320 forte, 370 molto forte (Manitoba)."],
+      ["P/L","Rapporto fra quanto l'impasto resiste (tenacità, P) e quanto si allunga (estensibilità, L). Intorno a 0,5–0,6 è equilibrato, sopra 0,8 è tenace e si allunga poco."],
+      ["Glutine / maglia glutinica","La rete elastica che si forma quando le proteine della farina incontrano l'acqua. Trattiene il gas del lievito: senza, il pane non cresce."],
+      ["Autolisi","Riposo di sola farina e acqua prima di impastare. L'impasto si idrata e diventa più facile da lavorare."],
+      ["Incordatura","Il momento in cui l'impasto diventa liscio, elastico e si stacca dalla ciotola: la maglia glutinica è formata."],
+      ["Bassinage","Un po' d'acqua tenuta da parte e aggiunta a filo alla fine, quando l'impasto è già incordato."],
+      ["Puntata (bulk)","La prima lievitazione: tutto l'impasto riposa in un contenitore e cresce. Qui si fanno le pieghe."],
+      ["Pieghe","Movimenti con cui stiri e ripieghi l'impasto durante la puntata: danno forza senza impastare. Le principali sono stretch & fold, coil fold e laminazione."],
+      ["Staglio","Dividere l'impasto in pezzi del peso giusto."],
+      ["Preformatura","Una prima forma morbida e tonda, poi 15–30 minuti di riposo per far rilassare l'impasto."],
+      ["Formatura","La forma definitiva (pagnotta, filone…) con la superficie ben tesa."],
+      ["Appretto","La seconda lievitazione, del pane già formato, nel cestino o nella teglia. Si può fare a temperatura ambiente o in frigo."],
+      ["Frigo (maturazione a freddo)","Tenere l'impasto a 4 °C per molte ore: il lievito rallenta, il sapore aumenta, il pane si organizza meglio."],
+      ["Prova del dito","Premi l'impasto con un dito infarinato: se risale piano e lascia un segno è pronto per il forno."],
+      ["Prefermento","Una parte dell'impasto preparata ore prima con lievito: biga (solida) o poolish (liquida)."],
+      ["Lievito madre / licoli","Lievito naturale fatto di farina, acqua, lieviti e batteri lattici. Solido (lievito madre) o liquido (licoli). Va nutrito con i rinfreschi."],
+      ["Rinfresco","Dare al lievito madre farina e acqua nuove per tenerlo vivo e attivo."],
+      ["Temperatura dell'impasto","La temperatura che l'impasto ha a fine lavorazione. Ideale 24–26 °C: per arrivarci si sceglie la temperatura dell'acqua."],
+      ["Attrito","Il calore che le mani o la planetaria trasmettono all'impasto mentre lo lavori."],
+      ["Alveolatura","I buchi della mollica. Aperta e irregolare in un pane rustico idratato, fitta e regolare in un pan bauletto."],
+      ["Mollica e crosta","La parte morbida interna e la parte esterna cotta."],
+      ["Taglio e orecchio","Il taglio con la lametta prima di infornare. L'orecchio è il bordo che si solleva lungo il taglio."],
+      ["Vapore","Umidità nel forno nei primi minuti: il pane cresce di più e la crosta viene lucida."],
+      ["Malto","Ingrediente da orzo germinato. Il diastasico ha enzimi attivi che aiutano la lievitazione, il non diastasico dà solo colore e sapore."]
+    ].map(([k,v]) => `<div class="day"><b style="font-family:var(--f-body);font-weight:700;color:var(--ink)">${k}</b><p>${v}</p></div>`).join("")}
+    </div>`},
+  {id:"autolisi", t:"Autolisi", s:"Farina e acqua prima di tutto", body:`
+    <p>Mescola solo farina e acqua (senza sale e senza lievito) e lascia riposare coperto. Le farine si idratano, gli enzimi iniziano a lavorare e il glutine comincia a formarsi da solo: dopo, impasti meno e l'impasto è più estensibile.</p>
+    <ul><li><b>Quanto:</b> 30 minuti per farine raffinate, 45–60 per integrali, almeno 1 ora per la semola.</li>
+    <li><b>Acqua:</b> usane il 90–95%, il resto si aggiunge a filo dopo il sale (bassinage).</li>
+    <li><b>Con lievito madre:</b> aggiungilo a fine autolisi insieme al sale o poco prima.</li></ul>` + prat},
+  {id:"impasto", t:"Impastare e incordare", s:"A mano o in planetaria, fino al velo", body:`
+    <p>Impastare serve a formare la maglia glutinica. È pronta quando l'impasto si stacca dalle pareti, è liscio e un pezzetto si allarga in un velo sottile senza strapparsi.</p>
+    ${panels(ILL.velo)}
+    <ul><li><b>Planetaria:</b> gancio, prima velocità bassa per 3–4 minuti, poi media. Sale dopo i primi minuti, acqua di riserva a filo solo quando l'impasto è già incordato.</li>
+    <li><b>A mano:</b> per impasti morbidi usa lo slap & fold, per impasti molto idratati basta mescolare bene e affidarsi alle pieghe durante la puntata.</li>
+    <li><b>Non scaldarlo:</b> a fine impasto l'ideale è 24–26 °C. Per questo il calcolatore ti dà la temperatura dell'acqua.</li></ul>` + src("ka_ddt")},
+  {id:"slap", t:"Slap & fold", s:"Impastare a mano un impasto morbido", when:"Subito dopo aver unito gli ingredienti, 5–10 minuti. Per impasti fino a circa 75%.", body:() => panels(ILL.slap) + `<p>Non aggiungere farina sul banco: all'inizio l'impasto è appiccicoso, dopo qualche minuto si stacca da solo.</p>` + prat},
+  {id:"stretch", t:"Stretch & fold in ciotola", s:"La piega base durante la puntata", when:"Nella prima metà della puntata: 3–4 serie, una ogni 30 minuti. Per idratazioni medie, 66–75%.", body:() => panels(ILL.stretch) + `<p>Ogni serie dà forza senza impastare. Smetti quando l'impasto tiene la forma e resiste allo stiramento.</p>` + prat},
+  {id:"coil", t:"Coil fold", s:"Per impasti molto idratati", when:"Per impasti oltre il 75%: 3–4 serie ogni 30 minuti, nella prima metà della puntata.", body:() => panels(ILL.coil) + `<p>Più delicata dello stretch & fold: non strappa e non sgonfia. Bagna le mani ogni volta, mai farina.</p>` + prat},
+  {id:"lettera", t:"Pieghe a tre sul banco", s:"Per impasti più sodi", when:"Per impasti sotto il 66%, o quando vuoi controllare bene la forza: 2–3 serie ogni 30–45 minuti.", body:() => panels(ILL.lettera) + prat},
+  {id:"laminazione", t:"Laminazione", s:"Una piega sola che dà molta forza", when:"Una volta, al posto della prima serie di pieghe. Ideale per inserire semi, olive, noci.", body:() => panels(ILL.laminazione) + `<p>Se l'impasto si strappa mentre lo allarghi, non è ancora pronto: fallo riposare 15 minuti e riprova.</p>` + prat},
+  {id:"bulk", t:"Leggere la puntata (bulk)", s:"Quando è finita la prima lievitazione", body:() => panels(ILL.bulk) + `
+    <ul><li>Usa un contenitore a pareti dritte: vedere la crescita è il modo più sicuro.</li>
+    <li>Con lievito di birra punta a circa +50%, con lievito madre +50–75%. Superficie bombata, bolle sui lati e sul fondo, l'impasto trema se muovi il contenitore.</li>
+    <li>Se la cucina è più fredda o più calda di quanto impostato, l'orologio sbaglia: fidati dell'impasto.</li></ul>` + prat},
+  {id:"preforma", t:"Preformatura", s:"Dare una prima forma e far riposare", body:`
+    <p>Rovescia l'impasto sul banco poco infarinato, dividilo se serve, e dai una forma tonda e morbida senza stringere troppo. Lascia riposare 15–30 minuti scoperto: il glutine si rilassa e la formatura finale sarà più facile.</p>` + prat},
+  {id:"pirlatura", t:"Pirlatura: la pagnotta tonda", s:"Creare tensione in superficie", body:() => panels(ILL.pirlatura) + `<p>La pelle tesa fa salire la pagnotta in verticale in forno. Se si strappa hai tirato troppo: lascia riposare e riprova con meno forza.</p>` + prat},
+  {id:"filone", t:"Formatura del filone", s:"Batard e baguette", body:() => panels(ILL.filone) + prat},
+  {id:"appretto", t:"Appretto e prova del dito", s:"Capire quando infornare", body:() => panels(ILL.poke) + `
+    <ul><li><b>Temperatura ambiente:</b> di solito 1–3 ore, dipende dal lievito e dalla cucina.</li>
+    <li><b>In frigo (4 °C):</b> 8–16 ore. Il freddo rallenta tutto, sviluppa aroma e rende l'impasto più facile da tagliare. Inforna direttamente freddo.</li>
+    <li>Per l'appretto in frigo il manuale Zanichelli raccomanda farine con W superiore a 270.</li></ul>` + src("zani")},
+  {id:"tagli", t:"Tecniche di taglio", s:"Dove si apre il pane", body:() => panels(ILL.tagli) + `
+    <ul><li><b>A cosa serve:</b> il pane in forno si espande di colpo. Il taglio decide dove si apre, invece di lasciarlo strappare a caso.</li>
+    <li><b>Profondità:</b> abbastanza da superare la pelle formata in formatura, non così tanto da indebolire la forma. Tagli singoli o doppi un po' più profondi, i decorativi appena in superficie. Se un taglio è troppo leggero, ripassa sulla stessa linea.</li>
+    <li><b>Lama:</b> dritta per croce e tagli decorativi, curva per i tagli del filone, che sollevano un bordo (l'orecchio).</li>
+    <li><b>Spolvero:</b> per il contrasto, 50% farina di riso e 50% farina normale, oppure solo riso per un bianco pieno. Togli l'eccesso dal cestino con un pennello.</li>
+    <li><b>Impasto freddo di frigo</b> si taglia molto più pulito: è uno dei vantaggi del riposo notturno.</li></ul>` + src("ka_sc")},
+  {id:"cottura", t:"Cottura in forno: pentola, vapore, temperature", s:"Con o senza pentola, come fare il vapore", body:() => `
+    <p><b>Perché serve il vapore.</b> Nei primi minuti il vapore tiene la superficie umida ed elastica: il pane può crescere ancora in forno prima che la crosta si indurisca, e l'amido in superficie gelatinizza dando la crosta lucida. Poi il vapore va tolto per far colorare e indurire la crosta (King Arthur).</p>
+    ${panels(ILL.oven)}
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th>Metodo</th><th>Come</th><th>Pro e contro</th></tr>
+      <tr><td><b>Pentola in ghisa</b></td><td>Preriscaldata nel forno, pane dentro, coperchio per circa 20 min, poi senza</td><td>Il più semplice ed efficace. Solo pagnotte della misura della pentola</td></tr>
+      <tr><td><b>Cloche o pirofila con coperchio</b></td><td>Come la pentola</td><td>Lo smalto trattiene molto bene calore e vapore</td></tr>
+      <tr><td><b>Cupola</b></td><td>Ciotola o teglia rovesciata sopra il pane, su pietra, acciaio o teglia piana</td><td>Va bene per filoni e forme lunghe. Il pane non deve toccare la cupola</td></tr>
+      <tr><td><b>Teglia d'acqua</b></td><td>Teglia profonda preriscaldata sul ripiano basso, acqua bollente appena inforni</td><td>Vapore continuo. Attenzione a non rovesciarla quando la togli</td></tr>
+      <tr><td><b>Pietre laviche</b></td><td>In una padella di ferro vecchia, poi acqua bollente</td><td>Più superficie, più vapore. La padella può deformarsi</td></tr>
+      <tr><td><b>Asciugamani</b></td><td>Strofinacci arrotolati e bagnati di acqua bollente in una seconda teglia</td><td>Vapore costante per tutta la prima fase</td></tr>
+      <tr><td><b>Spruzzino</b></td><td>Spruzza fondo e pareti appena prima e dopo aver infornato</td><td>Facile ma debole: il vapore sparisce presto</td></tr>
+      <tr><td><b>Senza vapore</b></td><td>Solo forno caldo</td><td>Crosta opaca, il pane si apre meno. Va bene per pane in cassetta e focacce unte</td></tr>
+    </table></div>
+    <ul>
+      <li><b>Ventilato:</b> spegnilo quando inforni (asciuga l'aria e toglie vapore); puoi riaccenderlo alla fine per una crosta più croccante.</li>
+      <li><b>Preriscaldamento:</b> forno al massimo con dentro pentola, pietra o acciaio, per almeno 45 minuti, così il fondo è caldo quanto l'aria.</li>
+      <li><b>Colore:</b> King Arthur riassume così: "il vapore è il primo passo per un buon colore, un forno caldo il secondo, il tempo il terzo". Per una pagnotta conta 45–50 minuti in tutto. Una crosta scura dà più sapore: il segnale giusto è una sottile striscia bruciata sull'orecchio.</li>
+      <li><b>È cotto</b> quando battendo sotto suona vuoto, la crosta è dura e il pane pesa almeno il 15% in meno dell'impasto crudo.</li>
+      <li><b>Raffreddamento:</b> su una griglia, fino a completo raffreddamento prima di tagliarlo, altrimenti la mollica resta gommosa. Il pane con tanta segale può richiedere fino a 24 ore.</li>
+    </ul>` + src("ka_steam","ka_dark","ka_done")}
+];
+
+/* ===== guide: lieviti e strumenti ===== */
+const G_LIEV = [
+  {id:"birra", t:"Lievito di birra: fresco o secco", s:"Differenze e conversioni", body:`
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th></th><th>Fresco (cubetto)</th><th>Secco istantaneo</th><th>Secco attivo</th></tr>
+      <tr><td><b>Quanto usarne</b></td><td>100%</td><td>35% del fresco</td><td>50% del fresco</td></tr>
+      <tr><td><b>Esempio</b></td><td>10 g</td><td>3,5 g</td><td>5 g</td></tr>
+      <tr><td><b>Come si usa</b></td><td>Sbriciolato nell'acqua o nella farina</td><td>Direttamente nella farina</td><td>Si reidrata prima in acqua tiepida</td></tr>
+      <tr><td><b>Conservazione</b></td><td>Frigo, pochi giorni dopo l'apertura</td><td colspan="2">Mesi in dispensa, chiuso. In frigo dopo l'apertura</td></tr>
+    </table></div>
+    <ul><li>Sono lo stesso organismo, <i>Saccharomyces cerevisiae</i>. Cambia solo l'acqua che contengono: per questo le dosi sono diverse.</li>
+    <li>Sul sacchetto leggi se il secco va sciolto (attivo) o no (istantaneo). In Italia la bustina da 7 g per 500 g di farina è quasi sempre istantanea.</li>
+    <li><b>Quanto in percentuale:</b> il manuale Zanichelli indica dall'1% al 6% sulla farina per le lavorazioni dirette di laboratorio. A casa, con tempi lunghi, si scende molto sotto: il calcolatore ti dà la dose in base a ore e temperatura.</li>
+    <li>Il lievito lavora meglio fra 25 e 28 °C e muore sopra i 50 °C circa: non usare mai acqua calda.</li></ul>` + src("asbe","zani")},
+  {id:"lm", t:"Lievito madre solido", s:"Farlo nascere, rinfrescarlo, conservarlo", body:`
+    <p>Coltura di lieviti e batteri lattici che vive in un impasto di farina e acqua. Il solido ha circa il 50% di acqua sulla farina.</p>
+    <h4>Farlo nascere</h4>
+    <div class="day"><b>Giorno 1</b><p>150 g di farina 0 o 00, 120 g d'acqua, 50 g di uvetta ammollata e frullata (aiuta con zuccheri e lieviti). Impasta, metti in un barattolo grande almeno 6 volte il volume, copri. 48 ore a temperatura ambiente.</p></div>
+    <div class="day"><b>Giorno 3</b><p>Primo rinfresco: 150 g di impasto + 150 g di farina + 75 g d'acqua (rapporto 1:1:0,5).</p></div>
+    <div class="day"><b>Per 1 mese</b><p>Ripeti il rinfresco ogni 24 ore. È pronto quando raddoppia con regolarità e ha un profumo acidulo e pulito.</p></div>
+    <h4>Usarlo</h4>
+    <ul><li>Rinfrescalo e usalo quando è al massimo: circa 3–4 ore a 26–28 °C (un taglio a croce sulla superficie si chiude e scompare).</li>
+    <li>Dose: 10% sulla farina d'estate, 20% d'inverno (Dissapore, con Giorilli e Bonci). Altroconsumo indica 100–150 g ogni 500 g di farina.</li></ul>
+    <h4>Mantenerlo</h4>
+    <ul><li>In frigo a 4–6 °C, rinfrescato circa una volta alla settimana. Prima di usarlo dopo il frigo fai 1–2 rinfreschi a temperatura ambiente.</li>
+    <li>Se è molto acido, prima del rinfresco puoi fare il <b>bagnetto</b>: fettine in acqua leggermente zuccherata per 20 minuti, poi strizza.</li>
+    <li>Si può congelare per alcuni mesi: dopo lo scongelamento servono rinfreschi quotidiani per circa una settimana.</li></ul>` + src("dis_lm","altro_lm","zani")},
+  {id:"licoli", t:"Licoli (lievito liquido)", s:"Lievito madre in coltura liquida, 100% acqua", body:`
+    <p>Stessa coltura, con acqua uguale alla farina. Più facile da rinfrescare (si mescola con un cucchiaio), di solito meno acido del solido.</p>
+    <h4>Farlo nascere</h4>
+    <div class="day"><b>Giorno 1</b><p>King Arthur: 113 g di farina integrale + 113 g d'acqua a 20–21 °C. Copri e lascia 24 ore. (Dissapore propone 150 g di farina tipo 1 o 2, 150 g d'acqua e 10 g di uvetta, per 48 ore.)</p></div>
+    <div class="day"><b>Giorno 2</b><p>Tieni 113 g, butta il resto, aggiungi 113 g di farina e 113 g d'acqua. Forse non vedi ancora niente: è normale.</p></div>
+    <div class="day"><b>Giorni 3–5</b><p>Due rinfreschi al giorno, ogni 12 ore, sempre 1:1:1.</p></div>
+    <div class="day"><b>Giorno 6 e oltre</b><p>È pronto quando <b>raddoppia almeno in 6–8 ore</b> dal rinfresco, con tante bolle e odore acidulo pulito. Può servire da 7 giorni a un paio di settimane: conta il segnale, non il calendario.</p></div>
+    <h4>Rapporti di rinfresco</h4>
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th>Rapporto</th><th>Picco a circa 25 °C</th><th>Quando usarlo</th></tr>
+      <tr><td>1:1:1</td><td>4–6 h</td><td>Rinfresco al mattino, pane nel pomeriggio</td></tr>
+      <tr><td>1:2:2</td><td>circa 8 h</td><td>Rinfresco a pranzo, impasto la sera</td></tr>
+      <tr><td>1:4:4</td><td>circa 12 h</td><td>Rinfresco la sera, impasto al mattino</td></tr>
+    </table></div>
+    <p class="small">Test di King Arthur a 78 °F (25,5 °C). Il rapporto cambia solo i tempi, non la resa nel pane.</p>
+    <h4>Mantenerlo e convertirlo</h4>
+    <ul><li>In frigo a 4–6 °C, rinfresco ogni 4 giorni (Dissapore) o settimanale (King Arthur, con un rinfresco abbondante prima di riporlo).</li>
+    <li><b>Da solido a licoli:</b> 50 g di solido + 100 g di farina + 100 g d'acqua, poi rinfreschi 1:1:1.</li>
+    <li><b>Da licoli a solido:</b> 50 g di licoli + 150 g di farina + 75 g d'acqua, poi rinfreschi 1:1:0,5.</li></ul>` + src("ka_st","ka_fr","dis_lm")},
+  {id:"biga", t:"Biga", s:"Prefermento solido, metodo Giorilli", body:`
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th>Parametro</th><th>Valore</th></tr>
+      <tr><td>Farina</td><td>00 o 0 forte, W oltre 300</td></tr>
+      <tr><td>Acqua</td><td>44% sulla farina (42–50% secondo la stagione)</td></tr>
+      <tr><td>Lievito di birra fresco</td><td>1% sulla farina</td></tr>
+      <tr><td>Biga corta</td><td>16–20 ore a 18–20 °C</td></tr>
+      <tr><td>Biga lunga</td><td>24 ore in frigo a 4–5 °C, poi 24 ore a 18–20 °C</td></tr>
+      <tr><td>Temperatura a fine impasto</td><td>20–21 °C</td></tr>
+    </table></div>
+    <ul><li><b>Come si fa:</b> mescola appena, senza impastare. Deve restare a grumi grossolani, non un panetto liscio.</li>
+    <li><b>Quando è pronta:</b> profumo di yogurt, leggermente alcolico, grumi gonfi.</li>
+    <li><b>Quanta usarne:</b> un punto di partenza è un terzo della farina totale, poi si sale. Più biga = più aroma ed estensibilità, tempi successivi più brevi.</li>
+    <li><b>Perché:</b> aroma, mollica più alveolata, pane che dura di più.</li></ul>` + src("dis_bp","zani")},
+  {id:"poolish", t:"Poolish", s:"Prefermento liquido, 100% acqua", body:`
+    <p>Farina e acqua in parti uguali più lievito di birra. Farina consigliata con W 280–300, temperatura dell'impasto non oltre 25 °C (ideale 20–22 °C).</p>
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th>Durata</th><th>Lievito fresco per kg di farina del poolish</th></tr>
+      <tr><td>1–2 h</td><td>25–30 g</td></tr>
+      <tr><td>4–5 h</td><td>15 g</td></tr>
+      <tr><td>7–8 h</td><td>5–10 g</td></tr>
+      <tr><td>10–12 h</td><td>3 g</td></tr>
+      <tr><td>15–18 h</td><td>1–1,5 g</td></tr>
+    </table></div>
+    <ul><li><b>Pronto:</b> raddoppiato, pieno di bolle, con il centro che inizia ad abbassarsi.</li>
+    <li><b>Quanto usarne:</b> anche qui un buon inizio è un terzo della farina totale.</li></ul>
+    <p class="small">Valori tra il manuale Zanichelli (per kg) e la tabella riportata da Dissapore (in %): dove differiscono ho indicato l'intervallo.</p>` + src("zani","dis_bp")},
+  {id:"confronto", t:"Quale metodo scegliere", s:"Diretto, biga, poolish, lievito madre", body:`
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th>Metodo</th><th>Organizzazione</th><th>Risultato</th></tr>
+      <tr><td><b>Diretto</b> (birra)</td><td>Tutto in giornata, il più semplice</td><td>Sapore pulito, dura meno</td></tr>
+      <tr><td><b>Diretto lungo + frigo</b></td><td>Poco lievito, notte in frigo</td><td>Più aroma, comodo da organizzare</td></tr>
+      <tr><td><b>Poolish</b></td><td>Prefermento la sera prima</td><td>Estensibile, aroma delicato, crosta sottile</td></tr>
+      <tr><td><b>Biga</b></td><td>Prefermento 16–48 ore</td><td>Aroma intenso, alveolatura ampia</td></tr>
+      <tr><td><b>Lievito madre / licoli</b></td><td>Va mantenuto vivo con rinfreschi</td><td>Acidità, profumo complesso, pane che si conserva giorni</td></tr>
+    </table></div>`},
+  {id:"farine-pane", t:"Quale farina per quale pane", s:"Mollica, crosta, colore, semi", body:() => `
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th>Vuoi</th><th>Farina</th><th>Come</th></tr>
+      <tr><td><b>Pane in giornata, semplice</b></td><td>00 o 0 di media forza, W 200–260</td><td>Lievito di birra, 60–68% d'acqua, poche ore</td></tr>
+      <tr><td><b>Pagnotta rustica, mollica aperta</b></td><td>Tipo 1 o 2, W 260–320, eventualmente 20–30% di integrale</td><td>70–78% d'acqua, pieghe, frigo una notte</td></tr>
+      <tr><td><b>Lunga lievitazione o frigo</b></td><td>W 250–320 (Altroconsumo); per il frigo W oltre 270 (Zanichelli)</td><td>Poco lievito, tempi lunghi</td></tr>
+      <tr><td><b>Pane integrale che cresce</b></td><td>Integrale con 20–40% di farina forte o Manitoba</td><td>Più acqua, autolisi, tempi non troppo lunghi</td></tr>
+      <tr><td><b>Pane di semola, mollica gialla</b></td><td>Semola rimacinata di grano duro</td><td>Il disciplinare del Pane di Altamura DOP: semola rimacinata, 20% di lievito madre, 2% di sale, circa 60% d'acqua. Crosta di almeno 3 mm, mollica giallo paglierino</td></tr>
+      <tr><td><b>Pane morbido, pan bauletto</b></td><td>0 o 00, W 220–280</td><td>Idratazione più bassa, cottura in stampo senza vapore</td></tr>
+      <tr><td><b>Pane di segale</b></td><td>Segale con o senza grano tenero</td><td>Lievito madre (acidità), stampo, niente pieghe, riposo fino a 24 h prima di tagliare</td></tr>
+    </table></div>
+    <h4>Crosta e colore</h4>
+    <ul><li><b>Croccante e lucida:</b> vapore nei primi 20 minuti, poi forno asciutto.</li>
+    <li><b>Scura e saporita:</b> forno caldo e tempo: 45–50 minuti per una pagnotta. Il colore viene dalla reazione di Maillard, che ha bisogno dell'umidità del vapore all'inizio.</li>
+    <li><b>Più colorata:</b> il malto aggiunge zuccheri che colorano la crosta (vedi sotto).</li>
+    <li><b>Sottile:</b> pezzi piccoli (baguette, panini) e cottura breve; pezzi grandi e cotture lunghe fanno crosta spessa.</li></ul>
+    <h4>Semi</h4>
+    <ul><li><b>Sulla crosta:</b> bagna la superficie del pane formato rotolandolo su un canovaccio umido, poi rotolalo nei semi. Per pane croccante usa acqua, non uovo. Usa semi crudi: girasole e zucca bruciano facilmente; con tanti semi abbassa il forno di 5–10 °C e cuoci più a lungo. Taglia con forbici o coltello seghettato.</li>
+    <li><b>Nell'impasto:</b> i semi che assorbono molto, come il lino, vanno messi in ammollo prima. King Arthur usa 1 parte di lino e 3 d'acqua, preparati insieme al lievito la sera prima. Girasole e sesamo invece si tostano e si aggiungono a fine impasto.</li></ul>` + src("altro","zani","altamura","ka_dark","ka_seeds","ka_seedf")},
+  {id:"malto", t:"Malto d'orzo", s:"Diastasico o no, quanto metterne, cosa cambia", body:`
+    <div class="tbl-wrap"><table class="cmp">
+      <tr><th></th><th>Diastasico (polvere)</th><th>Non diastasico / sciroppo</th></tr>
+      <tr><td><b>Cos'è</b></td><td>Orzo germinato essiccato a bassa temperatura: gli enzimi sono vivi</td><td>Essiccato ad alta temperatura: enzimi inattivi, colore più scuro</td></tr>
+      <tr><td><b>Cosa fa</b></td><td>Trasforma parte dell'amido in maltosio: più cibo per il lievito, lievitazione più vivace, crosta più colorata</td><td>Sapore, dolcezza e colore della crosta. Non accelera la lievitazione</td></tr>
+      <tr><td><b>Quanto</b></td><td>Partire da 0,1–0,2% sulla farina e salire piano (Hamelman)</td><td>Per pane francese e italiano 0,5–2% sulla farina; integrale 5–9% (manuale canadese)</td></tr>
+      <tr><td><b>Se esageri</b></td><td>Mollica gommosa e appiccicosa</td><td>Crosta troppo scura, sapore dolce</td></tr>
+    </table></div>
+    <ul><li><b>Quando serve:</b> con farine povere di enzimi, lievitazioni lunghe in frigo, quando la crosta resta pallida. Il manuale canadese ricorda che una buona farina spesso ha già enzimi a sufficienza.</li>
+    <li><b>Conservazione:</b> il malto trattiene umidità e aiuta il pane a restare morbido più a lungo.</li>
+    <li><b>Sostituzioni:</b> 1 g di sciroppo di malto ≈ 0,8 g di malto diastasico in polvere (King Arthur). Per rendere inattivo il diastasico, tostalo 5 minuti a 175 °C.</li>
+    <li>Nella focaccia genovese di Tesauro: 0,5% di malto diastasico in polvere.</li>
+    <li>Nel calcolatore puoi aggiungerlo dalla scheda Impasto, alla voce "Malto d'orzo".</li></ul>` + src("ka_malt","cbaker","dis_foc")},
+  {id:"strumenti", t:"Strumenti", s:"Quelli che servono davvero", body:() => `
+    <div class="panels">${[
+      [`<rect class="tool" x="22" y="40" width="76" height="34" rx="6"/><rect class="tool" x="30" y="26" width="60" height="14" rx="4"/><rect x="44" y="50" width="32" height="12" rx="2" class="accent-fill"/>`, "<b>Bilancia digitale</b> al grammo, meglio una di precisione a 0,1 g per sale e lievito"],
+      [`<rect class="tool" x="56" y="8" width="8" height="54" rx="4"/><circle class="tool" cx="60" cy="70" r="12"/><rect x="50" y="64" width="20" height="10" rx="2" class="accent-fill"/>`, "<b>Termometro a sonda</b>: acqua, impasto e cottura al cuore"],
+      [`<path class="tool" d="M24 64 Q24 26 60 26 Q96 26 96 64Z"/><path class="thin" d="M36 54 H84"/>`, "<b>Tarocco</b> (raschia) in plastica per ciotola e banco"],
+      [`<rect class="tool" x="18" y="40" width="70" height="10" rx="5"/><path class="tool" d="M88 36 L106 40 L106 50 L88 54Z"/>`, "<b>Lametta</b> (grigne o lame) per i tagli, o un cutter affilato"],
+      [`<ellipse class="tool" cx="60" cy="46" rx="44" ry="26"/><ellipse class="tool" cx="60" cy="46" rx="34" ry="18"/><ellipse class="tool" cx="60" cy="46" rx="24" ry="10"/>`, "<b>Cestino di lievitazione</b> (banneton) in vimini o una ciotola con canovaccio"],
+      [`<path class="tool" d="M20 40 H100 V70 Q100 80 90 80 H30 Q20 80 20 70Z"/><path class="tool" d="M16 34 H104 V40 H16Z"/><rect x="52" y="26" width="16" height="8" rx="3" class="accent-fill"/>`, "<b>Pentola in ghisa</b> con coperchio: crea il vapore da sola"],
+      [`<rect class="tool" x="34" y="8" width="52" height="76" rx="6"/><path class="thin" d="M36 30 h8 M36 46 h8 M36 62 h8" style="stroke:var(--bowl)"/>`, "<b>Contenitore a pareti dritte</b> per vedere la crescita in puntata"],
+      [`<rect class="tool" x="14" y="56" width="92" height="12" rx="3"/><path class="thin" d="M30 50 q4-8 0-16 M60 50 q4-8 0-16 M90 50 q4-8 0-16" style="stroke:var(--bowl)"/>`, "<b>Pietra refrattaria o acciaio</b> più una teglia per l'acqua del vapore"]
+    ].map((p,i) => fig(sv(p[0], p[1].replace(/<[^>]+>/g,"")), "", p[1])).join("")}</div>
+    <p class="small muted">Utili ma non indispensabili: spruzzino per l'acqua, carta forno, pennello per togliere l'eccesso di farina, cuffie o sacchetti per coprire il cestino in frigo.</p>`},
+  {id:"fonti", t:"Tutte le fonti", s:"Leggi, mulini, scuole", body:() => `
+    <p>Ogni dato numerico delle farine riporta la sua fonte. Il tipo di fonte è segnato con un'etichetta: <span class="chip dec">mulino</span> scheda ufficiale, <span class="chip dec">rivenditore</span> o <span class="chip dec">importatore</span> valori del mulino riportati da chi la vende, <span class="chip est">stima</span> calcolata da me.</p>
+    <ul>${Object.values(SOURCES).map(s => `<li><a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a> <span class="muted small">(${esc(s.k)})</span></li>`).join("")}</ul>`}
+];
+
+function guideHTML(g){
+  const body = typeof g.body === "function" ? g.body() : g.body;
+  return `<details class="g" id="g-${g.id}"><summary><span><span class="s1">${g.t}</span><span class="s2">${g.s}</span></span>${ICON.chev}</summary>
+    <div class="g-body">${g.when ? `<p class="when"><b>Quando:</b> ${g.when}</p>` : ""}${body}</div></details>`;
+}
+function renderGuides(){
+  $("#g-tecnica").innerHTML = G_TEC.map(guideHTML).join("");
+  $("#g-lieviti").innerHTML = G_LIEV.map(guideHTML).join("");
+  $("#toc-tecnica").innerHTML = G_TEC.map(g => `<a href="#tecnica" data-g="${g.id}">${g.t}</a>`).join("");
+  $("#toc-lieviti").innerHTML = G_LIEV.map(g => `<a href="#lieviti" data-g="${g.id}">${g.t}</a>`).join("");
+  $$(".toc a").forEach(a => a.onclick = e => { e.preventDefault(); openGuide(a.dataset.g); });
+  $("#g-tecnica details").open = true;
+}
+init();
+</script>
+<script>if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});</script></body></html>

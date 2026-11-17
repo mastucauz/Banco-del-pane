@@ -1,0 +1,2 @@
+{"name":"Banco del Pane","short_name":"Banco Pane","lang":"it","id":"./","start_url":"./index.html","scope":"./","display":"standalone","orientation":"portrait","background_color":"#F3F2ED","theme_color":"#3E5A29",
+"icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"},{"src":"apple-touch-icon.png","sizes":"180x180","type":"image/png"}]}
