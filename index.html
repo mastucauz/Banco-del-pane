@@ -735,11 +735,12 @@ function makePlan(lev, A, overheadH){
   let fh = Math.min(wantFh, maxFh);
   const totalH = overheadH + rb + fh + post;
   let startMin = target - totalH*60;
-  if (startMin < now){ /* poco tempo: accorcio il frigo */
-    fh = Math.max(8, fh - (now - startMin)/60); startMin = now;
+  if (startMin < now){ /* è tardi: non accorcio il frigo (servirebbe più lievito), sposto l'infornata più avanti */
+    res.late = true; startMin = now; res.target = now + totalH*60;
   }
   Object.assign(res, {mode:"fridge", bulk: rb, fh, post, app: post, eq: rb*f + fridgeEq(fh) + post*f, startMin, total: overheadH + rb + fh + post});
-  if (S.endDay === 2 && fh < 30) res.why = `La farina regge circa ${hm(maxFh)} di frigo, non due notti intere: inizi ${startMin >= 1440 ? "domani" : "più tardi"} e la qualità resta la stessa.`;
+  if (res.late) res.why = `Per infornare alle ${teg ? "19" : "10"} avresti dovuto iniziare prima: se inizi adesso inforni più tardi (vedi sopra). Non accorcio il frigo, perché con meno ore di frigo servirebbe più lievito.`;
+  else if (S.endDay === 2 && fh < 30) res.why = `La farina regge circa ${hm(maxFh)} di frigo, non due notti intere: inizi ${startMin >= 1440 ? "domani" : "più tardi"} e la qualità resta la stessa.`;
   return finish();
 }
 /* "Uso già una mia dose": tengo la dose e adatto i tempi, in modo che dose e tempi siano coerenti */
@@ -889,7 +890,8 @@ function compute(){
       ${P.mode==="fridge" ? `<div><span>In frigo (${fridgeT()} °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
       <div><span>Inforni</span><b>${at(endMin)}</b></div>
     </div>
-    <p class="small"><b>Quanto tempo serve.</b> Dal momento in cui inizi a impastare a quando metti in forno, con ${levWord} e la cucina a ${T} °C servono <b>almeno ${hm(P.minH)}</b>: è il tempo più breve in cui il lievito riesce a far crescere l'impasto. Il tempo <b>consigliato è ${hm(P.recH)}</b> o più: una lievitazione più lenta dà più sapore e una mollica migliore. ${P.mode==="fridge"?"Con la notte in frigo il tempo è più lungo ma lavori pochissimo: il freddo rallenta il lievito.":""}</p>
+    <p class="small"><b>Quanto tempo serve.</b> Dal momento in cui inizi a impastare a quando metti in forno, con ${levWord} e la cucina a ${T} °C servono <b>almeno ${hm(P.minH)}</b>: è il tempo più breve in cui il lievito riesce a far crescere l'impasto. Il tempo <b>consigliato è ${hm(P.recH)}</b> o più: una lievitazione più lenta dà più sapore e una mollica migliore. </p>
+    ${P.mode==="fridge" ? `<p class="small"><b>Perché col frigo il lievito non cala di molto.</b> A ${fridgeT()} °C il lievito lavora pochissimo: ${hm(P.fh)} di frigo valgono solo circa ${hm(fridgeEq(P.fh))} a 24 °C. Il frigo serve a dare sapore e a fermare l'impasto fino all'ora giusta, non a farlo crescere: quasi tutta la crescita avviene prima, a temperatura ambiente, e poi in forno. Per questo la dose è solo un po' più bassa che in giornata (${fmt(levDose("fresco", {fresh: freshFor(5)}, A.F),1)} g col lievito fresco). La regola "meno lievito" vale per le lievitazioni lunghe a temperatura ambiente, o per due notti in frigo.</p>` : ""}
     <p class="small"><b>Perché l'acqua a ${wT} °C.</b> ${wExplain}</p>
     ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
     ${P.own ? `<p class="small"><b>Con la tua dose (${fmt(S.myDose,1)} g).</b> Per il mio programma standard userei ${fmt(autoG,1)} g. Ho tenuto i tuoi grammi e ho adattato le ore: ${P.mode==="fridge" ? `prima lievitazione ${hm(P.bulk)}, frigo ${hm(P.fh)}${P.post>0.1?`, poi ${hm(P.post)} fuori frigo prima di infornare`:", poi in forno direttamente dal frigo"}` : `in tutto ${hm(P.use)} di lievitazione a ${T} °C`}.${P.ownMsg ? ` <b>${P.ownMsg}</b>` : ""}</p>` : ""}
