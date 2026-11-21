@@ -261,6 +261,17 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
 .hero .hydro-bar b{background:var(--accent)}
 .hero input[type="range"]{accent-color:var(--accent)}
 .hero .hydro-scale,.hero .ovr label{color:var(--muted)}
+.fls{display:grid;gap:10px}
+.fl{background:var(--sunken);border-radius:12px;padding:12px;display:grid;gap:6px}
+.fl-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.fl-h span{color:var(--muted);font-size:.82rem}
+.fl-chips{display:flex;flex-wrap:wrap;gap:6px}
+.fl-chips span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:.8rem;font-weight:600}
+.fl-chips span:first-child{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.fl p{margin:0;font-size:.92rem}
+.fl-add{border-top:1px dashed var(--line);padding-top:6px}
+.crumb-tips{margin:12px 0 6px;padding-left:18px;display:grid;gap:6px;font-size:.92rem}
+#seg-crumb{margin-top:8px}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -624,7 +635,7 @@ const DEFAULT = {
   rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
   style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
   start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
-  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, example:true, panW:30, panL:40, panN:1
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", example:true, panW:30, panL:40, panN:1
 };
 let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
 if (!RECIPES[S.style]) S.style = "pagnotta";
@@ -996,6 +1007,73 @@ function compute(){
     else if (f.c === "sg") t += "Non forma glutine: non contribuisce alla struttura.";
     why.push(t);
   });
+  const flourCards = A.rows.map(r => {
+    const f = r.f, W = wOf(f), p = protOf(f), share = r.k;
+    let bread = "", ifadd = "";
+    const soft = TENERO.includes(f.c) && !["1","2","int"].includes(f.c);
+    if (f.c === "man" || (soft && W >= 340)){
+      bread = "<b>Crosta</b> sottile e dorata · <b>mollica</b> molto elastica, un po' gommosa se usata da sola · <b>sapore</b> neutro · <b>sviluppo</b> altissimo.";
+      ifadd = share > 0.6 ? "<b>Se la tagli con il 30–50% di una tipo 1 o 2</b>, il pane viene più profumato, con la mollica più morbida e la crosta più croccante, appena un po' meno alto." : "<b>In questa quantità</b> sostiene le altre farine: pane più alto e alveoli più grandi.";
+    } else if (soft && W >= 250){
+      bread = "<b>Crosta</b> sottile e dorata · <b>mollica</b> bianca e soffice · <b>sapore</b> delicato · <b>sviluppo</b> buono, regge anche il frigo.";
+      ifadd = "<b>Se sostituisci il 20–30% con una tipo 2 o integrale</b>, il pane viene più saporito, con la crosta più scura e croccante, un po' più basso. <b>Con il 10–20% di semola</b> la mollica diventa giallina e profumata e la crosta più croccante.";
+    } else if (soft){
+      bread = "<b>Crosta</b> chiara e sottile · <b>mollica</b> fitta e morbida · <b>sapore</b> delicato · <b>sviluppo</b> limitato.";
+      ifadd = `<b>Se aggiungi il 20–30% di manitoba</b>, il pane viene più alto e con alveoli più aperti${S.endDay>0?", e regge la notte in frigo":""}.`;
+    } else if (f.c === "1"){
+      bread = "<b>Crosta</b> più colorata e croccante · <b>mollica</b> avorio, leggermente puntinata · <b>sapore</b> di grano più deciso · <b>sviluppo</b> buono.";
+      ifadd = W < 260 ? "<b>Se aggiungi il 10–20% di manitoba</b>, il pane viene più alto e con alveoli più grandi, senza perdere sapore." : "<b>Se aggiungi il 10–20% di integrale</b>, il pane viene più rustico e profumato, con la crosta più scura.";
+    } else if (f.c === "2"){
+      bread = "<b>Crosta</b> scura e rustica · <b>mollica</b> color nocciola · <b>sapore</b> di grano e nocciola, pieno · <b>sviluppo</b> medio, un po' più basso di una 0.";
+      ifadd = "<b>Se aggiungi il 20–30% di una tipo 0 forte o manitoba</b>, il pane viene più alto e leggero, con un sapore ancora rustico.";
+    } else if (f.c === "int"){
+      bread = "<b>Crosta</b> spessa e scura · <b>mollica</b> scura e più compatta · <b>sapore</b> pieno, leggermente amarognolo · <b>sviluppo</b> basso se usata da sola.";
+      ifadd = share > 0.5 ? "<b>Se aggiungi il 20–30% di manitoba</b>, il pane viene più alto e con la mollica più aperta, e il sapore integrale resta." : "<b>In questa quantità</b> dà sapore e colore senza abbassare troppo il pane. Fai l'autolisi.";
+    } else if (f.c === "sem" || f.c === "semint"){
+      bread = "<b>Crosta</b> dorata e croccante · <b>mollica</b> gialla, fitta e profumata · <b>sapore</b> intenso e dolce · <b>si conserva</b> più a lungo · <b>sviluppo</b> medio.";
+      ifadd = "<b>Se aggiungi il 30–50% di una tipo 0 forte</b>, il pane viene più alto e leggero, e resta giallo e profumato.";
+    } else if (f.c === "seg"){
+      bread = "<b>Crosta</b> scura · <b>mollica</b> scura, densa e umida · <b>sapore</b> acidulo e intenso · <b>si conserva</b> per giorni · <b>sviluppo</b> basso.";
+      ifadd = "<b>Se la tieni sotto il 20% con una tipo 0 forte</b>, il pane ha il sapore della segale ma resta alto.";
+    } else if (f.c === "farro" || f.c === "mono" || f.c === "antico"){
+      bread = "<b>Crosta</b> sottile e dorata · <b>mollica</b> morbida, poco alveolata · <b>sapore</b> dolce, di nocciola · <b>sviluppo</b> basso: l'impasto tende ad allargarsi.";
+      ifadd = "<b>Se aggiungi il 30% di una farina forte</b>, il pane viene più alto e regge tempi più lunghi; il sapore resta.";
+    } else if (f.c === "sg"){
+      bread = "Non forma glutine: <b>mollica</b> friabile, il pane non cresce.";
+      ifadd = "<b>Tienila sotto il 10–15%</b> del totale, solo per il sapore.";
+    }
+    return `<div class="fl"><div class="fl-h"><b>${esc(f.n)}</b><span>${esc(f.b)} · ${fmt(share*100)}%</span></div>
+      <div class="fl-chips"><span>Assorbe ${fmt(r.h.min)}–${fmt(r.h.max)}%</span><span>Proteine ${f.p!=null?fmt(p,1):"≈"+fmt(p,1)}%</span><span>W ${f.w ? (f.w[0]===f.w[1]? f.w[0] : f.w[0]+"–"+f.w[1]) : "≈"+fmt(W)}</span></div>
+      <p class="fl-bread">${bread}</p>${ifadd ? `<p class="fl-add">${ifadd}</p>` : ""}</div>`;
+  }).join("");
+  /* mollica: come ottenerla */
+  const CRUMBS = [["aperta","Alveoli grandi"],["regolare","Regolare"],["fitta","Fitta e morbida"]];
+  const cr = S.crumb || "regolare";
+  const strongMix = A.W >= 280;
+  const crumbTips = {
+    aperta: [
+      `<b>Più acqua:</b> sali di 3–5 punti rispetto al ${H}% (usa il cursore dell'acqua qui sopra), senza superare il massimo che la miscela regge.`,
+      strongMix ? `<b>Farina:</b> la tua miscela (W ≈ ${fmt(A.W)}) va bene.` : `<b>Farina:</b> la tua miscela è debole (W ≈ ${fmt(A.W)}): aggiungi 20–30% di manitoba, altrimenti gli alveoli grandi collassano.`,
+      `<b>Impasto e pieghe:</b> non impastare troppo; dai forza con coil fold delicati, che non sgonfiano.`,
+      `<b>Puntata completa:</b> chiudila quando l'impasto è cresciuto del 75% circa, con bolle grandi ai bordi e superficie che trema.`,
+      `<b>Formatura delicata:</b> non schiacciare le bolle; tensione in superficie, non dentro.`,
+      `<b>Frigo e forno:</b> l'appretto in frigo aiuta; inforna molto caldo (250 °C) con pentola chiusa o vapore per i primi 20 minuti.`
+    ],
+    regolare: [
+      `<b>Acqua:</b> resta sul ${H}% consigliato.`,
+      `<b>Puntata:</b> chiudila a +50% di volume, superficie bombata con qualche bolla.`,
+      `<b>Formatura:</b> tensione media, sgonfia solo le bolle più grandi in superficie.`,
+      `<b>Appretto:</b> pronto quando il dito infarinato lascia un buco che risale piano e non del tutto.`
+    ],
+    fitta: [
+      `<b>Meno acqua:</b> scendi di 3–5 punti rispetto al ${H}%.`,
+      `<b>Impasta di più:</b> fino a un impasto liscio ed elastico (velo sottile).`,
+      `<b>Puntata più corta:</b> chiudila a +40–50% di volume.`,
+      `<b>Sgonfia e forma stretto:</b> premi via le bolle prima di formare, forma ben stretto; per un pane in cassetta usa lo stampo.`,
+      `<b>Un filo d'olio (2–3%)</b> o un po' di latte rendono la mollica più morbida e regolare.`,
+      `<b>Forno</b> un po' più basso (220–230 °C): crosta più sottile e mollica uniforme.`
+    ]
+  }[cr];
   if (!teg && R.hAdj) why.push(`Il formato <b>${R.l.toLowerCase()}</b> sposta l'acqua di ${R.hAdj>0?"+":""}${R.hAdj} punti${R.hAdj>0?": un impasto allargato non deve reggersi da solo.":": la mollica deve essere fitta e morbida."}`);
   if (levelAdj && S.style !== "genovese") why.push(`Livello <b>${S.level}</b>: ${levelAdj<0?"tolgo qualche punto per un impasto più facile da gestire.":"aggiungo qualche punto, sei abituato a impasti umidi."}`);
 
@@ -1096,6 +1174,18 @@ function compute(){
     ${R.brine ? `<p class="small">${R.brine(A.F, total / (S.panN||1))}</p>` : ""}
   </section>
 
+  <section class="card" aria-labelledby="h-fl">
+    <div class="sect-h"><h3 id="h-fl">Le tue farine</h3><span class="muted small">come viene il pane</span></div>
+    <div class="fls">${flourCards}</div>
+  </section>
+
+  ${teg ? "" : `<section class="card" aria-labelledby="h-crumb">
+    <h3 id="h-crumb">Che mollica vuoi?</h3>
+    <div class="seg" id="seg-crumb">${CRUMBS.map(([k,l]) => `<button type="button" data-v="${k}" aria-pressed="${cr===k}">${l}</button>`).join("")}</div>
+    <ul class="crumb-tips">${crumbTips.map(t => `<li>${t}</li>`).join("")}</ul>
+    <button class="linkish" data-guide="coil" type="button">Come si fa il coil fold</button>
+  </section>`}
+
   ${notes.some(n => n[0] !== "good") ? `<section class="card" aria-labelledby="h-cons">
     <h3 id="h-cons">Consigli sulla tua miscela</h3>
     <div class="notes">${notes.filter(n => n[0] !== "good").map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>
@@ -1128,6 +1218,7 @@ function compute(){
   $("#in-hover").addEventListener("change", e => { S.hOver = +e.target.value; markEdited(); compute(); });
   const rh = $("#reset-h"); if (rh) rh.onclick = () => { S.hOver = null; save(); compute(); };
   $$("[data-guide]", out).forEach(b => b.onclick = () => openGuide(b.dataset.guide));
+  const sc = $("#seg-crumb"); if (sc) sc.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.crumb = b.dataset.v; save(); const y = scrollY; compute(); scrollTo(0, y); };
   save();
 }
 
