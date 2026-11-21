@@ -272,6 +272,11 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
 .fl-add{border-top:1px dashed var(--line);padding-top:6px}
 .crumb-tips{margin:12px 0 6px;padding-left:18px;display:grid;gap:6px;font-size:.92rem}
 #seg-crumb{margin-top:8px}
+.report{display:grid;gap:10px}
+.rep-now,.rep-if{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.rep-now li{background:var(--accent-soft);border-radius:10px;padding:9px 12px;font-size:.95rem}
+.rep-if li{border-left:3px solid var(--crust);padding:2px 0 2px 10px;font-size:.93rem}
+.rep-h{margin:6px 0 0;font-size:1rem}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1046,6 +1051,47 @@ function compute(){
       <div class="fl-chips"><span>Assorbe ${fmt(r.h.min)}–${fmt(r.h.max)}%</span><span>Proteine ${f.p!=null?fmt(p,1):"≈"+fmt(p,1)}%</span><span>W ${f.w ? (f.w[0]===f.w[1]? f.w[0] : f.w[0]+"–"+f.w[1]) : "≈"+fmt(W)}</span></div>
       <p class="fl-bread">${bread}</p>${ifadd ? `<p class="fl-add">${ifadd}</p>` : ""}</div>`;
   }).join("");
+  /* ===== resoconto della ricetta intera ===== */
+  const shS = x => A.sh(x);
+  const sStrong = A.rows.filter(r => r.f.c === "man" || (["00","0"].includes(r.f.c) && wOf(r.f) >= 340)).reduce((a,r) => a + r.k, 0);
+  const sWhite = shS(["00","0"]) , s1 = shS("1"), s2 = shS("2"), sInt = shS("int"), sSem = shS(["sem","semint"]), sSeg = shS("seg"), sAnt = shS(["farro","mono","antico"]), sSg = shS("sg");
+  const rustic = s2 + sInt + sSeg + sAnt*0.5 + s1*0.2;
+  const Wm = A.W, cold = P.mode === "fridge", starterLev = S.lev === "lm" || S.lev === "licoli";
+  const hRel = (H - lo) / Math.max(1, hi - lo);
+  /* sviluppo */
+  let rise = Wm >= 320 && A.wholeShare < 0.3 ? "alto" : Wm >= 260 && A.wholeShare < 0.4 ? "buono" : Wm >= 200 ? "medio" : "basso";
+  if (sSeg >= 0.4 || sSg >= 0.15) rise = "basso";
+  /* mollica */
+  const crumbCol = sSeg >= 0.3 ? "scura" : sInt >= 0.3 ? "scura e puntinata di crusca" : sSem >= 0.4 ? "gialla" : sInt + s2 >= 0.3 ? "color nocciola" : sSem >= 0.15 ? "giallina" : s1 + s2 + sInt >= 0.25 ? "avorio" : "bianca";
+  const holes = (A.wholeShare >= 0.5 || sSeg >= 0.3 || H < lo - 1) ? "fitti e regolari" : Wm < 200 ? "piccoli e regolari" : (H >= 74 && Wm >= 280 && hRel >= 0.5) ? "grandi e irregolari" : hRel >= 0.3 ? "medi, abbastanza aperti" : "medi e regolari";
+  /* crosta */
+  const crustCol = rustic >= 0.35 ? "scura e rustica" : rustic >= 0.12 || S.malt !== "no" ? "ben colorata" : sSem >= 0.15 ? "dorata e croccante" : "dorata";
+  const crustExtra = cold ? ", con le bollicine tipiche della notte in frigo" : "";
+  /* sapore */
+  const taste = [sSeg >= 0.2 ? "acidulo e intenso di segale" : rustic >= 0.35 ? "pieno e rustico, di grano e nocciola" : rustic >= 0.1 ? "di grano, più deciso di una 00" : sSem >= 0.15 ? "dolce e profumato di grano duro" : "delicato"];
+  if (cold) taste.push("più aromatico grazie alle ore in frigo");
+  if (starterLev) taste.push("con la leggera acidità del lievito madre");
+  const keeps = sSeg >= 0.2 || sSem >= 0.3 || starterLev || A.wholeShare >= 0.3 ? "si conserva bene per 3–4 giorni" : "è al meglio il primo giorno, poi tende a seccare";
+  const now = [
+    `<b>Sviluppo ${rise}</b>: ${rise==="alto"?"pane alto e leggero":rise==="buono"?"pane ben sviluppato":rise==="medio"?"pane di altezza media, si allarga un po'":"pane basso e compatto"} (forza media della miscela W ≈ ${fmt(Wm)}${A.wholeShare >= 0.05 ? `, ${fmt(A.wholeShare*100)}% di farine integrali` : ""}).`,
+    `<b>Mollica ${crumbCol}</b>, con alveoli ${holes} (acqua al ${H}%).`,
+    `<b>Crosta ${crustCol}</b>${crustExtra}.`,
+    `<b>Sapore</b> ${taste.join(", ")}; ${keeps}.`
+  ];
+  /* cosa succede se... */
+  const ifs = [];
+  if (sStrong < 0.1 && (Wm < 270 || (cold && Wm < 290))) ifs.push(`<b>Se aggiungi il 15–20% di manitoba</b> (al posto della stessa quantità delle altre farine): pane più alto, alveoli più aperti${cold?" e più sicurezza nella notte in frigo":""}.`);
+  if (sStrong > 0.5) ifs.push(`<b>Se sostituisci metà della manitoba con una tipo 1 o 2</b>: mollica più morbida e meno gommosa, più sapore, crosta più croccante; il pane resta alto.`);
+  if (rustic < 0.15 && sSeg < 0.1) ifs.push(`<b>Se sostituisci il 20% con una tipo 2 o integrale</b>: più sapore e profumo, crosta più scura e croccante, mollica nocciola, pane un po' più basso. Alza l'acqua di 2–3 punti.`);
+  if (A.wholeShare >= 0.4) ifs.push(`<b>Se scendi al 25–30% di integrale</b> (il resto tipo 0 o 1 forte): pane più alto e mollica più aperta, con ancora un buon sapore.`);
+  if (sSem < 0.1 && sSeg < 0.2) ifs.push(`<b>Se metti il 15–20% di semola rimacinata</b>: mollica giallina e profumata, crosta più croccante, si conserva un giorno in più. Fai l'autolisi.`);
+  if (!teg && H + 4 <= hi + 2 && Wm >= 260 && A.wholeShare < 0.5) ifs.push(`<b>Se alzi l'acqua al ${H+4}%</b>: alveoli più grandi e mollica più umida, ma impasto più appiccicoso da formare.`);
+  if (!cold && Wm >= 260) ifs.push(`<b>Se fai la notte in frigo</b> (scegli "Domani"): più aroma, crosta più colorata e con bollicine, e il pane freddo si taglia meglio.`);
+  if (S.malt === "no" && (cold || rustic < 0.1)) ifs.push(`<b>Se aggiungi malto diastasico</b> (0,2% in polvere o 0,5% estratto): crosta più dorata e lievitazione un po' più vivace.`);
+  /* miglioramenti: gli avvisi dell'app */
+  const fixes = notes.filter(n => n[0] === "bad" || n[0] === "warn" || n[0] === "info");
+  const flourDetail = flourCards;
+
   /* mollica: come ottenerla */
   const CRUMBS = [["aperta","Alveoli grandi"],["regolare","Regolare"],["fitta","Fitta e morbida"]];
   const cr = S.crumb || "regolare";
@@ -1174,9 +1220,12 @@ function compute(){
     ${R.brine ? `<p class="small">${R.brine(A.F, total / (S.panN||1))}</p>` : ""}
   </section>
 
-  <section class="card" aria-labelledby="h-fl">
-    <div class="sect-h"><h3 id="h-fl">Le tue farine</h3><span class="muted small">come viene il pane</span></div>
-    <div class="fls">${flourCards}</div>
+  <section class="card report" aria-labelledby="h-rep">
+    <h3 id="h-rep">Come verrà il tuo pane</h3>
+    <ul class="rep-now">${now.map(t => `<li>${t}</li>`).join("")}</ul>
+    ${ifs.length ? `<h4 class="rep-h">Come verrebbe se…</h4><ul class="rep-if">${ifs.slice(0,4).map(t => `<li>${t}</li>`).join("")}</ul>` : ""}
+    ${fixes.length ? `<h4 class="rep-h">Da migliorare</h4><div class="notes">${fixes.map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>` : ""}
+    <details class="more"><summary>Farina per farina</summary><div class="fls" style="margin-top:10px">${flourDetail}</div></details>
   </section>
 
   ${teg ? "" : `<section class="card" aria-labelledby="h-crumb">
@@ -1186,10 +1235,7 @@ function compute(){
     <button class="linkish" data-guide="coil" type="button">Come si fa il coil fold</button>
   </section>`}
 
-  ${notes.some(n => n[0] !== "good") ? `<section class="card" aria-labelledby="h-cons">
-    <h3 id="h-cons">Consigli sulla tua miscela</h3>
-    <div class="notes">${notes.filter(n => n[0] !== "good").map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>
-  </section>` : ""}
+
 
   <section class="card" aria-labelledby="h-prog">
     <div class="sect-h"><h3 id="h-prog">La tua giornata</h3><span class="muted small">a ${T} °C${P.mode==="fridge"?` + ${hm(P.fh)} in frigo`:""}</span></div>
