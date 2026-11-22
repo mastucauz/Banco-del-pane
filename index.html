@@ -70,8 +70,8 @@ main{max-width:760px;margin:0 auto;padding-top:18px;padding-bottom:calc(96px + e
 .flour-row{display:grid;grid-template-columns:1fr 96px 36px;gap:8px;align-items:center}
 .flour-row + .flour-row{margin-top:8px}
 .flour-row select,.flour-row input{min-width:0}
-select,input[type="text" data-num],input[type="text"],input[type="time"],input[type="search"],textarea{width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:10px 10px;min-height:44px}
-input[type="text" data-num]{font-family:var(--f-num);text-align:right}
+select,input[data-num],input[type="text"],input[type="time"],input[type="search"],textarea{width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:10px 10px;min-height:44px}
+input[data-num]{font-family:var(--f-num);text-align:right}
 .unit{position:relative}
 .unit input{padding-right:26px}
 .unit::after{content:attr(data-u);position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
