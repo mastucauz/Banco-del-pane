@@ -1268,9 +1268,24 @@ function compute(){
   steps.push({t, h:`Puntata · ${hm(P.bulk)} dal lievito`, p:`La <b>puntata</b> è la prima lievitazione e parte <b>quando metti il lievito</b>: il tempo d'impasto e gli eventuali riposi dopo l'impasto (anche in planetaria) sono già dentro queste ${hm(P.bulk)}. L'impasto riposa coperto nel contenitore, a ${T} °C. Segna il livello di partenza sul contenitore.`, g:"bulk", bulk:true, nomark:true});
   const bulkLeft = Math.max(30, P.bulk*60 - kneadMin);
   if (fold !== "none"){
-    const gap = (S.style==="teglia"||S.style==="lingue") ? 15 : 30;
-    const n = bulkLeft >= gap*4 + 30 ? 4 : bulkLeft >= gap*3 + 20 ? 3 : 2;
-    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i} di ${n}`, p: i===1 && H>=75 && !teg ? "Se vuoi, al posto della prima serie fai una laminazione." : "", g: fold, fold:true, bulk:true});
+    /* quante pieghe e ogni quanto: dipende dall'impasto (regola pratica mia, non una norma) */
+    const why = [];
+    let n = H >= 78 ? 4 : H >= 72 ? 3 : H >= 66 ? 2 : 1;
+    why.push(`acqua al ${H}%`);
+    if (A.W < 240){ n += 1; why.push(`farina debole (W ≈ ${fmt(A.W)}): serve più sostegno`); }
+    else if (A.W >= 330){ n -= 1; why.push(`farina forte (W ≈ ${fmt(A.W)}): la maglia si forma quasi da sola`); }
+    else why.push(`forza media (W ≈ ${fmt(A.W)})`);
+    if (A.wholeShare >= 0.3){ n -= 1; why.push(`${fmt(A.wholeShare*100)}% integrale: la crusca strappa la maglia, meglio poche pieghe delicate`); }
+    if (A.sh(["farro","mono","antico"]) >= 0.4){ n -= 1; why.push("farro o grani antichi: glutine fragile"); }
+    if (S.mixer === "planetaria" && !teg){ n -= 1; why.push("impasto in planetaria già incordato"); }
+    n = clamp(n, teg ? 3 : H >= 70 ? 2 : 1, 5);
+    /* le pieghe stanno nella prima metà abbondante della puntata, poi l'impasto deve crescere tranquillo */
+    const win = bulkLeft * (teg ? 0.6 : 0.55);
+    const gap = clamp(Math.round(win / n / 5) * 5, teg ? 15 : 20, teg ? 30 : 45);
+    while (n > 1 && n * gap > bulkLeft - 30) n--;
+    why.push(`puntata di ${hm(P.bulk)} a ${T} °C`);
+    const whyTxt = `<b>Perché ${n} ${n>1?"serie":"serie"}${n>1?` ogni ${gap} minuti`:` dopo ${gap} minuti`}:</b> ${why.join("; ")}. È una mia regola pratica; l'ultima parola è dell'impasto: se dopo una serie è già liscio, tiene la forma e resiste quando lo tiri, salta le successive; se è ancora molle e si allarga, fanne una in più.`;
+    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i} di ${n}`, p: i===1 ? whyTxt + (H>=75 && !teg ? " Se vuoi, al posto della prima serie fai una laminazione." : "") : "", g: fold, fold:true, bulk:true});
   }
   t = yeastT + Math.max(P.bulk*60, kneadMin + 30);
   const dough = total;
