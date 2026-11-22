@@ -353,6 +353,20 @@ details.g{border:0;border-radius:18px;box-shadow:0 1px 0 var(--line)}
 .plan-grid div:not(.key) b{font-size:1.1rem;letter-spacing:-.02em}
 .flour-row{grid-template-columns:minmax(0,1fr) 92px 40px}
 *{min-width:0}
+
+/* orari reali */
+.mk-info{background:var(--sunken);border-radius:14px;padding:10px 12px;font-size:.9rem;color:var(--muted);margin-bottom:14px}
+.mk-info b{color:var(--ink)}
+.mk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px}
+.mk-btn{border:0;border-radius:999px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:800;padding:10px 16px;min-height:44px;box-shadow:0 6px 14px -8px var(--accent)}
+.mk-btn:active{transform:scale(.97)}
+.mk.done{color:var(--good);font-weight:700;font-size:.92rem}
+.mk.done input[type="time"]{width:auto;min-height:38px;padding:4px 10px;font-family:var(--f-num);font-weight:700;color:var(--good);background:var(--good-bg)}
+.tl.done .b h4{color:var(--muted)}
+.tl.done .dot::before{background:var(--good);border-color:var(--good)}
+.tl.next .b h4{color:var(--accent)}
+.tl.next .t{color:var(--accent);font-weight:700}
+.tl.next .dot::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 5px var(--accent-soft)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -815,7 +829,8 @@ function clock(startStr, mins){
   return {s: String(Math.floor(mm/60)).padStart(2,"0") + ":" + String(mm%60).padStart(2,"0"), day};
 }
 const DAYW = ["oggi","domani","dopodomani","fra 3 giorni"];
-const at = mins => { const c = clock(S.start, mins); return `${c.s}${c.day ? " di " + (DAYW[c.day]||`+${c.day} g`) : ""}`; };
+const dayW = d => d < 0 ? (d === -1 ? "ieri" : `${-d} giorni fa`) : (DAYW[d] || `+${d} g`);
+const at = mins => { const c = clock(S.start, mins); return `${c.s}${c.day ? " di " + dayW(c.day) : ""}`; };
 const hm = h => { const t = Math.round(h*60/5)*5; const H = Math.floor(t/60), M = t%60; return H ? (M ? `${H} h ${M} min` : `${H} h`) : `${M} min`; };
 const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60+m; };
 
@@ -1027,10 +1042,10 @@ function compute(){
     <div class="plan-grid">
       <div class="key"><span>${yeastLev?LEVS.find(l=>l[0]===S.lev)[1]:"Lievito madre"}</span><b>${yeastLev ? fmt(yG,1)+" g" : fmt(starter)+" g"}</b></div>
       <div class="key"><span>Acqua a</span><b>${wT} °C</b></div>
-      <div><span>Inizia</span><b>${at(t0)}</b></div>
+      <div><span id="pb-start-l">Inizia</span><b id="pb-start">${at(t0)}</b></div>
       <div><span>Prima lievitazione</span><b>${hm(P.bulk)}</b></div>
       ${P.mode==="fridge" ? `<div><span>In frigo (${fridgeT()} °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
-      <div><span>Inforni</span><b>${at(endMin)}</b></div>
+      <div><span>Inforni</span><b id="pb-end">${at(endMin)}</b></div>
     </div>
     ${cmpBox}
     ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
@@ -1235,15 +1250,17 @@ function compute(){
   if (usesStarter) steps.push({t:-1, h:"Prima: rinfresca il lievito", p: S.lev==="licoli" ? "Licoli 1:1:1 (lievito:farina:acqua). Usalo quando è raddoppiato e pieno di bolle, di solito in 4–8 ore a 24–26 °C. Rinfrescalo in modo che sia al raddoppio all'ora d'inizio." : "Lievito madre solido 1:1:0,5. Usalo quando è raddoppiato, circa 3–4 ore a 26–28 °C.", g: S.lev==="licoli" ? "licoli" : "lm"});
   if (doAut){ steps.push({t, h:`Autolisi (${aut} min)`, p:`Mescola le farine con ${fmt(water - hold)} g di acqua a ${wT} °C${hold?`, tieni da parte ${hold} g`:""}. Copri e lascia riposare senza sale e senza lievito.`, g:"autolisi"}); t += aut; }
   steps.push({t, h:"Impasto", p:`${doAut?"Aggiungi":"Mescola farine, acqua a "+wT+" °C e"} ${levName}${extraTxt.find(x=>/malto|zucchero/.test(x)) ? " e "+extraTxt.filter(x=>/malto|zucchero/.test(x)).join(", ") : ""}. Lavora ${kneadMin} min, poi il sale (${fmt(salt,1)} g)${hold?" e a filo l'acqua tenuta da parte":""}${extraTxt.find(x=>/olio/.test(x)) ? ", per ultimo l'olio a filo ("+extraTxt.filter(x=>/olio/.test(x)).join(", ")+")" : ""}. ${S.mixer==="planetaria"?"Gancio a velocità bassa, poi media fino a incordatura.":S.style==="teglia"||S.style==="lingue"?"Con un cucchiaio o a mano: basta che sia omogeneo, la forza arriva con le pieghe.":"Slap & fold o in ciotola fino a pasta liscia."}`, g: S.mixer==="planetaria" ? "impasto" : "slap"});
+  const yeastT = t;
   t += kneadMin;
   const bulkStart = t;
-  steps.push({t, h:`Puntata · ${hm(P.bulk)}`, p:`La <b>puntata</b> è la prima lievitazione: l'impasto intero riposa coperto nel contenitore, a ${T} °C, e cresce. Segna il livello di partenza sul contenitore.`, g:"bulk"});
+  steps.push({t, h:`Puntata · ${hm(P.bulk)} dal lievito`, p:`La <b>puntata</b> è la prima lievitazione e parte <b>quando metti il lievito</b>: il tempo d'impasto e gli eventuali riposi dopo l'impasto (anche in planetaria) sono già dentro queste ${hm(P.bulk)}. L'impasto riposa coperto nel contenitore, a ${T} °C. Segna il livello di partenza sul contenitore.`, g:"bulk", bulk:true, nomark:true});
+  const bulkLeft = Math.max(30, P.bulk*60 - kneadMin);
   if (fold !== "none"){
     const gap = (S.style==="teglia"||S.style==="lingue") ? 15 : 30;
-    const n = P.bulk*60 >= gap*4 + 30 ? 4 : P.bulk*60 >= gap*3 + 20 ? 3 : 2;
-    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i} di ${n}`, p: i===1 && H>=75 && !teg ? "Se vuoi, al posto della prima serie fai una laminazione." : "", g: fold, fold:true});
+    const n = bulkLeft >= gap*4 + 30 ? 4 : bulkLeft >= gap*3 + 20 ? 3 : 2;
+    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i} di ${n}`, p: i===1 && H>=75 && !teg ? "Se vuoi, al posto della prima serie fai una laminazione." : "", g: fold, fold:true, bulk:true});
   }
-  t = bulkStart + P.bulk*60;
+  t = yeastT + Math.max(P.bulk*60, kneadMin + 30);
   const dough = total;
   if (teg){
     const nPieces = S.style === "lingue" ? Math.max(1, Math.round(dough / R.piece)) : S.panN;
@@ -1293,6 +1310,40 @@ function compute(){
     steps.push({t, h:"Raffreddamento su griglia", p:"Almeno 1 ora prima di tagliare: la mollica finisce di assestarsi mentre l'umidità esce.", g:null});
   }
   steps.sort((a,b) => a.t - b.t);
+
+  /* ===== orari reali: segni quando fai un passo (soprattutto quando metti il lievito) e tutto il resto si riallinea ===== */
+  const M0 = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
+  if (!S.marks || typeof S.marks !== "object") S.marks = {};
+  for (const k in S.marks) if (Date.now() - S.marks[k] > 4*86400000) delete S.marks[k];
+  const seenK = {};
+  steps.forEach(s => { if (s.t < 0 || s.nomark) return; let k = s.h === "Impasto" ? "lievito" : s.h.split(" · ")[0]; if (s.fold) k = "fold"; seenK[k] = (seenK[k]||0) + 1; s.k = seenK[k] > 1 ? k + seenK[k] : k; });
+  const markedIdx = steps.map((s,i) => s.k && S.marks[s.k] != null ? i : -1).filter(i => i >= 0);
+  steps.forEach((s,i) => {
+    if (s.t < 0) return;
+    let a = -1; for (const j of markedIdx) if (j <= i && (s.bulk || !steps[j].bulk)) a = j;
+    if (a < 0 && markedIdx.length) a = markedIdx[0];
+    s.real = a < 0 ? s.t : (S.marks[steps[a].k] - M0)/60000 + (s.t - steps[a].t);
+    s.done = S.marks[s.k] != null;
+  });
+  const lastMarked = markedIdx.length ? markedIdx[markedIdx.length-1] : -1;
+  const nextIdx = steps.findIndex((s,i) => i > lastMarked && s.t >= 0 && !s.done && !s.nomark && (lastMarked >= 0 || s.k === "lievito"));
+  const yS = steps.find(s => s.k === "lievito");
+  const hhmm = ms => { const d = new Date(ms); return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); };
+  if (markedIdx.length){
+    const first = steps.find(s => s.t >= 0), bake = steps.find(s => /cottura/i.test(s.h) && !/Accendi/.test(s.h));
+    const ps = $("#pb-start"), pe = $("#pb-end"), pl = $("#pb-start-l");
+    if (yS && yS.done){ if (pl) pl.textContent = "Lievito messo"; if (ps) ps.textContent = at(yS.real); }
+    else if (ps && first) ps.textContent = at(first.real);
+    if (pe && bake) pe.textContent = at(bake.real);
+  }
+  const markUI = (s, i) => {
+    if (s.t < 0 || s.nomark) return "";
+    if (s.done) return `<div class="mk done"><span>✓ ${s.k === "lievito" ? "Lievito messo" : "Fatto"} alle</span><input type="time" class="mk-time" data-k="${s.k}" value="${hhmm(S.marks[s.k])}" aria-label="Correggi l'orario"><button type="button" class="linkish mk-undo" data-k="${s.k}">annulla</button></div>`;
+    const lbl = s.k === "lievito" ? "Ho messo il lievito adesso" : "Fatto adesso";
+    if (i === nextIdx || (s.k === "lievito" && !(yS && yS.done))) return `<div class="mk"><button type="button" class="mk-btn" data-k="${s.k}">${lbl}</button></div>`;
+    if (lastMarked >= 0 && i > lastMarked) return `<div class="mk"><button type="button" class="linkish mk-small" data-k="${s.k}">segna come fatto</button></div>`;
+    return "";
+  };
 
   /* ===== render ===== */
   const pct = v => `${clamp((v-50)/50*100,0,100).toFixed(1)}%`;
@@ -1344,10 +1395,13 @@ function compute(){
 
   <section class="card" aria-labelledby="h-prog">
     <div class="sect-h"><h3 id="h-prog">La tua giornata</h3><span class="muted small">a ${T} °C${P.mode==="fridge"?` + ${hm(P.fh)} in frigo`:""}</span></div>
+    ${markedIdx.length
+      ? `<div class="mk-info">${yS && yS.done ? `Orari ricalcolati da quando hai messo il lievito, alle <b>${hhmm(S.marks.lievito)}</b>.` : "Orari ricalcolati dai passi che hai segnato."} Se un orario è sbagliato, toccalo e correggilo. <button type="button" class="linkish" id="mk-reset">Ricomincia</button></div>`
+      : `<div class="mk-info">Quando metti il lievito tocca <b>Ho messo il lievito adesso</b>: da quel momento parte la puntata e ricalcolo tutti gli orari. Puoi segnare anche gli altri passi quando li fai.</div>`}
     <ol class="timeline">
-      ${steps.map(s => { const c = s.t < 0 ? null : clock(S.start, s.t); return `<li class="tl ${s.cold?"cold":""} ${s.fold?"fold":""}">
-        <div class="t">${c ? c.s + (c.day ? `<small>${DAYW[c.day]||"+"+c.day+" g"}</small>` : "") : "prima"}</div><div class="dot"></div>
-        <div class="b"><h4>${s.h}</h4>${s.p?`<p>${s.p}</p>`:""}${s.g?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
+      ${steps.map((s,i) => { const c = s.t < 0 ? null : clock("00:00", s.real); return `<li class="tl ${s.cold?"cold":""} ${s.fold?"fold":""} ${s.done?"done":""} ${i===nextIdx?"next":""}">
+        <div class="t">${c ? c.s + (c.day ? `<small>${dayW(c.day)}</small>` : "") : "prima"}</div><div class="dot"></div>
+        <div class="b"><h4>${s.h}</h4>${s.p && !s.done?`<p>${s.p}</p>`:""}${markUI(s,i)}${s.g && !s.done?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
     </ol>
   </section>
 
@@ -1369,6 +1423,13 @@ function compute(){
   $("#in-hover").addEventListener("change", e => { S.hOver = +e.target.value; markEdited(); compute(); });
   const rh = $("#reset-h"); if (rh) rh.onclick = () => { S.hOver = null; save(); compute(); };
   $$("[data-guide]", out).forEach(b => b.onclick = () => openGuide(b.dataset.guide));
+  const keepY = fn => { const y = scrollY; fn(); save(); compute(); scrollTo(0, y); };
+  $$(".mk-btn,.mk-small", out).forEach(b => b.onclick = () => keepY(() => { S.marks[b.dataset.k] = Date.now(); }));
+  $$(".mk-undo", out).forEach(b => b.onclick = () => keepY(() => { delete S.marks[b.dataset.k]; }));
+  $$(".mk-time", out).forEach(el => el.onchange = () => { if (!el.value) return; const [h,m] = el.value.split(":").map(Number);
+    const d = new Date(); d.setHours(h, m, 0, 0); let ms = d.getTime(); if (ms > Date.now() + 10*60000) ms -= 86400000;
+    keepY(() => { S.marks[el.dataset.k] = ms; }); });
+  const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; });
   const sc = $("#seg-crumb"); if (sc) sc.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.crumb = b.dataset.v; save(); const y = scrollY; compute(); scrollTo(0, y); };
   save();
 }
