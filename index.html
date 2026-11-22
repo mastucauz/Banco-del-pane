@@ -1387,6 +1387,16 @@ function init(){
   renderRows(); renderFilters(); renderFlourList(); renderGuides(); compute();
   go(location.hash.slice(1) || "impasto", true);
 }
+
+/* tocchi un campo numerico o di testo: il valore è già selezionato, scrivi sopra senza cancellare */
+document.addEventListener("focusin", e => {
+  const el = e.target;
+  if (!el.matches || !el.matches('input[type="number"],input[type="text"],input[type="search"],input:not([type])')) return;
+  const sel = () => { try { el.select(); if (el.type !== "number") el.setSelectionRange(0, el.value.length); } catch (_) {} };
+  setTimeout(sel, 0);
+  el.addEventListener("mouseup", ev => ev.preventDefault(), {once:true});
+  el.addEventListener("touchend", () => setTimeout(sel, 0), {once:true});
+});
 /* ===== disegni ===== */
 const sv = (inner, label) => `<svg class="ill" viewBox="0 0 120 90" role="img" aria-label="${label}">${inner}</svg>`;
 const BOWL = `<ellipse class="bowl-in" cx="60" cy="40" rx="52" ry="9"/><path class="bowl-b" d="M8 40 Q10 86 60 86 Q110 86 112 40 A52 9 0 0 1 8 40Z"/>`;
