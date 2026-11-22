@@ -2,33 +2,36 @@
 <title>Banco del Pane di Mario Mingione</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Layout: app a schede con barra in basso (stile telefono), colonna unica max 720px, schede "banco" per i risultati */
 :root{
-  --bg:#F3F2ED; --surface:#FFFFFF; --sunken:#E9E7DF; --ink:#1E1C18; --muted:#66625A; --line:#DCD9CF;
-  --accent:#3E5A29; --accent-soft:#E3EAD6; --on-accent:#FFFFFF;
-  --crust:#A4531B; --crust-soft:#F6E6D8;
+  --bg:#F4ECDF; --surface:#FFFBF4; --sunken:#EFE3D0; --ink:#2A1C12; --muted:#7B6654; --line:#E5D5BE;
+  --accent:#A8461A; --accent-soft:#F7DFCB; --on-accent:#FFF8F0;
+  --crust:#C2621F; --crust-soft:#F9E4D2;
   --warn:#8A5300; --warn-bg:#FBEFD6; --bad:#9B2C1F; --bad-bg:#F9E1DC; --good:#2E6A39; --good-bg:#DFF0E1;
   --dough:#EEDFC2; --dough-line:#B49B6C; --dough-shade:#DCC69C; --bowl:#7D838C; --hand:#F2CFB0; --hand-line:#A87B5A;
-  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --hero-a:#3B2415; --hero-b:#8E3B14;
+  --f-display:"Fraunces", Georgia, "Times New Roman", serif;
   --f-body:"Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --f-num:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --r:14px;
+  --f-num:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:24px;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#13140F; --surface:#1C1D17; --sunken:#24251E; --ink:#ECEAE1; --muted:#A39F94; --line:#34352C;
-  --accent:#A7C47B; --accent-soft:#2A3320; --on-accent:#13140F;
-  --crust:#E79A5E; --crust-soft:#3A2617;
+  --bg:#140E0A; --surface:#1F1712; --sunken:#2A2019; --ink:#F4E8D9; --muted:#BBA48F; --line:#3A2B20;
+  --accent:#F08A4B; --accent-soft:#3B2316; --on-accent:#1A0F08;
+  --crust:#F2A066; --crust-soft:#3A2617;
   --warn:#EBB65B; --warn-bg:#2F2613; --bad:#F08A7A; --bad-bg:#371B17; --good:#8FD19B; --good-bg:#17301C;
   --dough:#5A4E3A; --dough-line:#A88F63; --dough-shade:#463C2C; --bowl:#8F959E; --hand:#C99B7A; --hand-line:#7A5640;
+  --hero-a:#2A180E; --hero-b:#7A3210;
   color-scheme:dark }}
 :root[data-theme="dark"]{
-  --bg:#13140F; --surface:#1C1D17; --sunken:#24251E; --ink:#ECEAE1; --muted:#A39F94; --line:#34352C;
-  --accent:#A7C47B; --accent-soft:#2A3320; --on-accent:#13140F;
-  --crust:#E79A5E; --crust-soft:#3A2617;
+  --bg:#140E0A; --surface:#1F1712; --sunken:#2A2019; --ink:#F4E8D9; --muted:#BBA48F; --line:#3A2B20;
+  --accent:#F08A4B; --accent-soft:#3B2316; --on-accent:#1A0F08;
+  --crust:#F2A066; --crust-soft:#3A2617;
   --warn:#EBB65B; --warn-bg:#2F2613; --bad:#F08A7A; --bad-bg:#371B17; --good:#8FD19B; --good-bg:#17301C;
   --dough:#5A4E3A; --dough-line:#A88F63; --dough-shade:#463C2C; --bowl:#8F959E; --hand:#C99B7A; --hand-line:#7A5640;
+  --hero-a:#2A180E; --hero-b:#7A3210;
   color-scheme:dark }
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
@@ -277,6 +280,79 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
 .rep-now li{background:var(--accent-soft);border-radius:10px;padding:9px 12px;font-size:.95rem}
 .rep-if li{border-left:3px solid var(--crust);padding:2px 0 2px 10px;font-size:.93rem}
 .rep-h{margin:6px 0 0;font-size:1rem}
+
+/* ===================== v3: nuova grafica "forno" ===================== */
+body{font-size:16.5px}
+h1,h2,h3{font-weight:700;letter-spacing:-.015em}
+h2{font-size:2rem;font-weight:800}
+h3{font-size:1.3rem}
+/* barra in alto: banda scura color crosta */
+body::before{background:var(--hero-a)}
+.top{background:linear-gradient(120deg,var(--hero-a),var(--hero-b));border-bottom:0;backdrop-filter:none;color:#FFF3E6}
+.top .brand{font-size:1.35rem}
+.top .brand small{color:#F3C9A6}
+/* titoli delle viste: grande, con riga calda */
+.view > header h2, .view > .head h2{position:relative;padding-bottom:6px}
+.lede{font-size:1.02rem}
+/* schede: niente bordo, ombra morbida, angoli grandi */
+.card{border:0;border-radius:var(--r);padding:20px 18px;box-shadow:0 1px 0 var(--line),0 12px 28px -18px rgba(70,35,10,.45)}
+/* passi numerati nella pagina Impasto */
+#v-impasto{counter-reset:step}
+#v-impasto > .card > h3:first-child,#v-impasto > .card > .sect-h:first-child h3{display:flex;align-items:center;gap:10px}
+#v-impasto > .card > h3:first-child::before,#v-impasto > .card > .sect-h:first-child h3::before{counter-increment:step;content:counter(step);display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-family:var(--f-body);font-size:.95rem;font-weight:800;flex:none}
+/* campi: tutti uguali su iPhone, niente stile di sistema */
+select,input[data-num],input[type="text"],input[type="search"],input[type="time"],textarea{-webkit-appearance:none;appearance:none;background:var(--sunken);border:1.5px solid transparent;border-radius:14px;min-height:48px;padding:10px 12px;color:var(--ink);width:100%;min-width:0}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 52%,calc(100% - 12px) 52%;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:32px;text-overflow:ellipsis}
+select:focus,input:focus,textarea:focus{border-color:var(--accent);outline:none;background-color:var(--surface)}
+input[data-num]{font-family:var(--f-num);font-weight:700;text-align:right;padding-right:30px}
+.unit{position:relative;min-width:0}
+/* righe farina: non escono più dal riquadro */
+.flour-row{grid-template-columns:minmax(0,1fr) 104px 40px}
+.flour-row > *{min-width:0}
+.icon-btn{border:0;background:var(--sunken);border-radius:12px;width:40px;height:48px}
+/* bottoni a pillola */
+.seg{gap:8px}
+.seg button{background:var(--surface);border:1.5px solid var(--line);font-weight:700;padding:9px 15px;min-height:42px;transition:transform .1s}
+.seg button:active{transform:scale(.97)}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:0 6px 14px -8px var(--accent)}
+.lev-seg button small{opacity:.8}
+.btn{border-style:dashed;border-color:var(--accent);color:var(--accent);background:transparent}
+.btn.primary{border-style:solid;color:var(--on-accent);background:var(--accent)}
+/* risultato: blocco scuro "forno" */
+.plan{background:linear-gradient(150deg,var(--hero-a) 0%,var(--hero-b) 100%);color:#FFF3E6;border-radius:22px;padding:18px;box-shadow:0 18px 40px -20px rgba(60,25,5,.8)}
+.plan-grid div{background:rgba(255,243,230,.09);border-radius:14px}
+.plan-grid div.key{background:#FFF3E6;color:var(--hero-b)}
+.plan-grid b{font-family:var(--f-num);font-weight:700}
+.plan-grid div.key b{font-size:1.75rem}
+.doses{background:rgba(255,243,230,.08)}
+.doses-row.on{background:#FFF3E6;color:var(--hero-b)}
+/* idratazione: numero enorme in serif */
+.hero{border:0;box-shadow:0 1px 0 var(--line),0 12px 28px -18px rgba(70,35,10,.45)}
+.big .num{font-family:var(--f-display);font-size:4rem;font-weight:800;color:var(--accent)}
+/* ricetta */
+.recipe td.g{font-family:var(--f-num);font-weight:700}
+.recipe tr.sum td{border-bottom:0;font-size:1.1rem}
+/* resoconto */
+.rep-now li{background:var(--sunken);border-left:4px solid var(--accent)}
+.rep-if li{border-left-color:var(--accent);background:transparent}
+/* barra in basso: isola flottante */
+.tabs{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding:4px;border:0;border-radius:24px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 30px -12px rgba(40,20,5,.55)}
+.tab{border-radius:18px;padding:8px 4px}
+.tab[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+main{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+/* dettagli e guide */
+details.g{border:0;border-radius:18px;box-shadow:0 1px 0 var(--line)}
+.more summary::before{background:var(--accent);color:var(--on-accent)}
+.view{grid-template-columns:minmax(0,1fr)}
+.view,.flist,.fcard,.card,.g-body,.report{grid-template-columns:minmax(0,1fr)}
+.view > *,.flist > *,.fcard > *{min-width:0}
+.fstats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fstat{min-width:0;overflow-wrap:anywhere}
+.fstat b{font-size:.95rem}
+.chip{white-space:normal}
+.plan-grid div:not(.key) b{font-size:1.1rem;letter-spacing:-.02em}
+.flour-row{grid-template-columns:minmax(0,1fr) 92px 40px}
+*{min-width:0}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
