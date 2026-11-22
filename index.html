@@ -1327,17 +1327,17 @@ function compute(){
   } else {
     steps.push({t, h:"Fine puntata: preformatura", p:"La <b>preformatura</b> è una prima forma tonda e morbida, che serve a far riposare l'impasto prima della forma vera. Il volume è cresciuto di circa metà (con lievito madre fino a +75%), la superficie è bombata, ai bordi si vedono bolle. Arrotonda sul banco poco infarinato. Riposo 20 min.", g:"preforma"});
     t += 20;
-    steps.push({t, h:"Formatura", p: S.style==="cassetta" ? "Forma un cilindro e mettilo nello stampo unto, chiusura sotto." : S.style==="ciabatta" ? "Senza formare: rovescia sul banco infarinato e taglia a rettangoli, spostali su carta forno." : `Forma ${S.pieces>1? S.pieces+" pezzi da circa "+fmt(total/S.pieces)+" g":"la pagnotta"} e mettila nel cestino infarinato, chiusura in alto.`, g: S.style==="filone" ? "filone" : "pirlatura"});
     t += 10;
+    steps.push({t, h:"Formatura e cestino", p: S.style==="cassetta" ? "Forma un cilindro e mettilo nello stampo unto, chiusura sotto." : S.style==="ciabatta" ? "Senza formare: rovescia sul banco infarinato e taglia a rettangoli, spostali su carta forno." : `Forma ${S.pieces>1? S.pieces+" pezzi da circa "+fmt(total/S.pieces)+" g":"la pagnotta"} e mettila nel cestino infarinato, chiusura in alto.`, g: S.style==="filone" ? "filone" : "pirlatura"});
     if (P.mode === "fridge"){
-      steps.push({t, h:`Appretto in frigo · ${hm(P.fh)}`, p:`L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Cestino coperto in frigo a ${fridgeT()} °C: il freddo la rallenta e l'impasto prende aroma. Si cuoce direttamente dal frigo: freddo si taglia meglio.`, g:"appretto", cold:true});
+      steps.push({t, h:`Appretto in frigo · ${hm(P.fh)}`, p:`L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Cestino coperto in frigo a ${fridgeT()} °C: il freddo la rallenta e l'impasto prende aroma. Si cuoce direttamente dal frigo: freddo si taglia meglio.`, g:"appretto", cold:true, nomark:true});
       t += P.fh*60;
       if (P.post > 0.1){
         steps.push({t, h:`Fuori dal frigo · ${hm(P.post)}`, p:"Cestino coperto a temperatura ambiente, finché premendo con un dito infarinato il buco risale lentamente e non del tutto.", g:"appretto"});
         t += P.post*60;
       }
     } else {
-      steps.push({t, h:`Appretto · ${hm(P.app)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Coperto a temperatura ambiente. È pronto quando, premendo con un dito infarinato, il buco risale lentamente e non del tutto.", g:"appretto"});
+      steps.push({t, h:`Appretto · ${hm(P.app)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Coperto a temperatura ambiente. È pronto quando, premendo con un dito infarinato, il buco risale lentamente e non del tutto.", g:"appretto", nomark:true});
       t += P.app*60;
     }
     steps.push({t: t-50, h:"Accendi il forno", p:"Al massimo (250 °C), con pentola di ghisa o pietra dentro, per almeno 45 minuti.", g:"cottura"});
@@ -1374,8 +1374,8 @@ function compute(){
   }
   const markUI = (s, i) => {
     if (s.t < 0 || s.nomark) return "";
-    if (s.done) return `<div class="mk done"><span>✓ ${s.k === "lievito" ? "Lievito messo" : "Fatto"} alle</span><input type="time" class="mk-time" data-k="${s.k}" value="${hhmm(S.marks[s.k])}" aria-label="Correggi l'orario"><button type="button" class="linkish mk-undo" data-k="${s.k}">annulla</button></div>`;
-    const lbl = s.k === "lievito" ? "Ho messo il lievito adesso" : "Fatto adesso";
+    if (s.done) return `<div class="mk done"><span>✓ ${s.k === "lievito" ? "Lievito messo" : s.k === "Formatura e cestino" ? "Nel cestino" : s.k === "Accendi il forno" ? "Forno acceso" : /cottura/i.test(s.k) ? "Infornato" : "Fatto"} alle</span><input type="time" class="mk-time" data-k="${s.k}" value="${hhmm(S.marks[s.k])}" aria-label="Correggi l'orario"><button type="button" class="linkish mk-undo" data-k="${s.k}">annulla</button></div>`;
+    const lbl = s.k === "lievito" ? "Ho messo il lievito adesso" : s.k === "Formatura e cestino" ? "Pane nel cestino adesso" : s.k === "Accendi il forno" ? "Forno acceso adesso" : /cottura/i.test(s.k) ? "Infornato adesso" : "Fatto adesso";
     if (i === nextIdx || (s.k === "lievito" && !(yS && yS.done))) return `<div class="mk"><button type="button" class="mk-btn" data-k="${s.k}">${lbl}</button></div>`;
     if (lastMarked >= 0 && i > lastMarked) return `<div class="mk"><button type="button" class="linkish mk-small" data-k="${s.k}">segna come fatto</button></div>`;
     return "";
