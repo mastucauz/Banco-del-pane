@@ -1080,16 +1080,43 @@ function compute(){
     `<b>Crosta ${crustCol}</b>${crustExtra}.`,
     `<b>Sapore</b> ${taste.join(", ")}; ${keeps}.`
   ];
-  /* cosa succede se... */
+  /* cosa succede se... (con farine e grammi concreti, sulla tua dose) */
   const ifs = [];
-  if (sStrong < 0.1 && (Wm < 270 || (cold && Wm < 290))) ifs.push(`<b>Se aggiungi il 15–20% di manitoba</b> (al posto della stessa quantità delle altre farine): pane più alto, alveoli più aperti${cold?" e più sicurezza nella notte in frigo":""}.`);
-  if (sStrong > 0.5) ifs.push(`<b>Se sostituisci metà della manitoba con una tipo 1 o 2</b>: mollica più morbida e meno gommosa, più sapore, crosta più croccante; il pane resta alto.`);
-  if (rustic < 0.15 && sSeg < 0.1) ifs.push(`<b>Se sostituisci il 20% con una tipo 2 o integrale</b>: più sapore e profumo, crosta più scura e croccante, mollica nocciola, pane un po' più basso. Alza l'acqua di 2–3 punti.`);
-  if (A.wholeShare >= 0.4) ifs.push(`<b>Se scendi al 25–30% di integrale</b> (il resto tipo 0 o 1 forte): pane più alto e mollica più aperta, con ancora un buon sapore.`);
-  if (sSem < 0.1 && sSeg < 0.2) ifs.push(`<b>Se metti il 15–20% di semola rimacinata</b>: mollica giallina e profumata, crosta più croccante, si conserva un giorno in più. Fai l'autolisi.`);
-  if (!teg && H + 4 <= hi + 2 && Wm >= 260 && A.wholeShare < 0.5) ifs.push(`<b>Se alzi l'acqua al ${H+4}%</b>: alveoli più grandi e mollica più umida, ma impasto più appiccicoso da formare.`);
-  if (!cold && Wm >= 260) ifs.push(`<b>Se fai la notte in frigo</b> (scegli "Domani"): più aroma, crosta più colorata e con bollicine, e il pane freddo si taglia meglio.`);
-  if (S.malt === "no" && (cold || rustic < 0.1)) ifs.push(`<b>Se aggiungi malto diastasico</b> (0,2% in polvere o 0,5% estratto): crosta più dorata e lievitazione un po' più vivace.`);
+  const g5 = x => Math.max(5, Math.round(x / 5) * 5);
+  const fname = f => `${esc(f.n)}${f.b && f.b !== "Generica" ? " di " + esc(f.b) : ""}`;
+  const pick = test => { const rr = A.rows.filter(r => test(r.f)).sort((a,b) => b.g - a.g); return rr[0] || null; };
+  const biggest = (test = () => true) => pick(test) || [...A.rows].sort((a,b) => b.g - a.g)[0];
+  const sugg = id => { const f = flourById(id); return f ? `${esc(f.n)} di ${esc(f.b)}` : ""; };
+  const isStrong = f => f.c === "man" || (["00","0"].includes(f.c) && wOf(f) >= 340);
+  const swap = (from, g, toTxt) => `togli <b>${g} g</b> di ${fname(from.f)} e metti <b>${g} g</b> di ${toTxt}`;
+  if (sStrong < 0.1 && (Wm < 270 || (cold && Wm < 290))){
+    const g = g5(A.F * 0.15), from = biggest(f => !isStrong(f));
+    if (from) ifs.push(`<b>Più forza:</b> ${swap(from, Math.min(g, g5(from.g)), "manitoba (es. " + sugg("cap-manitoba") + ")")}. Il pane viene più alto, con alveoli più aperti${cold ? " e regge meglio la notte in frigo" : ""}.`);
+  }
+  if (sStrong > 0.5){
+    const from = pick(isStrong), g = g5(from.g / 2);
+    ifs.push(`<b>Mollica più morbida:</b> ${swap(from, g, "tipo 1 (es. " + sugg("petra-1111") + ")")}. Mollica meno gommosa, più sapore, crosta più croccante; il pane resta alto.`);
+  }
+  if (rustic < 0.15 && sSeg < 0.1){
+    const from = biggest(f => ["00","0"].includes(f.c) && !isStrong(f)) || biggest();
+    const g = Math.min(g5(A.F * 0.2), g5(from.g)), w = g5(A.F * 0.025);
+    ifs.push(`<b>Più sapore:</b> ${swap(from, g, "integrale (es. " + sugg("cap-integrale") + ") oppure tipo 2 (es. " + sugg("marino-buratto") + ")")}, e aggiungi <b>${w} g</b> d'acqua (${fmt(water + w)} g in tutto). Crosta più scura e croccante, mollica nocciola, pane un po' più basso.`);
+  }
+  if (A.wholeShare >= 0.4){
+    const from = pick(f => f.c === "int" || f.c === "semint" || f.c === "seg") || biggest();
+    const g = Math.min(g5(from.g), g5((A.wholeShare - 0.3) * A.F));
+    ifs.push(`<b>Pane più alto:</b> ${swap(from, g, "tipo 0 forte (es. " + sugg("cap-aria") + ")")}. Mollica più aperta, con ancora un buon sapore.`);
+  }
+  if (sSem < 0.1 && sSeg < 0.2){
+    const from = biggest(f => !isStrong(f)), g = Math.min(g5(A.F * 0.15), g5(from.g));
+    ifs.push(`<b>Mollica gialla e profumata:</b> ${swap(from, g, "semola rimacinata (es. " + sugg("cap-semola") + ")")}. Crosta più croccante e il pane si conserva un giorno in più. Fai l'autolisi.`);
+  }
+  if (!teg && H + 4 <= hi + 2 && Wm >= 260 && A.wholeShare < 0.5){
+    const w = g5(A.F * 0.04);
+    ifs.push(`<b>Alveoli più grandi:</b> porta l'acqua da ${fmt(water)} g a <b>${fmt(water + w)} g</b> (+${w} g, ${H + 4}%). Mollica più umida e aperta, ma impasto più appiccicoso da formare.`);
+  }
+  if (!cold && Wm >= 260) ifs.push(`<b>Più aroma:</b> scegli "Domani" (notte in frigo) e la dose di lievito si ricalcola da sola. Crosta più colorata e con bollicine, e il pane freddo si taglia meglio.`);
+  if (S.malt === "no" && (cold || rustic < 0.1)) ifs.push(`<b>Crosta più dorata:</b> aggiungi <b>${fmt(A.F * 0.002, 1)} g</b> di malto diastasico in polvere, oppure <b>${fmt(A.F * 0.005, 1)} g</b> di estratto liquido. Anche la lievitazione è un po' più vivace.`);
   /* miglioramenti: gli avvisi dell'app */
   const fixes = notes.filter(n => n[0] === "bad" || n[0] === "warn" || n[0] === "info");
   const flourDetail = flourCards;
@@ -1225,7 +1252,7 @@ function compute(){
   <section class="card report" aria-labelledby="h-rep">
     <h3 id="h-rep">Come verrà il tuo pane</h3>
     <ul class="rep-now">${now.map(t => `<li>${t}</li>`).join("")}</ul>
-    ${ifs.length ? `<h4 class="rep-h">Come verrebbe se…</h4><ul class="rep-if">${ifs.slice(0,4).map(t => `<li>${t}</li>`).join("")}</ul>` : ""}
+    ${ifs.length ? `<h4 class="rep-h">Come potresti cambiarlo</h4><ul class="rep-if">${ifs.slice(0,4).map(t => `<li>${t}</li>`).join("")}</ul>` : ""}
     ${fixes.length ? `<h4 class="rep-h">Da migliorare</h4><div class="notes">${fixes.map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("")}</div>` : ""}
     <details class="more"><summary>Farina per farina</summary><div class="fls" style="margin-top:10px">${flourDetail}</div></details>
   </section>
