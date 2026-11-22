@@ -1350,6 +1350,7 @@ function compute(){
   /* ===== orari reali: segni quando fai un passo (soprattutto quando metti il lievito) e tutto il resto si riallinea ===== */
   const M0 = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
   if (!S.marks || typeof S.marks !== "object") S.marks = {};
+  if (S.marks.Formatura != null && S.marks["Formatura e cestino"] == null){ S.marks["Formatura e cestino"] = S.marks.Formatura; delete S.marks.Formatura; }
   for (const k in S.marks) if (Date.now() - S.marks[k] > 4*86400000) delete S.marks[k];
   const seenK = {};
   steps.forEach(s => { if (s.t < 0 || s.nomark) return; let k = s.h === "Impasto" ? "lievito" : s.h.split(" · ")[0]; if (s.fold) k = "fold"; seenK[k] = (seenK[k]||0) + 1; s.k = seenK[k] > 1 ? k + seenK[k] : k; });
