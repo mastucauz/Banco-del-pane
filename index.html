@@ -378,6 +378,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   #rotate small{font-family:var(--f-body);font-size:.95rem;font-weight:500;opacity:.85}
   body{overflow:hidden}
 }
+
+.fold-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px}
+.chipbtn{border:1.5px dashed var(--accent);background:transparent;color:var(--accent);border-radius:999px;font:inherit;font-weight:700;font-size:.9rem;padding:8px 14px;min-height:40px}
+.chipbtn:active{transform:scale(.97)}
 </style>
 <div id="rotate" aria-live="polite"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Gira il telefono in verticale<small>Il Banco del Pane funziona solo in verticale.</small></div></div>
 
@@ -1281,11 +1285,16 @@ function compute(){
     n = clamp(n, teg ? 3 : H >= 70 ? 2 : 1, 5);
     /* le pieghe stanno nella prima metà abbondante della puntata, poi l'impasto deve crescere tranquillo */
     const win = bulkLeft * (teg ? 0.6 : 0.55);
-    const gap = clamp(Math.round(win / n / 5) * 5, teg ? 15 : 20, teg ? 30 : 45);
+    let gap = clamp(Math.round(win / n / 5) * 5, teg ? 15 : 20, teg ? 30 : 45);
     while (n > 1 && n * gap > bulkLeft - 30) n--;
+    const nRec = n;
+    /* pieghe in più (o in meno) decise da te: le consigliate restano un suggerimento */
+    const adj = S.foldAdj || 0;
+    n = clamp(nRec + adj, 1, 10);
+    if (n * gap > bulkLeft - 20) gap = Math.max(10, Math.floor((bulkLeft - 20) / n / 5) * 5);
     why.push(`puntata di ${hm(P.bulk)} a ${T} °C`);
-    const whyTxt = `<b>Perché ${n} ${n>1?"serie":"serie"}${n>1?` ogni ${gap} minuti`:` dopo ${gap} minuti`}:</b> ${why.join("; ")}. È una mia regola pratica; l'ultima parola è dell'impasto: se dopo una serie è già liscio, tiene la forma e resiste quando lo tiri, salta le successive; se è ancora molle e si allarga, fanne una in più.`;
-    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i} di ${n}`, p: i===1 ? whyTxt + (H>=75 && !teg ? " Se vuoi, al posto della prima serie fai una laminazione." : "") : "", g: fold, fold:true, bulk:true});
+    const whyTxt = `<b>Ne consiglio ${nRec}${nRec>1?" ogni "+gap+" minuti":""}, perché:</b> ${why.join("; ")}. È una mia regola pratica; l'ultima parola è dell'impasto: se dopo una serie è già liscio, tiene la forma e resiste quando lo tiri, salta le successive; se è ancora molle e si allarga, fanne una in più.`;
+    for (let i=1; i<=n; i++) steps.push({t: bulkStart + i*gap, h:`${FOLD_NAMES[fold]} · serie ${i}${i > nRec ? " (in più)" : ` di ${nRec}`}`, foldCtl: i === n ? {n, nRec} : null, p: i===1 ? whyTxt + (H>=75 && !teg ? " Se vuoi, al posto della prima serie fai una laminazione." : "") : "", g: fold, fold:true, bulk:true});
   }
   t = yeastT + Math.max(P.bulk*60, kneadMin + 30);
   const dough = total;
@@ -1428,7 +1437,7 @@ function compute(){
     <ol class="timeline">
       ${steps.map((s,i) => { const c = s.t < 0 ? null : clock("00:00", s.real); return `<li class="tl ${s.cold?"cold":""} ${s.fold?"fold":""} ${s.done?"done":""} ${i===nextIdx?"next":""}">
         <div class="t">${c ? c.s + (c.day ? `<small>${dayW(c.day)}</small>` : "") : "prima"}</div><div class="dot"></div>
-        <div class="b"><h4>${s.h}</h4>${s.p && !s.done?`<p>${s.p}</p>`:""}${markUI(s,i)}${s.g && !s.done?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
+        <div class="b"><h4>${s.h}</h4>${s.p && !s.done?`<p>${s.p}</p>`:""}${markUI(s,i)}${s.foldCtl ? `<div class="fold-ctl"><button type="button" class="chipbtn" id="fold-add">+ Aggiungi una piega</button>${s.foldCtl.n > 1 ? `<button type="button" class="chipbtn" id="fold-del">− Togli l'ultima</button>` : ""}${s.foldCtl.n !== s.foldCtl.nRec ? `<button type="button" class="linkish" id="fold-rec">torna a ${s.foldCtl.nRec}</button>` : ""}</div>` : ""}${s.g && !s.done?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
     </ol>
   </section>
 
@@ -1456,7 +1465,10 @@ function compute(){
   $$(".mk-time", out).forEach(el => el.onchange = () => { if (!el.value) return; const [h,m] = el.value.split(":").map(Number);
     const d = new Date(); d.setHours(h, m, 0, 0); let ms = d.getTime(); if (ms > Date.now() + 10*60000) ms -= 86400000;
     keepY(() => { S.marks[el.dataset.k] = ms; }); });
-  const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; });
+  const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; S.foldAdj = 0; });
+  const fa = $("#fold-add"); if (fa) fa.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) + 1; });
+  const fd = $("#fold-del"); if (fd) fd.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) - 1; });
+  const frc = $("#fold-rec"); if (frc) frc.onclick = () => keepY(() => { S.foldAdj = 0; });
   const sc = $("#seg-crumb"); if (sc) sc.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.crumb = b.dataset.v; save(); const y = scrollY; compute(); scrollTo(0, y); };
   save();
 }
