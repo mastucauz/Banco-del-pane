@@ -70,8 +70,8 @@ main{max-width:760px;margin:0 auto;padding-top:18px;padding-bottom:calc(96px + e
 .flour-row{display:grid;grid-template-columns:1fr 96px 36px;gap:8px;align-items:center}
 .flour-row + .flour-row{margin-top:8px}
 .flour-row select,.flour-row input{min-width:0}
-select,input[type="number"],input[type="text"],input[type="time"],input[type="search"],textarea{width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:10px 10px;min-height:44px}
-input[type="number"]{font-family:var(--f-num);text-align:right}
+select,input[type="text" data-num],input[type="text"],input[type="time"],input[type="search"],textarea{width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:10px 10px;min-height:44px}
+input[type="text" data-num]{font-family:var(--f-num);text-align:right}
 .unit{position:relative}
 .unit input{padding-right:26px}
 .unit::after{content:attr(data-u);position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
@@ -328,22 +328,22 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
       <div class="field"><span class="lbl">Lievito</span><div class="seg lev-seg" id="seg-lev"></div></div>
       <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
       <div class="nums">
-        <div class="field"><label for="in-temp">Cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="number" min="12" max="34" step="1" inputmode="numeric"></div></div>
-        <div class="field" id="fridge-field"><label for="in-fridge">Frigo</label><div class="unit" data-u="°C"><input id="in-fridge" type="number" min="1" max="10" step="1" inputmode="numeric"></div></div>
+        <div class="field"><label for="in-temp">Cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="text" data-num min="12" max="34" step="1" inputmode="decimal"></div></div>
+        <div class="field" id="fridge-field"><label for="in-fridge">Frigo</label><div class="unit" data-u="°C"><input id="in-fridge" type="text" data-num min="1" max="10" step="1" inputmode="decimal"></div></div>
       </div>
       <details class="more">
         <summary>Altre impostazioni<span class="muted small" id="more-sum"></span></summary>
         <div class="more-body">
           <div class="field" id="own-field"><label for="in-own">Uso già una mia dose di lievito (g)</label><div class="unit" data-u="g"><input id="in-own" type="text" inputmode="decimal" autocomplete="off"></div></div>
           <div class="nums">
-            <div class="field"><label for="in-ftemp">Farina</label><div class="unit" data-u="°C"><input id="in-ftemp" type="number" min="2" max="34" step="1" inputmode="numeric"></div></div>
-            <div class="field"><label for="in-salt">Sale</label><div class="unit" data-u="%"><input id="in-salt" type="number" min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
-            <div class="field" id="pieces-field"><label for="in-pieces">Pezzi</label><input id="in-pieces" type="number" min="1" max="30" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="in-ftemp">Farina</label><div class="unit" data-u="°C"><input id="in-ftemp" type="text" data-num min="2" max="34" step="1" inputmode="decimal"></div></div>
+            <div class="field"><label for="in-salt">Sale</label><div class="unit" data-u="%"><input id="in-salt" type="text" data-num min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
+            <div class="field" id="pieces-field"><label for="in-pieces">Pezzi</label><input id="in-pieces" type="text" data-num min="1" max="30" step="1" inputmode="decimal"></div>
           </div>
           <div class="field"><span class="lbl">Impasto</span><div class="seg" id="seg-mixer"></div></div>
           <div class="field"><span class="lbl">Malto d'orzo</span><div class="seg" id="seg-malt"></div></div>
           <div class="nums" id="malt-box" hidden>
-            <div class="field"><label for="in-malt">Malto</label><div class="unit" data-u="%"><input id="in-malt" type="number" min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
+            <div class="field"><label for="in-malt">Malto</label><div class="unit" data-u="%"><input id="in-malt" type="text" data-num min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
           </div>
         </div>
       </details>
@@ -370,8 +370,8 @@ table.cmp th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;colo
         <div class="field"><label for="c-name">Nome</label><input id="c-name" type="text" required placeholder="es. Tipo 1 macinata a pietra"></div>
         <div class="field"><label for="c-brand">Marca</label><input id="c-brand" type="text" placeholder="es. Mulino del paese"></div>
         <div class="field"><label for="c-cat">Tipo di farina</label><select id="c-cat"></select></div>
-        <div class="field"><label for="c-prot">Proteine</label><div class="unit" data-u="%"><input id="c-prot" type="number" min="4" max="20" step="0.1" required inputmode="decimal"></div></div>
-        <div class="field"><label for="c-w">W (se lo sai)</label><input id="c-w" type="number" min="50" max="480" step="10" inputmode="numeric" placeholder="facoltativo"></div>
+        <div class="field"><label for="c-prot">Proteine</label><div class="unit" data-u="%"><input id="c-prot" type="text" data-num min="4" max="20" step="0.1" required inputmode="decimal"></div></div>
+        <div class="field"><label for="c-w">W (se lo sai)</label><input id="c-w" type="text" data-num min="50" max="480" step="10" inputmode="decimal" placeholder="facoltativo"></div>
         <div class="field" style="grid-column:1/-1"><label for="c-note">Note</label><input id="c-note" type="text" placeholder="es. macinata a pietra, bio"></div>
         <div class="btn-row" style="grid-column:1/-1">
           <button class="btn primary" type="submit" id="c-save">Salva farina</button>
@@ -683,7 +683,7 @@ function renderRows(){
   $("#flour-rows").innerHTML = S.rows.map((r,i) => `
     <div class="flour-row">
       <select aria-label="Farina ${i+1}" data-i="${i}" class="r-f">${flourOptions(r.id)}</select>
-      <div class="unit" data-u="g"><input type="number" class="r-g" data-i="${i}" min="0" step="10" inputmode="numeric" value="${r.g}" aria-label="Grammi farina ${i+1}"></div>
+      <div class="unit" data-u="g"><input type="text" data-num class="r-g" data-i="${i}" min="0" step="10" inputmode="decimal" value="${r.g}" aria-label="Grammi farina ${i+1}"></div>
       <button class="icon-btn r-x" data-i="${i}" type="button" aria-label="Togli farina" ${S.rows.length<2?"disabled":""}>${ICON.x}</button>
     </div>`).join("");
 }
@@ -693,7 +693,7 @@ $("#flour-rows").addEventListener("change", e => {
 });
 $("#flour-rows").addEventListener("input", e => {
   const i = +e.target.dataset.i;
-  if (e.target.classList.contains("r-g")) { S.rows[i].g = Math.max(0, +e.target.value || 0); markEdited(); compute(); }
+  if (e.target.classList.contains("r-g")) { S.rows[i].g = Math.max(0, numIn(e.target.value) || 0); markEdited(); compute(); }
 });
 $("#flour-rows").addEventListener("click", e => {
   const b = e.target.closest(".r-x"); if (!b || S.rows.length < 2) return;
@@ -702,14 +702,16 @@ $("#flour-rows").addEventListener("click", e => {
 $("#add-flour").onclick = () => { S.rows.push({id:"cap-manitoba", g:100}); markEdited(); renderRows(); compute(); };
 $("#go-custom").onclick = () => { go("farine"); setTimeout(()=>$("#custom-card").scrollIntoView({behavior:"smooth"}), 50); $("#c-name").focus({preventScroll:true}); };
 
+const numIn = v => parseFloat(String(v).trim().replace(",", "."));
+const showIn = v => v == null || v === "" ? "" : String(v).replace(".", ",");
 function bindNum(id, key, isFloat){
-  const el = $(id); el.value = S[key];
-  el.addEventListener("input", () => { const v = isFloat ? parseFloat(el.value) : parseInt(el.value,10); if (!isNaN(v)) { S[key] = v; markEdited(); compute(); } });
+  const el = $(id); el.value = showIn(S[key]);
+  el.addEventListener("input", () => { const v = isFloat ? numIn(el.value) : Math.round(numIn(el.value)); if (!isNaN(v)) { S[key] = v; markEdited(); compute(); } });
 }
 bindNum("#in-temp","temp"); bindNum("#in-fridge","fridgeT");
-$("#in-own").value = S.myDose ?? ""; $("#in-own").addEventListener("input", e => { const v = parseFloat(String(e.target.value).replace(",", ".")); S.myDose = isNaN(v) || v <= 0 ? null : v; markEdited(); compute(); }); bindNum("#in-pieces","pieces"); bindNum("#in-salt","salt",true);
-$("#in-ftemp").value = S.ftemp ?? ""; $("#in-ftemp").addEventListener("input", e => { const v = parseInt(e.target.value,10); S.ftemp = isNaN(v) ? null : v; markEdited(); compute(); });
-$("#in-malt").addEventListener("input", e => { const v = parseFloat(e.target.value); if (!isNaN(v)) { S.maltPct = v; markEdited(); compute(); } });
+$("#in-own").value = showIn(S.myDose); $("#in-own").addEventListener("input", e => { const v = numIn(e.target.value); S.myDose = isNaN(v) || v <= 0 ? null : v; markEdited(); compute(); }); bindNum("#in-pieces","pieces"); bindNum("#in-salt","salt",true);
+$("#in-ftemp").value = showIn(S.ftemp); $("#in-ftemp").addEventListener("input", e => { const v = Math.round(numIn(e.target.value)); S.ftemp = isNaN(v) ? null : v; markEdited(); compute(); });
+$("#in-malt").addEventListener("input", e => { const v = numIn(e.target.value); if (!isNaN(v)) { S.maltPct = v; markEdited(); compute(); } });
 function nowStart(){ const d = new Date(); let m = d.getHours()*60 + d.getMinutes(); m = Math.ceil(m/15)*15; return String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
 
 /* ===== calcolo ===== */
@@ -849,15 +851,15 @@ function renderRecipeInfo(A, H, R){
     <p>${R.desc}</p>
     ${S.style === "lingue" ? `<p>Con ${fmt(A.F)} g di farina vengono circa ${Math.max(1, Math.round(A.F*factor/R.piece))} lingue da ${R.piece} g.</p>` : `
     <div class="row3">
-      <div class="field"><label for="pan-w">Teglia cm</label><input id="pan-w" type="number" min="10" max="80" inputmode="numeric" value="${S.panW}"></div>
-      <div class="field"><label for="pan-l">× cm</label><input id="pan-l" type="number" min="10" max="80" inputmode="numeric" value="${S.panL}"></div>
-      <div class="field"><label for="pan-n">Teglie</label><input id="pan-n" type="number" min="1" max="10" inputmode="numeric" value="${S.panN}"></div>
+      <div class="field"><label for="pan-w">Teglia cm</label><input id="pan-w" type="text" data-num min="10" max="80" inputmode="decimal" value="${S.panW}"></div>
+      <div class="field"><label for="pan-l">× cm</label><input id="pan-l" type="text" data-num min="10" max="80" inputmode="decimal" value="${S.panL}"></div>
+      <div class="field"><label for="pan-n">Teglie</label><input id="pan-n" type="text" data-num min="1" max="10" inputmode="decimal" value="${S.panN}"></div>
     </div>
     <p>Per ${S.panN > 1 ? S.panN + " teglie" : "una teglia"} ${S.panW}×${S.panL} servono circa <b class="num">${fmt(doughNeed)} g</b> di impasto, cioè <b class="num">${fmt(flourNeed)} g</b> di farina. Ora ne hai ${fmt(A.F)} g.</p>
     ${Math.abs(flourNeed - A.F) > 15 ? `<div><button class="btn primary" type="button" id="fit-pan">Adatta le farine alla teglia</button></div>` : ""}`}
     ${R.src ? `<p class="small">Fonte della ricetta: <a href="${SOURCES[R.src].u}" target="_blank" rel="noopener">${esc(SOURCES[R.src].t)}</a></p>` : ""}
   </div>`;
-  ["pan-w","pan-l","pan-n"].forEach(id => { const el = $("#"+id); if (!el) return; el.addEventListener("change", () => { const k = {"pan-w":"panW","pan-l":"panL","pan-n":"panN"}[id]; S[k] = Math.max(1, +el.value || 1); markEdited(); compute(); }); });
+  ["pan-w","pan-l","pan-n"].forEach(id => { const el = $("#"+id); if (!el) return; el.addEventListener("change", () => { const k = {"pan-w":"panW","pan-l":"panL","pan-n":"panN"}[id]; S[k] = Math.max(1, numIn(el.value) || 1); markEdited(); compute(); }); });
   const fit = $("#fit-pan");
   if (fit) fit.onclick = () => { const k = flourNeed / A.F; S.rows.forEach(r => r.g = Math.round(r.g * k / 5) * 5); markEdited(); renderRows(); compute(); toast("Farine adattate alla teglia"); };
 }
@@ -917,7 +919,7 @@ function compute(){
   const yG = yeastLev ? levDose(S.lev, P, A.F) : 0;
   const extras = teg && R.extra ? R.extra(A.F).filter(x => !(S.malt !== "no" && /[Mm]alto/.test(x[0]))) : [];
   const maltPct = S.malt === "no" ? 0 : (S.maltPct ?? MALT_DEF[S.malt]);
-  $("#malt-box").hidden = S.malt === "no"; if (S.malt !== "no" && document.activeElement !== $("#in-malt")) $("#in-malt").value = maltPct;
+  $("#malt-box").hidden = S.malt === "no"; if (S.malt !== "no" && document.activeElement !== $("#in-malt")) $("#in-malt").value = showIn(maltPct);
   if (maltPct) extras.push([MALT_NAME[S.malt], A.F*maltPct/100, fmt(maltPct,1)+"%"]);
   const extraIn = extras.filter(x => !/superficie|teglia/.test(x[0])).reduce((a,x) => a + x[1], 0);
   const total = A.F + water + salt + yG + starter + extraIn;
@@ -1332,7 +1334,7 @@ function fillForm(f){
   editing = f.mine ? f.id : null;
   $("#c-name").value = f.mine ? f.n : f.n + " (corretta)";
   $("#c-brand").value = f.b === "Generica" ? "" : f.b;
-  $("#c-cat").value = f.c; $("#c-prot").value = f.p ?? "";
+  $("#c-cat").value = f.c; $("#c-prot").value = showIn(f.p);
   $("#c-w").value = f.w ? Math.round((f.w[0]+f.w[1])/2) : "";
   $("#c-note").value = f.note || "";
   $("#custom-title").textContent = f.mine ? "Modifica la tua farina" : "Correggi e salva come tua";
@@ -1343,7 +1345,7 @@ function resetForm(){ editing = null; $("#custom-form").reset(); $("#custom-titl
 $("#c-cancel").onclick = resetForm;
 $("#custom-form").addEventListener("submit", e => {
   e.preventDefault();
-  const W = parseInt($("#c-w").value, 10), P = parseFloat($("#c-prot").value);
+  const W = Math.round(numIn($("#c-w").value)), P = numIn($("#c-prot").value);
   const f = { id: editing || "my-" + Date.now().toString(36), mine:true, b: $("#c-brand").value.trim() || "La mia farina", n: $("#c-name").value.trim(), c: $("#c-cat").value,
     p: isNaN(P) ? null : P, pSrc: isNaN(P) ? "stima" : "mio", w: isNaN(W) ? null : [W,W], wSrc: isNaN(W) ? "stima" : "mio", note: $("#c-note").value.trim() };
   if (f.c === "seg") f.light = /chiar|bianc/i.test(f.n);
@@ -1391,7 +1393,7 @@ function init(){
 /* tocchi un campo numerico o di testo: il valore è già selezionato, scrivi sopra senza cancellare */
 document.addEventListener("focusin", e => {
   const el = e.target;
-  if (!el.matches || !el.matches('input[type="number"],input[type="text"],input[type="search"],input:not([type])')) return;
+  if (!el.matches || !el.matches('input[type="text"],input[type="search"],input:not([type])')) return;
   const sel = () => { try { el.select(); if (el.type !== "number") el.setSelectionRange(0, el.value.length); } catch (_) {} };
   setTimeout(sel, 0);
   el.addEventListener("mouseup", ev => ev.preventDefault(), {once:true});
