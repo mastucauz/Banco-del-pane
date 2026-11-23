@@ -382,6 +382,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .fold-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px}
 .chipbtn{border:1.5px dashed var(--accent);background:transparent;color:var(--accent);border-radius:999px;font:inherit;font-weight:700;font-size:.9rem;padding:8px 14px;min-height:40px}
 .chipbtn:active{transform:scale(.97)}
+
+/* pagina ferma: niente spostamenti a destra e sinistra, niente zoom automatico di iPhone sui campi */
+html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
+input,select,textarea{font-size:max(16px,1em)}
+.mk.done input[type="time"]{font-size:16px}
+.new-recipe{display:grid;gap:8px;justify-items:start;margin-top:6px;padding-top:14px;border-top:1px dashed var(--line)}
 </style>
 <div id="rotate" aria-live="polite"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Gira il telefono in verticale<small>Il Banco del Pane funziona solo in verticale.</small></div></div>
 
@@ -1378,7 +1384,7 @@ function compute(){
     if (s.done) return `<div class="mk done"><span>✓ ${s.k === "lievito" ? "Lievito messo" : s.k === "Formatura e cestino" ? "Nel cestino" : s.k === "Accendi il forno" ? "Forno acceso" : /cottura/i.test(s.k) ? "Infornato" : "Fatto"} alle</span><input type="time" class="mk-time" data-k="${s.k}" value="${hhmm(S.marks[s.k])}" aria-label="Correggi l'orario"><button type="button" class="linkish mk-undo" data-k="${s.k}">annulla</button></div>`;
     const lbl = s.k === "lievito" ? "Ho messo il lievito adesso" : s.k === "Formatura e cestino" ? "Pane nel cestino adesso" : s.k === "Accendi il forno" ? "Forno acceso adesso" : /cottura/i.test(s.k) ? "Infornato adesso" : "Fatto adesso";
     if (i === nextIdx || (s.k === "lievito" && !(yS && yS.done))) return `<div class="mk"><button type="button" class="mk-btn" data-k="${s.k}">${lbl}</button></div>`;
-    if (lastMarked >= 0 && i > lastMarked) return `<div class="mk"><button type="button" class="linkish mk-small" data-k="${s.k}">segna come fatto</button></div>`;
+    if (lastMarked >= 0) return `<div class="mk"><button type="button" class="linkish mk-small" data-k="${s.k}">${lbl}</button></div>`;
     return "";
   };
 
@@ -1440,6 +1446,7 @@ function compute(){
         <div class="t">${c ? c.s + (c.day ? `<small>${dayW(c.day)}</small>` : "") : "prima"}</div><div class="dot"></div>
         <div class="b"><h4>${s.h}</h4>${s.p && !s.done?`<p>${s.p}</p>`:""}${markUI(s,i)}${s.foldCtl ? `<div class="fold-ctl"><button type="button" class="chipbtn" id="fold-add">+ Aggiungi una piega</button>${s.foldCtl.n > 1 ? `<button type="button" class="chipbtn" id="fold-del">− Togli l'ultima</button>` : ""}${s.foldCtl.n !== s.foldCtl.nRec ? `<button type="button" class="linkish" id="fold-rec">torna a ${s.foldCtl.nRec}</button>` : ""}</div>` : ""}${s.g && !s.done?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
     </ol>
+    <div class="new-recipe"><button type="button" class="btn primary" id="new-recipe">Nuova ricetta</button><p class="small muted">Cancella gli orari segnati e le pieghe aggiunte e riparte da capo. Farine e impostazioni restano: cambiale se vuoi.</p></div>
   </section>
 
   <details class="g">
@@ -1466,6 +1473,7 @@ function compute(){
   $$(".mk-time", out).forEach(el => el.onchange = () => { if (!el.value) return; const [h,m] = el.value.split(":").map(Number);
     const d = new Date(); d.setHours(h, m, 0, 0); let ms = d.getTime(); if (ms > Date.now() + 10*60000) ms -= 86400000;
     keepY(() => { S.marks[el.dataset.k] = ms; }); });
+  const nr = $("#new-recipe"); if (nr) nr.onclick = () => { S.marks = {}; S.foldAdj = 0; save(); compute(); scrollTo({top:0, behavior:"smooth"}); toast("Nuova ricetta: orari azzerati"); };
   const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; S.foldAdj = 0; });
   const fa = $("#fold-add"); if (fa) fa.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) + 1; });
   const fd = $("#fold-del"); if (fd) fd.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) - 1; });
