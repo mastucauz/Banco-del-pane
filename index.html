@@ -1446,7 +1446,7 @@ function compute(){
         <div class="t">${c ? c.s + (c.day ? `<small>${dayW(c.day)}</small>` : "") : "prima"}</div><div class="dot"></div>
         <div class="b"><h4>${s.h}</h4>${s.p && !s.done?`<p>${s.p}</p>`:""}${markUI(s,i)}${s.foldCtl ? `<div class="fold-ctl"><button type="button" class="chipbtn" id="fold-add">+ Aggiungi una piega</button>${s.foldCtl.n > 1 ? `<button type="button" class="chipbtn" id="fold-del">− Togli l'ultima</button>` : ""}${s.foldCtl.n !== s.foldCtl.nRec ? `<button type="button" class="linkish" id="fold-rec">torna a ${s.foldCtl.nRec}</button>` : ""}</div>` : ""}${s.g && !s.done?`<button class="linkish" data-guide="${s.g}" type="button">Come si fa</button>`:""}</div></li>`; }).join("")}
     </ol>
-    <div class="new-recipe"><button type="button" class="btn primary" id="new-recipe">Nuova ricetta</button><p class="small muted">Cancella gli orari segnati e le pieghe aggiunte e riparte da capo. Farine e impostazioni restano: cambiale se vuoi.</p></div>
+    <div class="new-recipe"><button type="button" class="btn primary" id="new-recipe">Nuova ricetta</button><p class="small muted">Azzera tutto: farine, grammi, dose, orari segnati e pieghe aggiunte. Restano solo temperatura della cucina e del frigo, planetaria, malto e tipo di lievito.</p></div>
   </section>
 
   <details class="g">
@@ -1473,7 +1473,11 @@ function compute(){
   $$(".mk-time", out).forEach(el => el.onchange = () => { if (!el.value) return; const [h,m] = el.value.split(":").map(Number);
     const d = new Date(); d.setHours(h, m, 0, 0); let ms = d.getTime(); if (ms > Date.now() + 10*60000) ms -= 86400000;
     keepY(() => { S.marks[el.dataset.k] = ms; }); });
-  const nr = $("#new-recipe"); if (nr) nr.onclick = () => { S.marks = {}; S.foldAdj = 0; save(); compute(); scrollTo({top:0, behavior:"smooth"}); toast("Nuova ricetta: orari azzerati"); };
+  const nr = $("#new-recipe"); if (nr) nr.onclick = () => {
+    /* azzera la ricetta: farine, dose, orari, pieghe. Restano solo le cose della tua cucina (temperature, planetaria, malto, livello, lievito) */
+    const keep = {temp:S.temp, fridgeT:S.fridgeT, mixer:S.mixer, malt:S.malt, level:S.level, lev:S.lev};
+    Object.assign(S, JSON.parse(JSON.stringify(DEFAULT)), keep, {rows:[{id:(S.rows[0]||DEFAULT.rows[0]).id, g:0}], example:false, marks:{}, foldAdj:0, myDose:null, hOver:null, maltPct:null, ftemp:null});
+    save(); scrollTo(0, 0); location.hash = "impasto"; location.reload(); };
   const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; S.foldAdj = 0; });
   const fa = $("#fold-add"); if (fa) fa.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) + 1; });
   const fd = $("#fold-del"); if (fd) fd.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) - 1; });
