@@ -783,7 +783,7 @@ const LEVELS = [["principiante","Principiante",-4],["intermedio","Intermedio",0]
 const LEVS = [["fresco","Birra fresco"],["secco","Birra secco"],["essic","Madre essiccato"],["lm","Lievito madre"],["licoli","Licoli"]];
 /* lievito madre essiccato con lievito secco (es. Molino Rossetto): 35 g = 1 cubetto da 25 g di fresco */
 const ESSIC_K = 35/25;
-const MIXERS = [["mano","A mano"],["planetaria","Planetaria"]];
+const MIXERS = [["mano","A mano"],["planetaria","Planetaria"],["spirale","Spirale"]];
 const ENDDAYS = [[0,"Oggi"],[1,"Domani (notte in frigo)"],[2,"Dopodomani (2 notti in frigo)"]];
 const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["estr","Estratto diastasico (liquido)"],["nodia","Non diastasico o sciroppo"]];
 const MALT_DEF = {dia:0.2, estr:0.5, nodia:1};
@@ -1022,7 +1022,7 @@ function compute(){
   const doAut = !ryeHeavy && H >= 64 && S.style !== "genovese";
   const share = A.sh(["sem","semint"]), wh = A.wholeShare;
   const aut = share >= 0.3 ? 60 : wh >= 0.3 ? 45 : 30;
-  const kneadMin = S.mixer === "planetaria" ? 10 : 15;
+  const kneadMin = S.mixer === "planetaria" || S.mixer === "spirale" ? 10 : 15;
   const overheadH = ((doAut ? aut : 0) + kneadMin + (teg ? 15 : 30)) / 60;
 
   /* programma per ogni lievito (per i numeri sui pulsanti) */
@@ -1059,12 +1059,12 @@ function compute(){
   renderRecipeInfo(A, H, R);
 
   /* temperatura dell'acqua (formula DDT) */
-  const T = P.T, DDT = 25, fr = S.mixer === "planetaria" ? 12 : 3;
+  const T = P.T, DDT = 25, fr = S.mixer === "planetaria" ? 12 : S.mixer === "spirale" ? 9 : 3;
   const FT = S.ftemp ?? T;
   $("#in-ftemp").placeholder = String(T);
   const wTraw = Math.round(usesStarter ? 4*DDT - FT - T - T - fr : 3*DDT - FT - T - fr);
   const wT = clamp(wTraw, 2, 45);
-  const wExplain = `${usesStarter?"4":"3"} × 25 °C (impasto finito) = ${usesStarter?100:75}, meno farina ${FT} °C, cucina ${T} °C${usesStarter?`, lievito ${T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":"delle mani"} ${fr} °C = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
+  const wExplain = `${usesStarter?"4":"3"} × 25 °C (impasto finito) = ${usesStarter?100:75}, meno farina ${FT} °C, cucina ${T} °C${usesStarter?`, lievito ${T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":S.mixer==="spirale"?"della spirale (stima, da tarare)":"delle mani"} ${fr} °C = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
 
   /* box programma */
   const t0 = P.startMin;
@@ -1290,7 +1290,7 @@ function compute(){
   const extraTxt = extras.filter(x => !/superficie|teglia/.test(x[0])).map(x => `${x[0].toLowerCase().replace(/ \(.*\)/,"")} (${fmt(x[1])} g)`);
   if (usesStarter) steps.push({t:-1, h:"Prima: rinfresca il lievito", p: S.lev==="licoli" ? "Licoli 1:1:1 (lievito:farina:acqua). Usalo quando è raddoppiato e pieno di bolle, di solito in 4–8 ore a 24–26 °C. Rinfrescalo in modo che sia al raddoppio all'ora d'inizio." : "Lievito madre solido 1:1:0,5. Usalo quando è raddoppiato, circa 3–4 ore a 26–28 °C.", g: S.lev==="licoli" ? "licoli" : "lm"});
   if (doAut){ steps.push({t, h:`Autolisi (${aut} min)`, p:`Mescola le farine con ${fmt(water - hold)} g di acqua a ${wT} °C${hold?`, tieni da parte ${hold} g`:""}. Copri e lascia riposare senza sale e senza lievito.`, g:"autolisi"}); t += aut; }
-  steps.push({t, h:"Impasto", p:`${doAut?"Aggiungi":"Mescola farine, acqua a "+wT+" °C e"} ${levName}${extraTxt.find(x=>/malto|zucchero/.test(x)) ? " e "+extraTxt.filter(x=>/malto|zucchero/.test(x)).join(", ") : ""}. Lavora ${kneadMin} min, poi il sale (${fmt(salt,1)} g)${hold?" e a filo l'acqua tenuta da parte":""}${extraTxt.find(x=>/olio/.test(x)) ? ", per ultimo l'olio a filo ("+extraTxt.filter(x=>/olio/.test(x)).join(", ")+")" : ""}. ${S.mixer==="planetaria"?"Gancio a velocità bassa, poi media fino a incordatura.":S.style==="teglia"||S.style==="lingue"?"Con un cucchiaio o a mano: basta che sia omogeneo, la forza arriva con le pieghe.":"Slap & fold o in ciotola fino a pasta liscia."}`, g: S.mixer==="planetaria" ? "impasto" : "slap"});
+  steps.push({t, h:"Impasto", p:`${doAut?"Aggiungi":"Mescola farine, acqua a "+wT+" °C e"} ${levName}${extraTxt.find(x=>/malto|zucchero/.test(x)) ? " e "+extraTxt.filter(x=>/malto|zucchero/.test(x)).join(", ") : ""}. Lavora ${kneadMin} min, poi il sale (${fmt(salt,1)} g)${hold?" e a filo l'acqua tenuta da parte":""}${extraTxt.find(x=>/olio/.test(x)) ? ", per ultimo l'olio a filo ("+extraTxt.filter(x=>/olio/.test(x)).join(", ")+")" : ""}. ${S.mixer==="planetaria"?"Gancio a velocità bassa, poi media fino a incordatura.":S.mixer==="spirale"?"Spirale: prima velocità 4–5 min finché la farina ha assorbito l'acqua, poi il sale e seconda velocità fino a incordatura (di solito 5–7 min). A fine impasto misura la temperatura: l'obiettivo è 24–26 °C.":S.style==="teglia"||S.style==="lingue"?"Con un cucchiaio o a mano: basta che sia omogeneo, la forza arriva con le pieghe.":"Slap & fold o in ciotola fino a pasta liscia."}`, g: (S.mixer==="planetaria"||S.mixer==="spirale") ? "impasto" : "slap"});
   const yeastT = t;
   t += kneadMin;
   const bulkStart = t;
@@ -1306,7 +1306,7 @@ function compute(){
     else why.push(`forza media (W ≈ ${fmt(A.W)})`);
     if (A.wholeShare >= 0.3){ n -= 1; why.push(`${fmt(A.wholeShare*100)}% integrale: la crusca strappa la maglia, meglio poche pieghe delicate`); }
     if (A.sh(["farro","mono","antico"]) >= 0.4){ n -= 1; why.push("farro o grani antichi: glutine fragile"); }
-    if (S.mixer === "planetaria" && !teg){ n -= 1; why.push("impasto in planetaria già incordato"); }
+    if ((S.mixer === "planetaria" || S.mixer === "spirale") && !teg){ n -= 1; why.push(`impasto in ${S.mixer} già incordato`); }
     n = clamp(n, teg ? 3 : H >= 70 ? 2 : 1, 5);
     /* le pieghe stanno nella prima metà abbondante della puntata, poi l'impasto deve crescere tranquillo */
     const win = bulkLeft * (teg ? 0.6 : 0.55);
@@ -1746,7 +1746,7 @@ const G_TEC = [
       ["Lievito madre / licoli","Lievito naturale fatto di farina, acqua, lieviti e batteri lattici. Solido (lievito madre) o liquido (licoli). Va nutrito con i rinfreschi."],
       ["Rinfresco","Dare al lievito madre farina e acqua nuove per tenerlo vivo e attivo."],
       ["Temperatura dell'impasto","La temperatura che l'impasto ha a fine lavorazione. Ideale 24–26 °C: per arrivarci si sceglie la temperatura dell'acqua."],
-      ["Attrito","Il calore che le mani o la planetaria trasmettono all'impasto mentre lo lavori."],
+      ["Attrito","Il calore che le mani, la planetaria o la spirale trasmettono all'impasto mentre lo lavori."],
       ["Alveolatura","I buchi della mollica. Aperta e irregolare in un pane rustico idratato, fitta e regolare in un pan bauletto."],
       ["Mollica e crosta","La parte morbida interna e la parte esterna cotta."],
       ["Taglio e orecchio","Il taglio con la lametta prima di infornare. L'orecchio è il bordo che si solleva lungo il taglio."],
@@ -1759,10 +1759,11 @@ const G_TEC = [
     <ul><li><b>Quanto:</b> 30 minuti per farine raffinate, 45–60 per integrali, almeno 1 ora per la semola.</li>
     <li><b>Acqua:</b> usane il 90–95%, il resto si aggiunge a filo dopo il sale (bassinage).</li>
     <li><b>Con lievito madre:</b> aggiungilo a fine autolisi insieme al sale o poco prima.</li></ul>` + prat},
-  {id:"impasto", t:"Impastare e incordare", s:"A mano o in planetaria, fino al velo", body:`
+  {id:"impasto", t:"Impastare e incordare", s:"A mano, in planetaria o con la spirale, fino al velo", body:`
     <p>Impastare serve a formare la maglia glutinica. È pronta quando l'impasto si stacca dalle pareti, è liscio e un pezzetto si allarga in un velo sottile senza strapparsi.</p>
     ${panels(ILL.velo)}
     <ul><li><b>Planetaria:</b> gancio, prima velocità bassa per 3–4 minuti, poi media. Sale dopo i primi minuti, acqua di riserva a filo solo quando l'impasto è già incordato.</li>
+    <li><b>Spirale:</b> lavora tirando e ripiegando l'impasto contro la barra frangipasta, per questo incorda prima e lo scalda meno della planetaria. Prima velocità finché l'acqua è assorbita, poi sale e seconda velocità fino al velo. L'attrito di 9 °C che uso nel calcolo è una stima: misura l'impasto a fine lavoro e, se è più caldo di 25 °C, la volta dopo usa acqua più fredda dello stesso numero di gradi (e viceversa).</li>
     <li><b>A mano:</b> per impasti morbidi usa lo slap & fold, per impasti molto idratati basta mescolare bene e affidarsi alle pieghe durante la puntata.</li>
     <li><b>Non scaldarlo:</b> a fine impasto l'ideale è 24–26 °C. Per questo il calcolatore ti dà la temperatura dell'acqua.</li></ul>` + src("ka_ddt")},
   {id:"slap", t:"Slap & fold", s:"Impastare a mano un impasto morbido", when:"Subito dopo aver unito gli ingredienti, 5–10 minuti. Per impasti fino a circa 75%.", body:() => panels(ILL.slap) + `<p>Non aggiungere farina sul banco: all'inizio l'impasto è appiccicoso, dopo qualche minuto si stacca da solo.</p>` + prat},
