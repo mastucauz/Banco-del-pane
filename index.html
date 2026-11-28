@@ -676,7 +676,26 @@ const ICON = {
 
 /* ===== farine: database + personalizzate ===== */
 let custom = store.get("bdp_custom", []);
-const allFlours = () => [...custom, ...FLOURS];
+/* le tue farine vanno sotto la loro marca, accanto a quelle del database */
+const DB_BRANDS = [...new Set(FLOURS.map(f => f.b))].filter(b => b !== "Generica");
+const normB = x => String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(molino|mulino|molini|mulini)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+function matchBrand(typed){
+  if (String(typed).trim() === "La mia farina") return "Senza marca";
+  const t = normB(typed); if (!t) return "";
+  for (const b of DB_BRANDS){ const n = normB(b); if (n === t) return b; }
+  for (const b of DB_BRANDS){ const n = normB(b), words = n.split(" ");
+    if (t.length >= 4 && (n.includes(t) || words.some(w => w.length >= 4 && t.split(" ").includes(w)))) return b; }
+  return String(typed).trim();
+}
+const allFlours = () => {
+  const mine = custom.map(f => ({...f, b: matchBrand(f.b) || f.b}));
+  const out = [];
+  const brands = [...new Set(FLOURS.map(f => f.b))];
+  brands.forEach(b => { out.push(...FLOURS.filter(f => f.b === b), ...mine.filter(f => f.b === b)); });
+  const known = new Set(brands);
+  const others = mine.filter(f => !known.has(f.b)).sort((a, b) => a.b.localeCompare(b.b, "it"));
+  return [...out, ...others];
+};
 const flourById = id => allFlours().find(f => f.id === id);
 
 const BASE_PROT = {"00":10.5,"0":12,"man":14,"1":12.5,"2":13,"int":13,"sem":12.5,"semint":13,"seg":8.5,"farro":13.5,"mono":15,"antico":11,"sg":7};
@@ -787,9 +806,9 @@ function markEdited(){ if (S.example){ S.example = false; $("#ex-flag").hidden =
 
 function flourOptions(sel){
   const groups = {};
-  allFlours().forEach(f => { const g = f.mine ? "Le mie farine" : f.b; (groups[g] = groups[g] || []).push(f); });
+  allFlours().forEach(f => { const g = f.b; (groups[g] = groups[g] || []).push(f); });
   return Object.entries(groups).map(([g, list]) =>
-    `<optgroup label="${esc(g)}">${list.map(f => `<option value="${f.id}" ${f.id===sel?"selected":""}>${esc(f.n)}${f.mine?"":" · "+esc(CATS[f.c].l.replace("Grano tenero ",""))}</option>`).join("")}</optgroup>`).join("");
+    `<optgroup label="${esc(g)}">${list.map(f => `<option value="${f.id}" ${f.id===sel?"selected":""}>${esc(f.n)} · ${esc(CATS[f.c].l.replace("Grano tenero ",""))}${f.mine?" ★":""}</option>`).join("")}</optgroup>`).join("");
 }
 function renderRows(){
   $("#flour-rows").innerHTML = S.rows.map((r,i) => `
@@ -1513,7 +1532,7 @@ function flourCard(f){
   const pTxt = f.p != null ? fmt(p,1) + "%" : "≈" + fmt(p,1) + "%";
   const src = [...new Set([f.wSrc, f.pSrc].filter(k => SOURCES[k]))];
   return `<article class="fcard">
-    <div class="fcard-h"><div><div class="m">${esc(f.b)}</div><h4>${esc(f.n)}</h4></div>${f.mine?'<span class="chip mine">tua</span>':""}</div>
+    <div class="fcard-h"><div><div class="m">${esc(f.b)}</div><h4>${esc(f.n)}</h4></div>${f.mine?'<span class="chip mine">aggiunta da te</span>':""}</div>
     <div class="chips"><span class="chip">${esc(CATS[f.c].l)}</span></div>
     <div class="fstats">
       <div class="fstat"><span>Proteine</span><b>${pTxt}</b>${srcChip(f.pSrc)}</div>
@@ -1544,6 +1563,7 @@ $("#f-list").addEventListener("click", e => {
 });
 
 /* modulo farina personalizzata */
+(() => { const dl = document.createElement("datalist"); dl.id = "brand-list"; dl.innerHTML = DB_BRANDS.map(b => `<option value="${esc(b)}">`).join(""); document.body.appendChild(dl); $("#c-brand").setAttribute("list", "brand-list"); })();
 $("#c-cat").innerHTML = Object.entries(CATS).map(([k,v]) => `<option value="${k}">${esc(v.l)}</option>`).join("");
 let editing = null;
 function fillForm(f){
@@ -1562,14 +1582,14 @@ $("#c-cancel").onclick = resetForm;
 $("#custom-form").addEventListener("submit", e => {
   e.preventDefault();
   const W = Math.round(numIn($("#c-w").value)), P = numIn($("#c-prot").value);
-  const f = { id: editing || "my-" + Date.now().toString(36), mine:true, b: $("#c-brand").value.trim() || "La mia farina", n: $("#c-name").value.trim(), c: $("#c-cat").value,
+  const f = { id: editing || "my-" + Date.now().toString(36), mine:true, b: matchBrand($("#c-brand").value) || "Senza marca", n: $("#c-name").value.trim(), c: $("#c-cat").value,
     p: isNaN(P) ? null : P, pSrc: isNaN(P) ? "stima" : "mio", w: isNaN(W) ? null : [W,W], wSrc: isNaN(W) ? "stima" : "mio", note: $("#c-note").value.trim() };
   if (f.c === "seg") f.light = /chiar|bianc/i.test(f.n);
   if (f.c === "farro") f.whole = /integr/i.test(f.n);
   custom = editing ? custom.map(x => x.id === editing ? f : x) : [f, ...custom];
   store.set("bdp_custom", custom);
   toast(editing ? "Farina aggiornata" : "Farina salvata");
-  resetForm(); renderRows(); compute(); fFilter = "mie"; renderFilters(); renderFlourList();
+  resetForm(); renderRows(); compute(); fFilter = "tutte"; $("#f-search").value = f.b; renderFilters(); renderFlourList();
   $("#f-list").scrollIntoView({behavior:"smooth"});
 });
 
