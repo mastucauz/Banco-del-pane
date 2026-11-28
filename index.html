@@ -55,6 +55,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 main{max-width:760px;margin:0 auto;padding-top:18px;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .view{display:grid;gap:18px}
+.view[hidden]{display:none}
 .lede{color:var(--muted);max-width:62ch}
 .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 
@@ -454,6 +455,86 @@ body.sheet-open{overflow:hidden}
 
 .fric-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
 #fric-info .linkish{font-size:inherit}
+
+/* ===== v4: home, mix, attrezzatura, tempi ===== */
+.tabs-in{grid-template-columns:repeat(5,1fr)}
+.tab{font-size:.7rem}
+:root{--t-peach:#F6D9BF; --t-wheat:#F1E2B8; --t-sand:#EADCC6; --t-olive:#DDE5C2; --t-tomato:#F5CFC4; --t-sky:#D6E3EA}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--t-peach:#3A2618; --t-wheat:#352C17; --t-sand:#30261C; --t-olive:#262D19; --t-tomato:#3A1E19; --t-sky:#1C272D} }
+:root[data-theme="dark"]{--t-peach:#3A2618; --t-wheat:#352C17; --t-sand:#30261C; --t-olive:#262D19; --t-tomato:#3A1E19; --t-sky:#1C272D}
+.home-hero{background:linear-gradient(160deg,var(--hero-a),var(--hero-b));color:#FFF3E6;border-radius:28px;padding:20px 18px 0;display:grid;gap:6px;overflow:hidden}
+.home-hero h2{font-size:2rem;line-height:1.05;color:#FFF3E6}
+.home-hero p{margin:0;opacity:.85;max-width:32ch}
+.scene{width:100%;height:auto;display:block;margin-top:4px}
+.steam{animation:rise 3.2s ease-in-out infinite;opacity:0}
+.steam:nth-of-type(2){animation-delay:1.1s}.steam:nth-of-type(3){animation-delay:2.1s}
+@keyframes rise{0%{opacity:0;transform:translateY(6px)}40%{opacity:.7}100%{opacity:0;transform:translateY(-14px)}}
+@media (prefers-reduced-motion: reduce){ .steam{animation:none;opacity:.5} }
+.live{background:var(--surface);border-radius:24px;padding:16px;display:grid;gap:12px;box-shadow:0 1px 0 var(--line),0 16px 30px -20px rgba(70,35,10,.5);margin-top:-30px;position:relative;margin-inline:8px}
+.live-h{display:flex;align-items:center;gap:8px;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--good)}
+.live-h i{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px var(--good-bg)}
+.live-h.idle{color:var(--muted)} .live-h.idle i{background:var(--muted);box-shadow:0 0 0 4px var(--sunken)}
+.live-main{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center}
+.live-main > div:only-child{grid-column:1/-1}
+.live .clock{font-family:var(--f-num);font-weight:700;font-size:2rem;color:var(--accent);line-height:1}
+.live .clock small{display:block;font-size:.72rem;color:var(--muted);font-family:var(--f-body);font-weight:600;margin-top:4px}
+.live-main b{font-size:1.02rem}
+.live-main span{color:var(--muted);font-size:.9rem;display:block}
+.prog{display:flex;gap:4px}
+.prog i{flex:1;height:6px;border-radius:9px;background:var(--sunken)}
+.prog i.d{background:var(--good)} .prog i.n{background:var(--accent)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.sec-h h3{font-size:1.4rem}
+.formulas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.f-card{border:0;text-align:left;font:inherit;color:var(--ink);border-radius:22px;padding:8px 12px 12px;display:grid;gap:2px;cursor:pointer;transition:transform .15s}
+.f-card:active{transform:scale(.97)}
+.f-card svg{width:100%;height:auto;aspect-ratio:4/3;display:block}
+.f-card b{font-family:var(--f-display);font-size:1.05rem;line-height:1.15}
+.f-card .sub{font-size:.8rem;color:var(--muted)}
+.f-card.on{box-shadow:inset 0 0 0 2px var(--accent)}
+.peach{background:var(--t-peach)} .wheat{background:var(--t-wheat)} .sand{background:var(--t-sand)} .olive{background:var(--t-olive)} .tomato{background:var(--t-tomato)} .sky{background:var(--t-sky)}
+.pantry{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+.sack-c{flex:none;width:122px;border:0;font:inherit;color:var(--ink);background:var(--surface);border-radius:20px;padding:10px;display:grid;justify-items:center;align-content:start;gap:2px;text-align:center;box-shadow:0 1px 0 var(--line)}
+.sack-c .sack{width:64px;height:80px;filter:none}
+.sack-c small{font-size:.66rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.sack-c b{font-size:.9rem;line-height:1.15}
+.sack-c span{font-family:var(--f-num);font-size:.7rem;color:var(--muted)}
+.sack-c.add{border:2px dashed var(--line);background:transparent;box-shadow:none;align-content:center;color:var(--accent);font-weight:800}
+#v-home{gap:22px}
+/* righe farina colorate */
+.flour-row select{box-shadow:inset 6px 0 0 var(--dot,#ddd)}
+.mix-box{display:grid;gap:10px}
+.mix-box:empty{display:none}
+.mixbar{display:flex;height:14px;border-radius:99px;overflow:hidden;gap:2px}
+.mixbar i{display:block;min-width:4px}
+.mixleg{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.82rem;color:var(--muted)}
+.mixleg span{display:inline-flex;align-items:center;gap:6px}
+.mixleg i{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(60,30,10,.25)}
+.mixleg b{color:var(--ink);font-family:var(--f-num)}
+.mixres{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+.mixres div{border:1.5px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:2px;min-width:0}
+.mixres span{font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.mixres b{font-family:var(--f-num);font-size:1rem}
+.mixres em{font-style:normal;font-size:.75rem;font-weight:800;color:var(--accent)}
+.mixres em.k3,.mixres em.k4{color:var(--good)}
+.mixhint{margin:0;font-size:.9rem;color:var(--muted)}
+/* attrezzatura */
+.eq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.eqc{display:grid;justify-items:start;align-content:start;gap:1px;text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:8px 9px 10px;font:inherit;cursor:pointer;min-width:0}
+.eqc svg{width:100%;max-width:58px;height:auto;margin-bottom:4px}
+.eqc b{font-size:.86rem;line-height:1.15}
+.eqc small{color:var(--muted);font-size:.72rem;line-height:1.25}
+.eqc[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.ovenline{display:grid;grid-template-columns:auto 1fr auto auto;gap:4px 10px;align-items:baseline;font-size:.86rem;color:var(--muted);background:var(--sunken);border-radius:14px;padding:10px 12px}
+.ovenline b{color:var(--ink);font-family:var(--f-num);font-size:.9rem}
+.ovenline p{grid-column:1/-1;margin:2px 0 0;color:var(--warn);font-size:.85rem}
+/* tempi */
+.stages{display:flex;gap:3px;border-radius:14px;overflow:hidden;margin-top:12px}
+.st{padding:9px 8px;min-width:0;display:grid;gap:2px}
+.st b{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st small{font-size:.7rem;font-family:var(--f-num);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85}
+.st.warm{background:rgba(255,197,143,.28)} .st.cold{background:rgba(140,190,230,.3)} .st.oven{background:#FFF3E6;color:var(--hero-b)}
+.stage-ax{display:flex;justify-content:space-between;font-family:var(--f-num);font-size:.72rem;opacity:.8;margin-top:4px}
 </style>
 <div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
 <div id="cmp-bar" hidden></div>
@@ -461,6 +542,9 @@ body.sheet-open{overflow:hidden}
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <radialGradient id="hp-crust" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#E9A35C"/><stop offset=".65" stop-color="#C46B28"/><stop offset="1" stop-color="#8E4515"/></radialGradient>
+    <linearGradient id="hp-ciab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EBC38C"/><stop offset="1" stop-color="#C98E4E"/></linearGradient>
+    <linearGradient id="hp-foc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0C46B"/><stop offset="1" stop-color="#D3962F"/></linearGradient>
     <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
       <path d="M1 1 L9 5 L1 9 Z" style="fill:var(--crust)"/>
     </marker>
@@ -479,7 +563,26 @@ body.sheet-open{overflow:hidden}
 
 <main id="main">
   <!-- IMPASTO -->
-  <section class="view" id="v-impasto" aria-labelledby="h-impasto">
+  <section class="view" id="v-home" aria-labelledby="h-home" hidden>
+    <div class="home-hero">
+      <h2 id="h-home">Che cosa inforni oggi?</h2>
+      <p>Scegli una formula: farine, acqua, lievito e orari li calcolo io.</p>
+      <svg class="scene" viewBox="0 0 400 170" role="img" aria-label="Una pagnotta appena sfornata sul banco, accanto a un sacco di farina">
+        <path d="M0 132 H400 V170 H0Z" fill="#6B3A1C"/><path d="M0 132 H400" stroke="#8A4E27" stroke-width="3"/><path d="M0 146 H400 M0 160 H400" stroke="#5A3017" stroke-width="1.5" opacity=".6"/>
+        <g transform="translate(276 44)"><path d="M14 12 Q44 0 74 12 L84 92 Q44 106 4 92 Z" fill="#F3E7D0"/><path d="M22 12 Q44 20 66 12" stroke="#C9B38E" stroke-width="2" fill="none"/><path d="M32 4 Q44 -4 56 4" stroke="#B49B6C" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="20" y="42" width="48" height="28" rx="5" fill="#A8461A"/><text x="44" y="61" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="800" font-size="13" fill="#FFF3E6">Tipo 1</text><ellipse cx="44" cy="96" rx="44" ry="5" fill="#000" opacity=".18"/></g>
+        <g fill="#FFF3E6" opacity=".55"><circle cx="250" cy="128" r="2"/><circle cx="262" cy="125" r="1.4"/><circle cx="240" cy="126" r="1.2"/><circle cx="96" cy="127" r="1.5"/><circle cx="82" cy="129" r="1"/></g>
+        <g transform="translate(118 58)"><ellipse cx="72" cy="76" rx="76" ry="8" fill="#000" opacity=".22"/><path d="M0 70 C0 22 30 4 72 4 C114 4 144 22 144 70 Q72 82 0 70Z" fill="url(#hp-crust)"/><path d="M30 34 C52 20 92 20 116 34" stroke="#F8DDB3" stroke-width="7" fill="none" stroke-linecap="round"/><g fill="#FFF3E6" opacity=".5"><circle cx="40" cy="52" r="1.6"/><circle cx="58" cy="60" r="1.2"/><circle cx="96" cy="54" r="1.5"/><circle cx="112" cy="62" r="1.1"/></g>
+          <g stroke="#FFF3E6" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"><path class="steam" d="M52 0 c-6 -8 6 -12 0 -22"/><path class="steam" d="M74 -2 c-6 -8 6 -12 0 -22"/><path class="steam" d="M96 0 c-6 -8 6 -12 0 -22"/></g></g>
+        <g transform="translate(14 112) rotate(-8)"><rect x="0" y="0" width="92" height="14" rx="7" fill="#D8A86E"/><rect x="-14" y="3" width="16" height="8" rx="4" fill="#B5814A"/><rect x="90" y="3" width="16" height="8" rx="4" fill="#B5814A"/></g>
+      </svg>
+    </div>
+    <div class="live" id="home-live"></div>
+    <section aria-labelledby="h-form"><div class="sec-h"><h3 id="h-form">Formule</h3></div><div class="formulas" id="home-formulas"></div></section>
+    <section aria-labelledby="h-pan"><div class="sec-h"><h3 id="h-pan">La tua dispensa</h3><button type="button" class="linkish" data-goto="farine">Farine e confronto</button></div><div class="pantry" id="home-pantry"></div></section>
+    <section aria-labelledby="h-tips"><div class="sec-h"><h3 id="h-tips">Prima di iniziare</h3></div><div class="notes" id="home-tips"></div></section>
+  </section>
+
+  <section class="view" id="v-impasto" aria-labelledby="h-impasto" hidden>
     <div>
       <h2 id="h-impasto">Il tuo impasto</h2>
       <p class="lede">Farine e grammi: al resto penso io.</p>
@@ -493,6 +596,7 @@ body.sheet-open{overflow:hidden}
         <button class="btn ghost" id="go-custom" type="button">Non trovo la mia farina</button>
       </div>
       <div class="total-line"><span>Farina totale</span><span class="num" id="flour-total">0 g</span></div>
+      <div id="mix-box" class="mix-box"></div>
     </div>
 
     <div class="card">
@@ -501,6 +605,14 @@ body.sheet-open{overflow:hidden}
       <div class="field"><span class="lbl">Focacce e pizze</span><div class="seg" id="seg-style-teglia"></div></div>
       <div id="recipe-info"></div>
       <div class="field"><span class="lbl">La tua esperienza con impasti umidi</span><div class="seg" id="seg-level"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Attrezzatura</h3>
+      <div class="field"><span class="lbl">Forno</span><div class="eq" id="eq-oven"></div></div>
+      <div class="ovenline" id="oven-line"></div>
+      <div class="field"><span class="lbl">Impasto</span><div class="eq" id="eq-mixer"></div></div>
+      <div class="field fric"><label for="in-dtemp">Impasto misurato a fine lavoro</label><div class="fric-row"><div class="unit" data-u="°C"><input id="in-dtemp" type="text" data-num inputmode="decimal" placeholder="es. 26"></div><button type="button" class="btn" id="fric-save">Taratura</button></div><p class="small muted" id="fric-info"></p></div>
     </div>
 
     <div class="card">
@@ -520,8 +632,6 @@ body.sheet-open{overflow:hidden}
             <div class="field"><label for="in-salt">Sale</label><div class="unit" data-u="%"><input id="in-salt" type="text" data-num min="1.2" max="3" step="0.1" inputmode="decimal"></div></div>
             <div class="field" id="pieces-field"><label for="in-pieces">Pezzi</label><input id="in-pieces" type="text" data-num min="1" max="30" step="1" inputmode="decimal"></div>
           </div>
-          <div class="field"><span class="lbl">Impasto</span><div class="seg" id="seg-mixer"></div></div>
-          <div class="field fric"><label for="in-dtemp">Impasto misurato a fine lavoro</label><div class="fric-row"><div class="unit" data-u="°C"><input id="in-dtemp" type="text" data-num inputmode="decimal" placeholder="es. 26"></div><button type="button" class="btn" id="fric-save">Taratura</button></div><p class="small muted" id="fric-info"></p></div>
           <div class="field"><span class="lbl">Malto d'orzo</span><div class="seg" id="seg-malt"></div></div>
           <div class="nums" id="malt-box" hidden>
             <div class="field"><label for="in-malt">Malto</label><div class="unit" data-u="%"><input id="in-malt" type="text" data-num min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
@@ -586,6 +696,7 @@ body.sheet-open{overflow:hidden}
 
 <nav class="tabs" aria-label="Sezioni">
   <div class="tabs-in">
+    <button class="tab" data-view="home" type="button"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <button class="tab" data-view="impasto" type="button"><svg viewBox="0 0 24 24"><path d="M4 15c0-4 3.6-7 8-7s8 3 8 7c0 2-1.5 3-3 3H7c-1.5 0-3-1-3-3z"/><path d="M8 11.5c1-1.2 2-1.2 3 0M13 11.5c1-1.2 2-1.2 3 0"/></svg>Impasto</button>
     <button class="tab" data-view="farine" type="button"><svg viewBox="0 0 24 24"><path d="M12 21V8"/><path d="M12 12c-2-0.5-3.5-2-3.5-4 2 .3 3.5 1.8 3.5 4zM12 12c2-.5 3.5-2 3.5-4-2 .3-3.5 1.8-3.5 4zM12 16.5c-2-.5-3.5-2-3.5-4 2 .3 3.5 1.8 3.5 4zM12 16.5c2-.5 3.5-2 3.5-4-2 .3-3.5 1.8-3.5 4zM12 7.5c-1-1-1-2.6 0-4.5 1 1.9 1 3.5 0 4.5z"/></svg>Farine</button>
     <button class="tab" data-view="tecnica" type="button"><svg viewBox="0 0 24 24"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9a1.5 1.5 0 0 1 3 0v4.5a7 7 0 0 1-7 7h-.5a6 6 0 0 1-5-2.7L4 14.5a1.5 1.5 0 0 1 2.4-1.8L7 13.5"/></svg>Tecnica</button>
@@ -840,7 +951,7 @@ const DEFAULT = {
   rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
   style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
   start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
-  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", example:true, panW:30, panL:40, panN:1
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", example:true, panW:30, panL:40, panN:1
 };
 let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
 if (!RECIPES[S.style]) S.style = "pagnotta";
@@ -900,7 +1011,7 @@ function flourOptions(sel){
 }
 function renderRows(){
   $("#flour-rows").innerHTML = S.rows.map((r,i) => `
-    <div class="flour-row">
+    <div class="flour-row" style="--dot:${(flourById(r.id) && SACK[flourById(r.id).c]) || "#ddd"}">
       <select aria-label="Farina ${i+1}" data-i="${i}" class="r-f">${flourOptions(r.id)}</select>
       <div class="unit" data-u="g"><input type="text" data-num class="r-g" data-i="${i}" min="0" step="10" inputmode="decimal" value="${r.g}" aria-label="Grammi farina ${i+1}"></div>
       <button class="icon-btn r-x" data-i="${i}" type="button" aria-label="Togli farina" ${S.rows.length<2?"disabled":""}>${ICON.x}</button>
@@ -908,7 +1019,7 @@ function renderRows(){
 }
 $("#flour-rows").addEventListener("change", e => {
   const i = +e.target.dataset.i;
-  if (e.target.classList.contains("r-f")) { S.rows[i].id = e.target.value; markEdited(); compute(); }
+  if (e.target.classList.contains("r-f")) { S.rows[i].id = e.target.value; markEdited(); renderRows(); compute(); }
 });
 $("#flour-rows").addEventListener("input", e => {
   const i = +e.target.dataset.i;
@@ -1087,6 +1198,7 @@ function renderRecipeInfo(A, H, R){
 function compute(){
   const A = analyzeMix();
   $("#flour-total").textContent = A ? fmt(A.F) + " g" : "0 g";
+  renderMix(A); renderEq();
   const out = $("#out");
   if (!A){ out.innerHTML = '<div class="empty">Inserisci almeno una farina con i grammi per vedere la ricetta.</div>'; $("#plan-box").innerHTML = ""; return; }
   const R = RECIPES[S.style], teg = R.kind === "teglia";
@@ -1178,6 +1290,12 @@ function compute(){
       ${P.mode==="fridge" ? `<div><span>In frigo (${fridgeT()} °C)</span><b>${hm(P.fh)}</b></div>${P.post?`<div><span>Fuori frigo</span><b>${hm(P.post)}</b></div>`:""}` : `<div><span>Seconda lievitazione</span><b>${hm(P.app)}</b></div>`}
       <div><span>Inforni</span><b id="pb-end">${at(endMin)}</b></div>
     </div>
+    ${(() => { const segs = [{l:"Puntata", h:P.bulk, c:"warm"}];
+      if (P.mode === "fridge"){ segs.push({l:"Frigo", h:P.fh, c:"cold"}); if (P.post > 0.1) segs.push({l:"Fuori frigo", h:P.post, c:"warm"}); }
+      else segs.push({l: teg ? "Panetti" : "Appretto", h:P.app, c:"warm"});
+      segs.push({l:"Forno", h:0.75, c:"oven"});
+      return `<div class="stages" aria-label="Tempi: ${segs.map(x => x.l + " " + hm(x.h)).join(", ")}">${segs.map(x => `<div class="st ${x.c}" style="flex:${Math.max(0.9, Math.sqrt(x.h)*1.6).toFixed(2)}"><b>${x.l}</b><small>${x.c === "oven" ? at(endMin).split(" ")[0] : hm(x.h)}</small></div>`).join("")}</div>
+      <div class="stage-ax"><span>${at(t0)}</span><span>${at(endMin)}</span></div>`; })()}
     ${cmpBox}
     ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
     ${P.own ? `<p class="small"><b>Con la tua dose (${fmt(S.myDose,1)} g).</b> Per il mio programma standard userei ${fmt(autoG,1)} g. Ho tenuto i tuoi grammi e ho adattato le ore: ${P.mode==="fridge" ? `prima lievitazione ${hm(P.bulk)}, frigo ${hm(P.fh)}${P.post>0.1?`, poi ${hm(P.post)} fuori frigo prima di infornare`:", poi in forno direttamente dal frigo"}` : `in tutto ${hm(P.use)} di lievitazione a ${T} °C`}.${P.ownMsg ? ` <b>${P.ownMsg}</b>` : ""}</p>` : ""}
@@ -1435,8 +1553,8 @@ function compute(){
       lingue:"Rovescia ogni panetto sul banco con semola, allarga con i polpastrelli in una lingua lunga e stretta (circa 15×40 cm), trasferisci su carta forno o pala."
     }[S.style];
     steps.push({t: t - 20, h:"Stesura", p: stesura + (R.brine ? " " + R.brine(A.F, each) : ""), g: null});
-    steps.push({t: t - 50, h:"Accendi il forno", p:`Al massimo con la teglia o la pietra dentro, per almeno 45 minuti.`, g:"cottura"});
-    steps.push({t, h:"Cottura", p: R.bake, g:"cottura"});
+    { const oi = ovenInfo(true); steps.push({t: t - oi.pre - 5, h:"Accendi il forno", p: oi.fire, g:"cottura"});
+    steps.push({t, h:"Cottura", p: oi.bake || R.bake, g:"cottura"}); }
     t += S.style === "schiacciata" ? 25 : 15;
     steps.push({t, h:"Fuori dal forno", p: S.style==="genovese" ? "Spennella con un filo d'olio. Si mangia tiepida." : "Lascia intiepidire su una griglia: il fondo resta croccante.", g:null});
   } else {
@@ -1455,7 +1573,7 @@ function compute(){
       steps.push({t, h:`Appretto · ${hm(P.app)}`, p:"L'<b>appretto</b> è la seconda lievitazione, quella del pane già formato. Coperto a temperatura ambiente. È pronto quando, premendo con un dito infarinato, il buco risale lentamente e non del tutto.", g:"appretto", nomark:true});
       t += P.app*60;
     }
-    steps.push({t: t-50, h:"Accendi il forno", p:"Al massimo (250 °C), con pentola di ghisa o pietra dentro, per almeno 45 minuti.", g:"cottura"});
+    { const oi = ovenInfo(false); steps.push({t: t - oi.pre - 5, h:"Accendi il forno", p: oi.fire, g:"cottura"}); }
     steps.push({t, h:"Taglio e cottura", p:"Rovescia il pane, taglialo con la lametta e inforna. Circa 20 min con vapore (pentola chiusa o teglia d'acqua bollente), poi togli il vapore e cuoci finché la crosta è ben scura: in tutto 45–50 min secondo King Arthur. È cotto quando battendo sotto suona vuoto e pesa almeno il 15% in meno dell'impasto.", g:"cottura"});
     t += 45;
     steps.push({t, h:"Raffreddamento su griglia", p:"Almeno 1 ora prima di tagliare: la mollica finisce di assestarsi mentre l'umidità esce.", g:null});
@@ -1488,6 +1606,7 @@ function compute(){
     else if (ps && first) ps.textContent = at(first.real);
     if (pe && bake) pe.textContent = at(bake.real);
   }
+  window._day = {M0, started: !!(yS && yS.done), steps: steps.filter(s => s.t >= 0).map(s => ({h:s.h, real:s.real, done:s.done})), notes: notes.filter(n => n[0] === "bad" || n[0] === "warn").slice(0, 2), style: S.style};
   const markUI = (s, i) => {
     if (s.t < 0 || s.nomark) return "";
     if (s.done) return `<div class="mk done"><span>✓ ${s.k === "lievito" ? "Lievito messo" : s.k === "Formatura e cestino" ? "Nel cestino" : s.k === "Accendi il forno" ? "Forno acceso" : /cottura/i.test(s.k) ? "Infornato" : "Fatto"} alle</span><input type="time" class="mk-time" data-k="${s.k}" value="${hhmm(S.marks[s.k])}" aria-label="Correggi l'orario"><button type="button" class="linkish mk-undo" data-k="${s.k}">annulla</button></div>`;
@@ -1591,6 +1710,7 @@ function compute(){
   const fa = $("#fold-add"); if (fa) fa.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) + 1; });
   const fd = $("#fold-del"); if (fd) fd.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) - 1; });
   const frc = $("#fold-rec"); if (frc) frc.onclick = () => keepY(() => { S.foldAdj = 0; });
+  renderHome();
   const sc = $("#seg-crumb"); if (sc) sc.onclick = e => { const b = e.target.closest("button"); if (!b) return; S.crumb = b.dataset.v; save(); const y = scrollY; compute(); scrollTo(0, y); };
   save();
 }
@@ -1655,6 +1775,64 @@ $("#f-list").addEventListener("click", e => {
   if (ed){ fillForm(flourById(ed.dataset.edit)); }
   if (d){ const id = d.dataset.del; custom = custom.filter(f => f.id !== id); store.set("bdp_custom", custom); S.rows = S.rows.filter(r => r.id !== id); if (!S.rows.length) S.rows = DEFAULT.rows.map(r=>({...r})); save(); renderRows(); compute(); renderFlourList(); toast("Farina eliminata"); }
 });
+
+/* ===== mix di farine ===== */
+function renderMix(A){
+  const box = $("#mix-box"); if (!box) return;
+  if (!A){ box.innerHTML = ""; return; }
+  const st = strengthOf({c:"0", w:[A.W, A.W]});
+  const tol = toleranceOf(A.W), left = tol - 2.5, fh = left <= 0 ? 0 : Math.min(72, fridgeHoursFor(left));
+  const hint = [];
+  if (fh >= 36) hint.push(`Regge anche due notti in frigo (fino a circa ${hm(fh)} a ${fridgeT()} °C).`);
+  else if (fh >= 10) hint.push(`Regge una notte in frigo (fino a circa ${hm(fh)} a ${fridgeT()} °C).`);
+  else hint.push("Meglio un pane in giornata: per una notte in frigo serve una farina più forte.");
+  if (A.wholeShare >= 0.25) hint.push(`Con il ${fmt(A.wholeShare*100)}% di integrale fai l'autolisi e tieni da parte un po' d'acqua.`);
+  box.innerHTML = `
+    ${A.rows.length > 1 ? `<div class="mixbar" aria-hidden="true">${A.rows.map(r => `<i style="flex:${r.k};background:${SACK[r.f.c] || "#ddd"}"></i>`).join("")}</div>
+    <div class="mixleg">${A.rows.map(r => `<span><i style="background:${SACK[r.f.c] || "#ddd"}"></i>${esc(r.f.n)} <b>${fmt(r.k*100)}%</b></span>`).join("")}</div>` : ""}
+    <div class="mixres">
+      <div><span>${A.rows.length > 1 ? "Forza del mix" : "Forza"}</span><b>W ≈ ${fmt(Math.round(A.W/5)*5)}</b><em class="k${st.k}">${st.l}</em></div>
+      <div><span>Proteine</span><b>${fmt(A.P,1)}%</b></div>
+      <div><span>Integrale</span><b>${fmt(A.wholeShare*100)}%</b></div>
+    </div>
+    <p class="mixhint">${hint.join(" ")}</p>`;
+}
+
+/* ===== attrezzatura: forno e impastatrice ===== */
+const OVENS = [
+  ["casa", "Forno di casa", "250 °C, pentola di ghisa"],
+  ["pietra", "Forno con pietra", "250 °C, pietra refrattaria"],
+  ["pizza", "Forno da pizza", "Ooni e simili, fino a 450 °C"]
+];
+const EQ_SVG = {
+  casa:`<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="5" y="5" width="54" height="38" rx="6" fill="#3B3B3F"/><rect x="11" y="11" width="34" height="26" rx="3" fill="#F08A4B" opacity=".9"/><path d="M18 30 q10 -8 20 0" stroke="#FFE2C4" stroke-width="2" fill="none"/><circle cx="52" cy="16" r="2.6" fill="#ddd"/><circle cx="52" cy="26" r="2.6" fill="#ddd"/></svg>`,
+  pietra:`<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="5" y="5" width="54" height="38" rx="6" fill="#3B3B3F"/><rect x="11" y="11" width="34" height="26" rx="3" fill="#F08A4B" opacity=".9"/><rect x="13" y="29" width="30" height="5" rx="1.5" fill="#B9A58A"/><circle cx="52" cy="16" r="2.6" fill="#ddd"/><circle cx="52" cy="26" r="2.6" fill="#ddd"/></svg>`,
+  pizza:`<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M8 38 Q8 9 32 9 Q56 9 56 38Z" fill="#2E2E30"/><path d="M18 38 Q18 21 32 21 Q46 21 46 38Z" fill="#F2A066"/><path d="M24 38 q8 -10 16 0" fill="#FFD9A8" opacity=".7"/><rect x="4" y="38" width="56" height="5" rx="2" fill="#666"/></svg>`,
+  mano:`<svg viewBox="0 0 64 48" aria-hidden="true"><ellipse cx="32" cy="34" rx="24" ry="9" fill="#E8D6B5"/><path d="M20 30 c0 -12 4 -20 8 -20 s4 6 4 10 c0 -6 2 -10 5 -10 s4 4 4 10 v6 c2 -4 6 -4 6 0 c0 6 -6 12 -14 12 c-8 0 -13 -3 -13 -8z" fill="#F2CFB0" stroke="#A87B5A" stroke-width="1.5"/></svg>`,
+  planetaria:`<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="16" y="3" width="34" height="12" rx="5" fill="#C8361F"/><rect x="40" y="13" width="10" height="27" rx="3" fill="#C8361F"/><path d="M12 24 h28 v8 a10 10 0 0 1 -10 10 h-8 a10 10 0 0 1 -10 -10z" fill="#BFC4CA"/><path d="M26 15 v10" stroke="#7D838C" stroke-width="2.5"/></svg>`,
+  spirale:`<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="22" y="3" width="30" height="12" rx="4" fill="#E9E4DA"/><rect x="40" y="13" width="10" height="27" rx="3" fill="#E9E4DA"/><path d="M12 22 h32 v12 a10 10 0 0 1 -10 10 h-12 a10 10 0 0 1 -10 -10z" fill="#BFC4CA"/><path d="M30 15 q7 5 0 9 q-7 4 0 9" stroke="#7D838C" stroke-width="2.5" fill="none"/></svg>`
+};
+function renderEq(){
+  const o = $("#eq-oven"), m = $("#eq-mixer"); if (!o || !m) return;
+  const ov = S.oven || "casa";
+  o.innerHTML = OVENS.map(([k,l,sub]) => `<button type="button" class="eqc" data-oven="${k}" aria-pressed="${ov===k}">${EQ_SVG[k]}<b>${l}</b><small>${sub}</small></button>`).join("");
+  m.innerHTML = MIXERS.map(([k,l]) => { const tuned = (S.fric||{})[k] != null; const fr = tuned ? S.fric[k] : FRIC_BASE[k];
+    return `<button type="button" class="eqc" data-mixer="${k}" aria-pressed="${S.mixer===k}">${EQ_SVG[k]}<b>${l}</b><small>attrito ${fmt(fr)} °C${tuned ? " · tarato" : ""}</small></button>`; }).join("");
+  const R = RECIPES[S.style], teg = R && R.kind === "teglia", oi = ovenInfo(teg);
+  $("#oven-line").innerHTML = `<span>Preriscaldo</span><b>${oi.pre} min</b><span>Temperatura</span><b>${oi.temp}</b>${oi.warn ? `<p>${oi.warn}</p>` : ""}`;
+}
+function ovenInfo(teg){
+  const ov = S.oven || "casa";
+  if (ov === "pietra") return {pre:60, temp:"250 °C", fire:"Al massimo (250 °C) con la pietra refrattaria sul ripiano più basso, per almeno 60 minuti: la pietra ci mette più del forno a scaldarsi."};
+  if (ov === "pizza"){
+    if (S.style === "lingue") return {pre:30, temp:"300–350 °C", fire:"Accendi il forno da pizza e porta la pietra a 300–350 °C (20–30 minuti; controlla con un termometro a infrarossi).", bake:"Nel forno da pizza a 300–350 °C: 3–5 minuti, girando la lingua a metà con la pala."};
+    return {pre:teg ? 45 : 50, temp:"250 °C", warn: teg ? "Per la teglia serve il forno di casa: il forno da pizza è troppo basso e troppo caldo per una teglia." : "Il forno da pizza è troppo caldo per il pane: per la cottura uso il forno di casa.",
+      fire: teg ? "Il forno di casa al massimo con la teglia o la pietra dentro, per almeno 45 minuti." : "Il forno di casa al massimo (250 °C), con pentola di ghisa o pietra dentro, per almeno 45 minuti."};
+  }
+  return {pre:teg ? 45 : 50, temp:"250 °C", fire: teg ? "Al massimo con la teglia o la pietra dentro, per almeno 45 minuti." : "Al massimo (250 °C), con la pentola di ghisa dentro, per almeno 45 minuti."};
+}
+$("#eq-oven").addEventListener("click", e => { const b = e.target.closest("[data-oven]"); if (!b) return; S.oven = b.dataset.oven; markEdited(); compute(); });
+$("#eq-mixer").addEventListener("click", e => { const b = e.target.closest("[data-mixer]"); if (!b) return; S.mixer = b.dataset.mixer; markEdited(); compute(); });
 
 /* ===== scheda della farina e confronto ===== */
 let cmpSel = [];
@@ -1837,16 +2015,72 @@ $("#custom-form").addEventListener("submit", e => {
   $("#f-list").scrollIntoView({behavior:"smooth"});
 });
 
+/* ===== home ===== */
+const FORMULAS = [
+  ["pagnotta","crosta e alveoli","peach"],["filone","lungo e croccante","wheat"],["ciabatta","molto idratata","sand"],["cassetta","morbido, a fette","sky"],
+  ["genovese","bassa e unta","olive"],["schiacciata","sottile e croccante","wheat"],["romana","alta e morbida","peach"],["teglia","alveoli grandi","tomato"],["lingue","stese lunghe","sand"]
+];
+function formulaSvg(k){
+  const crust = `<path d="M24 90 C24 50 48 34 80 34 C112 34 136 50 136 90 Q80 100 24 90Z" fill="url(#hp-crust)"/>`;
+  const shadow = (rx, cy=96) => `<ellipse cx="80" cy="${cy}" rx="${rx}" ry="6" fill="#000" opacity=".12"/>`;
+  const pan = (inner) => `<rect x="16" y="38" width="128" height="60" rx="8" fill="#3B3B3F"/><rect x="22" y="42" width="116" height="50" rx="6" fill="${inner}"/>`;
+  const map = {
+    pagnotta: shadow(58) + crust + `<path d="M44 60 C60 48 100 48 116 60" stroke="#F8DDB3" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+    filone: shadow(66,92) + `<g transform="rotate(-8 80 73)"><rect x="14" y="56" width="132" height="34" rx="17" fill="url(#hp-crust)"/><g stroke="#F8DDB3" stroke-width="5" stroke-linecap="round"><path d="M38 66 l16 -6"/><path d="M66 66 l16 -6"/><path d="M94 66 l16 -6"/></g></g>`,
+    ciabatta: shadow(62,94) + `<path d="M22 86 Q20 62 40 60 L122 56 Q142 58 140 84 Q80 96 22 86Z" fill="url(#hp-ciab)"/><g fill="#FFF8EA" opacity=".85"><ellipse cx="54" cy="68" rx="12" ry="4"/><ellipse cx="96" cy="66" rx="16" ry="4"/><ellipse cx="78" cy="80" rx="10" ry="3"/></g>`,
+    cassetta: shadow(52,98) + `<rect x="34" y="58" width="92" height="38" rx="4" fill="#6E6E73"/><path d="M36 62 Q36 30 80 30 Q124 30 124 62Z" fill="url(#hp-crust)"/><rect x="36" y="58" width="88" height="10" fill="#C46B28"/>`,
+    genovese: pan("url(#hp-foc)") + `<g fill="#B87420" opacity=".55"><circle cx="40" cy="56" r="4"/><circle cx="64" cy="64" r="4"/><circle cx="90" cy="54" r="4"/><circle cx="116" cy="64" r="4"/><circle cx="50" cy="80" r="4"/><circle cx="80" cy="82" r="4"/><circle cx="108" cy="82" r="4"/></g><g fill="#F7E7A8" opacity=".6"><ellipse cx="70" cy="70" rx="14" ry="5"/></g>`,
+    schiacciata: pan("url(#hp-foc)") + `<g fill="#FFF8EA"><circle cx="44" cy="58" r="2"/><circle cx="70" cy="74" r="2"/><circle cx="98" cy="60" r="2"/><circle cx="120" cy="78" r="2"/><circle cx="58" cy="82" r="1.6"/></g><path d="M30 68 q50 -14 100 4" stroke="#B87420" stroke-width="2" fill="none" opacity=".4"/>`,
+    romana: pan("url(#hp-foc)") + `<g fill="#B87420" opacity=".45"><circle cx="44" cy="60" r="5"/><circle cx="76" cy="58" r="5"/><circle cx="110" cy="62" r="5"/><circle cx="58" cy="80" r="5"/><circle cx="96" cy="80" r="5"/></g><g stroke="#3F7A3A" stroke-width="2.5" stroke-linecap="round"><path d="M64 70 l12 -5"/><path d="M98 70 l10 5"/></g>`,
+    teglia: pan("#E3A863") + `<rect x="28" y="47" width="104" height="40" rx="5" fill="#C8361F"/><g fill="#FFF8EA"><circle cx="46" cy="58" r="7"/><circle cx="84" cy="70" r="8"/><circle cx="116" cy="56" r="6"/><circle cx="62" cy="78" r="5"/></g><g fill="#3F7A3A"><ellipse cx="70" cy="56" rx="5" ry="3"/><ellipse cx="104" cy="76" rx="5" ry="3"/></g>`,
+    lingue: shadow(66,94) + `<path d="M14 82 Q12 66 30 64 L134 58 Q150 60 148 76 Q80 92 14 82Z" fill="url(#hp-ciab)"/><path d="M28 74 L136 66" stroke="#C8361F" stroke-width="7" stroke-linecap="round" opacity=".85"/><g fill="#FFF8EA"><circle cx="50" cy="72" r="4"/><circle cx="92" cy="69" r="4"/><circle cx="120" cy="67" r="3.5"/></g>`
+  };
+  return `<svg viewBox="0 0 160 120" aria-hidden="true">${map[k] || map.pagnotta}</svg>`;
+}
+function renderHome(){
+  const live = $("#home-live"), fm = $("#home-formulas"), pa = $("#home-pantry"), ti = $("#home-tips");
+  if (!live) return;
+  const d = window._day;
+  if (d && d.started){
+    const all = d.steps, next = all.find(s => !s.done && s.real*60000 + d.M0 >= Date.now() - 20*60000) || all.find(s => !s.done);
+    const doneN = all.filter(s => s.done).length;
+    const now = (Date.now() - d.M0) / 60000;
+    const c = next ? clock("00:00", next.real) : null, mins = next ? Math.round(next.real - now) : 0;
+    const bake = all.find(s => /cottura/i.test(s.h) && !/Accendi/.test(s.h));
+    live.hidden = false;
+    live.innerHTML = `<div class="live-h"><i></i>Pane in corso · ${esc(RECIPES[d.style] ? RECIPES[d.style].l : "")}</div>
+      ${next ? `<div class="live-main"><div class="clock">${c.s}<small>${mins > 0 ? (mins >= 60 ? "tra " + hm(mins/60) : `tra ${mins} min`) : mins > -20 ? "adesso" : "in ritardo"}</small></div><div><b>${next.h}</b><span>${bake ? "inforni alle " + clock("00:00", bake.real).s : ""}</span></div></div>` : `<div class="live-main"><div><b>Tutti i passi sono fatti. Buon pane!</b></div></div>`}
+      <div class="prog" aria-label="Passi fatti: ${doneN} di ${all.length}">${all.map((s,i) => `<i class="${s.done ? "d" : s === next ? "n" : ""}"></i>`).join("")}</div>
+      <button class="btn primary" type="button" id="home-open">Apri la giornata</button>`;
+    $("#home-open").onclick = () => { go("impasto"); setTimeout(() => { const h = $("#h-prog"); if (h) h.scrollIntoView({behavior:"smooth"}); }, 60); };
+  } else {
+    live.hidden = false;
+    live.innerHTML = `<div class="live-h idle"><i></i>Nessun pane in corso</div><div class="live-main"><div><b>Scegli una formula qui sotto</b><span>Quando metti il lievito, qui vedi il prossimo passo e l'ora.</span></div></div>`;
+  }
+  fm.innerHTML = FORMULAS.map(([k, sub, tone]) => `<button class="f-card ${tone}${S.style === k ? " on" : ""}" type="button" data-formula="${k}">${formulaSvg(k)}<b>${esc(RECIPES[k].l.replace(" / baguette",""))}</b><span class="sub">${sub}</span></button>`).join("");
+  const ids = [...new Set([...S.rows.map(r => r.id), ...custom.map(f => f.id)])].slice(0, 8);
+  pa.innerHTML = ids.map(id => flourById(id)).filter(Boolean).map(f => `<button type="button" class="sack-c" data-fs-home="${f.id}">${sackSvg(f)}<small>${esc(f.b)}</small><b>${esc(f.n)}</b><span>W ${f.w ? fmt(wOf(f)) : "≈ " + fmt(Math.round(wOf(f)/10)*10)} · ${fmt(protOf(f),1)}%</span></button>`).join("") + `<button type="button" class="sack-c add" id="home-addflour">+ Aggiungi<br>una farina</button>`;
+  const tips = d && d.notes ? d.notes : [];
+  ti.closest("section").hidden = !tips.length;
+  ti.innerHTML = tips.map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("");
+}
+$("#home-formulas").addEventListener("click", e => { const b = e.target.closest("[data-formula]"); if (!b) return;
+  S.style = b.dataset.formula; S.hOver = null; markEdited(); renderStyleSegs(); compute(); go("impasto"); toast(`${RECIPES[S.style].l}: ora scegli le farine`); });
+$("#home-pantry").addEventListener("click", e => { const b = e.target.closest("[data-fs-home]"); if (b){ openFlour(b.dataset.fsHome); return; }
+  if (e.target.closest("#home-addflour")){ go("farine"); setTimeout(() => $("#custom-card").scrollIntoView({behavior:"smooth"}), 60); } });
+setInterval(() => { if (!$("#v-home").hidden) renderHome(); }, 60000);
+
 /* ===== navigazione ===== */
-const VIEWS = ["impasto","farine","tecnica","lieviti"];
+const VIEWS = ["home","impasto","farine","tecnica","lieviti"];
 function go(v, noHash){
-  if (!VIEWS.includes(v)) v = "impasto";
+  if (!VIEWS.includes(v)) v = "home";
   VIEWS.forEach(x => { $("#v-"+x).hidden = x !== v; });
   $$(".tab").forEach(t => t.setAttribute("aria-current", t.dataset.view === v ? "page" : "false"));
   if (!noHash && location.hash !== "#"+v) { try{ history.replaceState(null, "", "#"+v); }catch(e){ location.hash = v; } }
   window.scrollTo(0,0);
 }
 $$(".tab").forEach(t => t.onclick = () => go(t.dataset.view));
+document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g) go(g.dataset.goto); });
 window.addEventListener("hashchange", () => go(location.hash.slice(1), true));
 
 function openGuide(key){
@@ -1862,12 +2096,12 @@ function openGuide(key){
 function init(){
   renderStyleSegs();
   segButtons($("#seg-level"), LEVELS, "level");
-  segButtons($("#seg-mixer"), MIXERS, "mixer");
+  renderEq();
   segButtons($("#seg-endday"), ENDDAYS, "endDay");
   segButtons($("#seg-malt"), MALTS, "malt");
   $("#ex-flag").hidden = !S.example;
   renderRows(); renderFilters(); renderFlourList(); renderGuides(); compute();
-  go(location.hash.slice(1) || "impasto", true);
+  go(location.hash.slice(1) || "home", true);
 }
 
 /* tocchi un campo numerico o di testo: il valore è già selezionato, scrivi sopra senza cancellare */
