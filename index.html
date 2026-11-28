@@ -535,6 +535,50 @@ body.sheet-open{overflow:hidden}
 .st small{font-size:.7rem;font-family:var(--f-num);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85}
 .st.warm{background:rgba(255,197,143,.28)} .st.cold{background:rgba(140,190,230,.3)} .st.oven{background:#FFF3E6;color:var(--hero-b)}
 .stage-ax{display:flex;justify-content:space-between;font-family:var(--f-num);font-size:.72rem;opacity:.8;margin-top:4px}
+
+/* v5: grafici e crosta */
+.hchart{display:grid;gap:6px}
+.hchart svg,.ferm svg{width:100%;height:auto;display:block;overflow:visible}
+.hc-ok{fill:color-mix(in srgb,#2E9E5B 16%,transparent)}
+.hc-hard{fill:color-mix(in srgb,#C0503A 13%,transparent)}
+.hc-area{fill:color-mix(in srgb,var(--accent) 18%,transparent)}
+.hc-line{fill:none;stroke:var(--accent);stroke-width:2.2}
+.hc-ax,.fc-ax{stroke:var(--line);stroke-width:1}
+.hc-t,.fc-t{font-size:10px;fill:var(--muted);font-family:var(--f-body)}
+.hc-mark{stroke:var(--ink);stroke-width:2}
+.hc-pill{fill:var(--accent)}
+.hc-pt{font-size:10.5px;font-weight:700;fill:var(--on-accent);font-family:var(--f-body)}
+.c-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
+.c-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.c-leg i.ok,.c-leg i.win{background:color-mix(in srgb,#2E9E5B 38%,transparent)}
+.c-leg i.hard{background:color-mix(in srgb,#C0503A 32%,transparent)}
+.c-leg i.warm{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+.c-leg i.cold{background:color-mix(in srgb,#3B82C4 38%,transparent)}
+.c-leg i.now{background:#2E9E5B;border-radius:50%}
+.ferm{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:8px;margin-top:12px}
+.ferm-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ferm h4{margin:0;font-family:var(--f-display,inherit);font-size:1.05rem}
+.ferm .verdict{margin:0;font-weight:700}
+.ferm .verdict::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;background:#2E9E5B;vertical-align:0}
+.ferm .verdict.warn::before{background:#D9822B}
+.fc-warm{fill:color-mix(in srgb,var(--accent) 9%,transparent)}
+.fc-cold{fill:color-mix(in srgb,#3B82C4 20%,transparent)}
+.fc-after{fill:var(--sunken)}
+.fc-win{fill:color-mix(in srgb,#2E9E5B 20%,transparent)}
+.fc-area{fill:color-mix(in srgb,var(--accent) 22%,transparent)}
+.fc-line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round}
+.fc-oven{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.fc-tb{font-size:10px;font-weight:700;fill:var(--ink);font-family:var(--f-body)}
+.fc-peak{fill:var(--surface);stroke:var(--accent);stroke-width:2.5}
+.fc-now{stroke:#2E9E5B;stroke-width:2}
+.fc-nowd{fill:#2E9E5B}
+.wt{display:grid;grid-template-columns:minmax(0,1fr) 38px auto 38px;align-items:center;gap:8px;font-size:.92rem}
+.wt b{min-width:52px;text-align:center}
+.ovenline .ol-bake{grid-column:1/-1;flex-basis:100%;margin:0}
+.wt button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--sunken);color:var(--ink);font-size:1.15rem;font-weight:700;cursor:pointer}
+.ovenat-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+#in-ovenat{font-size:16px}
+.crust-seg button small{display:block;font-weight:500;font-size:.75rem;opacity:.8}
 </style>
 <div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
 <div id="cmp-bar" hidden></div>
@@ -611,6 +655,7 @@ body.sheet-open{overflow:hidden}
       <h3>Attrezzatura</h3>
       <div class="field"><span class="lbl">Forno</span><div class="eq" id="eq-oven"></div></div>
       <div class="ovenline" id="oven-line"></div>
+      <div class="field" id="crust-field"><span class="lbl">La crosta che vuoi</span><div class="seg crust-seg" id="seg-crust"></div></div>
       <div class="field"><span class="lbl">Impasto</span><div class="eq" id="eq-mixer"></div></div>
       <div class="field fric"><label for="in-dtemp">Impasto misurato a fine lavoro</label><div class="fric-row"><div class="unit" data-u="°C"><input id="in-dtemp" type="text" data-num inputmode="decimal" placeholder="es. 26"></div><button type="button" class="btn" id="fric-save">Taratura</button></div><p class="small muted" id="fric-info"></p></div>
     </div>
@@ -619,6 +664,7 @@ body.sheet-open{overflow:hidden}
       <h3>Lievito e tempi</h3>
       <div class="field"><span class="lbl">Lievito</span><div class="seg lev-seg" id="seg-lev"></div></div>
       <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
+      <div class="field"><label for="in-ovenat">Voglio infornare alle</label><div class="ovenat-row"><input id="in-ovenat" type="time"><button type="button" class="linkish" id="ovenat-auto" hidden>lo decidi tu</button></div><p class="small muted" id="ovenat-info"></p></div>
       <div class="nums">
         <div class="field"><label for="in-temp">Cucina</label><div class="unit" data-u="°C"><input id="in-temp" type="text" data-num min="12" max="34" step="1" inputmode="decimal"></div></div>
         <div class="field" id="fridge-field"><label for="in-fridge">Frigo</label><div class="unit" data-u="°C"><input id="in-fridge" type="text" data-num min="1" max="10" step="1" inputmode="decimal"></div></div>
@@ -965,7 +1011,7 @@ const DEFAULT = {
   rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
   style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
   start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
-  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", example:true, panW:30, panL:40, panN:1
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", crust:"classica", ovenAt:null, example:true, panW:30, panL:40, panN:1
 };
 let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
 if (!RECIPES[S.style]) S.style = "pagnotta";
@@ -1107,20 +1153,34 @@ function makePlan(lev, A, overheadH){
   const now = toMin(nowStart());
   const res = {T, f, starter, tol, minF: minEq/f, recF: recEq/f, minH: overheadH + minEq/f, recH: overheadH + recEq/f, short:false, why:"", startMin: now};
   const finish = () => { res.fresh = clamp(Math.pow(4.2 / res.eq, 1/0.6), 0.05, 3); res.lmPct = clamp(20 * Math.pow(8 / res.eq, 2), 5, 40); return res; };
-  const roomPlan = (startMin) => {
-    const use = Math.min(Math.max(recEq/f, minEq/f), 12, Math.max(minEq/f, tol / f));
+  const roomPlan = (startMin, useO) => {
+    const use = useO ?? Math.min(Math.max(recEq/f, minEq/f), 12, Math.max(minEq/f, tol / f));
     Object.assign(res, {mode:"room", use, eq: use*f, fh:0, post:0, startMin});
     res.bulk = use * (teg ? 0.6 : 0.65); res.app = use - res.bulk;
     res.total = overheadH + use;
   };
   if (S.endDay === 0){
+    const want = S.ovenAt;
+    if (want != null){
+      const lo = minEq/f, hi = Math.max(lo, Math.min(tol/f, 14));
+      const avail = (want - now)/60 - overheadH;
+      res.target = want;
+      if (avail < lo){
+        roomPlan(now, lo);
+        res.why = `Alle ${at(want).split(" ")[0]} è troppo presto: con questa farina e la cucina a ${T} °C il primo orario possibile è ${at(now + res.total*60)}.`;
+      } else if (avail > hi){
+        roomPlan(Math.round(want - (overheadH + hi)*60), hi);
+        res.why = `Fino alle ${at(want).split(" ")[0]} sono tante ore: la farina regge circa ${hm(hi)} di lievitazione. Inizia alle ${at(res.startMin)}, oppure scegli "Domani" e usa il frigo.`;
+      } else roomPlan(now, avail);
+      return finish();
+    }
     roomPlan(now);
     const endClock = (now + res.total*60) / 60;
     if (endClock >= 23) res.why = "Iniziando adesso inforneresti a notte fonda: valuta \"Domani\", con la notte in frigo.";
     return finish();
   }
   /* domani / dopodomani: puntata breve, poi frigo, infornata a un'ora comoda */
-  const target = S.endDay*1440 + (teg ? 19*60 : 10*60);
+  const target = S.endDay*1440 + (S.ovenAt ?? (teg ? 19*60 : 10*60));
   res.target = target;
   const rb = (starter ? 4 : 2.5) / f;
   const post = teg ? R.post : 0;
@@ -1140,7 +1200,7 @@ function makePlan(lev, A, overheadH){
     res.late = true; startMin = now; res.target = now + totalH*60;
   }
   Object.assign(res, {mode:"fridge", bulk: rb, fh, post, app: post, eq: rb*f + fridgeEq(fh) + post*f, startMin, total: overheadH + rb + fh + post});
-  if (res.late) res.why = `Per infornare alle ${teg ? "19" : "10"} avresti dovuto iniziare prima: se inizi adesso inforni più tardi (vedi sopra). Non accorcio il frigo, perché con meno ore di frigo servirebbe più lievito.`;
+  if (res.late) res.why = `Per infornare alle ${at(target).split(" ")[0]} avresti dovuto iniziare prima: se inizi adesso inforni più tardi (vedi sopra). Non accorcio il frigo, perché con meno ore di frigo servirebbe più lievito.`;
   else if (S.endDay === 2 && fh < 30) res.why = `La farina regge circa ${hm(maxFh)} di frigo, non due notti intere: inizi ${startMin >= 1440 ? "domani" : "più tardi"} e la qualità resta la stessa.`;
   return finish();
 }
@@ -1153,7 +1213,7 @@ function adaptToDose(P, pct, overheadH){
     const use = need / f;
     out.use = use; out.eq = need; out.bulk = use * (RECIPES[S.style].kind==="teglia" ? 0.6 : 0.65); out.app = use - out.bulk;
     out.total = overheadH + use;
-    if (S.endDay > 0 && P.target != null) out.startMin = Math.max(now, P.target - out.total*60);
+    if (P.target != null) out.startMin = Math.max(now, P.target - out.total*60);
     if (need > P.tol) out.ownMsg = `Con questa dose servono circa ${fmt(need,0)} ore equivalenti a 24 °C, ma la tua farina ne regge circa ${P.tol}: rischi un impasto sfinito. Aumenta un po' la dose.`;
     else if (use < 1.5) out.ownMsg = `Con questa dose l'impasto sarebbe pronto in meno di 1 ora e mezza: troppo in fretta per avere sapore. Riduci la dose.`;
     return out;
@@ -1237,7 +1297,7 @@ function compute(){
   const share = A.sh(["sem","semint"]), wh = A.wholeShare;
   const aut = share >= 0.3 ? 60 : wh >= 0.3 ? 45 : 30;
   const kneadMin = S.mixer === "planetaria" || S.mixer === "spirale" ? 10 : 15;
-  const overheadH = ((doAut ? aut : 0) + kneadMin + (teg ? 15 : 30)) / 60;
+  const overheadH = ((doAut ? aut : 0) + (teg ? 15 : 30)) / 60; /* l'impasto è già dentro la puntata, che parte dal lievito */
 
   /* programma per ogni lievito (per i numeri sui pulsanti) */
   const plans = {}; LEVS.forEach(([k]) => plans[k] = makePlan(k, A, overheadH));
@@ -1287,7 +1347,7 @@ function compute(){
   const endMin = t0 + P.total*60;
   const levWord = S.lev==="fresco"?"lievito di birra fresco":S.lev==="secco"?"lievito secco":S.lev==="essic"?"lievito madre essiccato":S.lev==="lm"?"lievito madre":"licoli";
   /* confronto esplicito: senza frigo, una notte, due notti (stessa farina e cucina) */
-  const cmpDays = [0,1,2].map(d => { const keep = S.endDay; S.endDay = d; const Q = makePlan("fresco", A, overheadH); S.endDay = keep; return Q; });
+  const cmpDays = [0,1,2].map(d => { const keep = S.endDay, keepO = S.ovenAt; S.endDay = d; S.ovenAt = null; const Q = makePlan("fresco", A, overheadH); S.endDay = keep; S.ovenAt = keepO; return Q; });
   const cmpK = S.lev==="secco" ? 0.35 : S.lev==="essic" ? ESSIC_K : 1;
   const cmpG = Q => fmt(A.F * Q.fresh / 100 * cmpK, 1);
   const cmpBox = yeastLev ? `<div class="doses"><div class="doses-h">Dose di ${levWord} per ${fmt(A.F)} g di farina</div>
@@ -1313,7 +1373,12 @@ function compute(){
     ${cmpBox}
     ${P.why ? `<p class="small"><b>${P.why}</b></p>` : ""}
     ${P.own ? `<p class="small"><b>Con la tua dose (${fmt(S.myDose,1)} g).</b> Per il mio programma standard userei ${fmt(autoG,1)} g. Ho tenuto i tuoi grammi e ho adattato le ore: ${P.mode==="fridge" ? `prima lievitazione ${hm(P.bulk)}, frigo ${hm(P.fh)}${P.post>0.1?`, poi ${hm(P.post)} fuori frigo prima di infornare`:", poi in forno direttamente dal frigo"}` : `in tutto ${hm(P.use)} di lievitazione a ${T} °C`}.${P.ownMsg ? ` <b>${P.ownMsg}</b>` : ""}</p>` : ""}
-  </div>`;
+  </div><div id="ferm-box"></div>`;
+  { const oa = $("#in-ovenat"); if (oa){
+      if (document.activeElement !== oa) oa.value = at(endMin).split(" ")[0];
+      $("#ovenat-auto").hidden = S.ovenAt == null;
+      $("#ovenat-info").textContent = S.ovenAt == null ? "Lo calcolo io. Se vuoi infornare a un'ora precisa cambialo: adatto dose e inizio per arrivare al picco proprio a quell'ora." : "Scelto da te: dose di lievito e ora di inizio sono calcolate per arrivare al picco a quest'ora.";
+  } }
 
   /* tecnica pieghe */
   let fold = H >= 75 ? "coil" : H >= 66 ? "stretch" : "lettera";
@@ -1588,8 +1653,7 @@ function compute(){
       t += P.app*60;
     }
     { const oi = ovenInfo(false); steps.push({t: t - oi.pre - 5, h:"Accendi il forno", p: oi.fire, g:"cottura"}); }
-    steps.push({t, h:"Taglio e cottura", p:"Rovescia il pane, taglialo con la lametta e inforna. Circa 20 min con vapore (pentola chiusa o teglia d'acqua bollente), poi togli il vapore e cuoci finché la crosta è ben scura: in tutto 45–50 min secondo King Arthur. È cotto quando battendo sotto suona vuoto e pesa almeno il 15% in meno dell'impasto.", g:"cottura"});
-    t += 45;
+    { const cb = crustBake(); steps.push({t, h:"Taglio e cottura", p: cb.txt, g:"cottura"}); t += cb.min; }
     steps.push({t, h:"Raffreddamento su griglia", p:"Almeno 1 ora prima di tagliare: la mollica finisce di assestarsi mentre l'umidità esce.", g:null});
   }
   steps.sort((a,b) => a.t - b.t);
@@ -1621,6 +1685,8 @@ function compute(){
     if (pe && bake) pe.textContent = at(bake.real);
   }
   window._day = {M0, started: !!(yS && yS.done), steps: steps.filter(s => s.t >= 0).map(s => ({h:s.h, real:s.real, done:s.done})), notes: notes.filter(n => n[0] === "bad" || n[0] === "warn").slice(0, 2), style: S.style};
+  renderFerm(steps, P, yS);
+  { const bk = steps.find(st => /cottura/i.test(st.h) && !/Accendi/.test(st.h)); window._bakeOff = bk ? bk.t - endMin : 0; }
   const markUI = (s, i) => {
     if (s.t < 0 || s.nomark) return "";
     if (s.done) return `<div class="mk done"><span>✓ ${s.k === "lievito" ? "Lievito messo" : s.k === "Formatura e cestino" ? "Nel cestino" : s.k === "Accendi il forno" ? "Forno acceso" : /cottura/i.test(s.k) ? "Infornato" : "Fatto"} alle</span><input type="time" class="mk-time" data-k="${s.k}" value="${hhmm(S.marks[s.k])}" aria-label="Correggi l'orario"><button type="button" class="linkish mk-undo" data-k="${s.k}">annulla</button></div>`;
@@ -1641,10 +1707,7 @@ function compute(){
   <section class="hero" aria-label="Idratazione consigliata">
     <div class="eyebrow">Acqua consigliata · ${esc(R.l)}</div>
     <div class="big"><span class="num">${H}%</span><span class="sub">${fmt(water)} g di acqua${usesStarter?` (+${fmt(stWater)} g nel ${S.lev==="licoli"?"licoli":"lievito madre"})`:""} su ${fmt(flourTot)} g di farina</span></div>
-    <div>
-      <div class="hydro-bar" aria-hidden="true"><i style="left:${pct(lo)};width:calc(${pct(hi)} - ${pct(lo)})"></i><b style="left:${pct(H)}"></b></div>
-      <div class="hydro-scale"><span>50%</span><span>range consigliato: ${lo}–${hi}%</span><span>100%</span></div>
-    </div>
+    ${hydroChart(lo, hi, H)}
     <div class="ovr"><label for="in-hover">Vuoi provare un'altra idratazione? ${S.hOver!=null?`<button class="linkish" id="reset-h" style="color:inherit">torna a ${rec}%</button>`:""}</label><input id="in-hover" type="range" min="50" max="95" step="1" value="${H}"></div>
   </section>
 
@@ -1717,7 +1780,7 @@ function compute(){
     keepY(() => { S.marks[el.dataset.k] = ms; }); });
   const nr = $("#new-recipe"); if (nr) nr.onclick = () => {
     /* azzera la ricetta: farine, dose, orari, pieghe. Restano solo le cose della tua cucina (temperature, planetaria, malto, livello, lievito) */
-    const keep = {temp:S.temp, fridgeT:S.fridgeT, mixer:S.mixer, malt:S.malt, level:S.level, lev:S.lev};
+    const keep = {temp:S.temp, fridgeT:S.fridgeT, mixer:S.mixer, malt:S.malt, level:S.level, lev:S.lev, oven:S.oven, crust:S.crust, fric:S.fric};
     Object.assign(S, JSON.parse(JSON.stringify(DEFAULT)), keep, {rows:[{id:(S.rows[0]||DEFAULT.rows[0]).id, g:0}], example:false, marks:{}, foldAdj:0, myDose:null, hOver:null, maltPct:null, ftemp:null});
     save(); scrollTo(0, 0); location.hash = "impasto"; location.reload(); };
   const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; S.foldAdj = 0; });
@@ -1833,8 +1896,110 @@ function renderEq(){
   m.innerHTML = MIXERS.map(([k,l]) => { const tuned = (S.fric||{})[k] != null; const fr = tuned ? S.fric[k] : FRIC_BASE[k];
     return `<button type="button" class="eqc" data-mixer="${k}" aria-pressed="${S.mixer===k}">${EQ_SVG[k]}<b>${l}</b><small>attrito ${fmt(fr)} °C${tuned ? " · tarato" : ""}</small></button>`; }).join("");
   const R = RECIPES[S.style], teg = R && R.kind === "teglia", oi = ovenInfo(teg);
-  $("#oven-line").innerHTML = `<span>Preriscaldo</span><b>${oi.pre} min</b><span>Temperatura</span><b>${oi.temp}</b>${oi.warn ? `<p>${oi.warn}</p>` : ""}`;
+  $("#oven-line").innerHTML = `<span>Preriscaldo</span><b>${oi.pre} min</b><span>Temperatura</span><b>${oi.temp}</b>${teg ? "" : `<p class="ol-bake">Cottura del pane: <b>${crustBake().line}</b></p>`}${oi.warn ? `<p>${oi.warn}</p>` : ""}`;
+  const cf = $("#crust-field"); if (cf){ cf.hidden = teg; $("#seg-crust").innerHTML = CRUSTS.map(([k,l,sub]) => `<button type="button" data-crust="${k}" aria-pressed="${(S.crust||"classica")===k}">${l}<small>${sub}</small></button>`).join(""); }
 }
+/* ===== crosta: cambia tempi e modo di cottura del pane ===== */
+const CRUSTS = [["sottile","Sottile","croccante, dorata"],["classica","Classica","scura, croccante"],["rustica","Spessa","rustica, molto scura"]];
+function crustBake(){
+  const c = S.crust || "classica", stone = S.oven === "pietra";
+  const steam = stone ? "con vapore (una teglia con acqua bollente sul fondo del forno)" : "nella pentola di ghisa chiusa";
+  const off = stone ? "togli la teglia d'acqua" : "togli il coperchio";
+  const head = "Rovescia il pane, taglialo con la lametta e inforna. ";
+  const tail = " È cotto quando battendo sotto suona vuoto e pesa almeno il 15% in meno dell'impasto.";
+  if (c === "sottile") return {min:40, line:"35–40 min", txt: head + `20 min a 250 °C ${steam}, poi ${off} e altri 15–20 min, finché è dorato. Sforna appena ha preso colore: meno resta in forno, più la crosta resta sottile e croccante.` + tail};
+  if (c === "rustica") return {min:60, line:"50–55 min + 10 a forno spento", txt: head + `20 min a 250 °C ${steam}, poi ${off}, abbassa a 230 °C e cuoci altri 30–35 min, finché la crosta è molto scura. Poi spegni e lascia il pane 10 min con lo sportello socchiuso: la crosta si asciuga, diventa spessa e resta croccante a lungo.` + tail};
+  return {min:45, line:"45–50 min", txt: head + `Circa 20 min ${steam}, poi ${off} e cuoci finché la crosta è ben scura: in tutto 45–50 min a 250 °C secondo King Arthur.` + tail};
+}
+$("#seg-crust").addEventListener("click", e => { const b = e.target.closest("[data-crust]"); if (!b) return; S.crust = b.dataset.crust; markEdited(); compute(); });
+
+/* ===== grafico dell'idratazione: zona ideale della farina per questa ricetta ===== */
+function hydroChart(lo, hi, H){
+  const X0 = 12, X1 = 328, Y0 = 8, Y1 = 84, a = 45, b = 95, x = h => X0 + (clamp(h, a, b) - a)/(b - a)*(X1 - X0);
+  const c = (lo + hi)/2, sg = Math.max(4, (hi - lo)/2 + 3);
+  const pts = []; for (let h = a; h <= b; h += 0.5){ const v = Math.exp(-Math.pow((h - c)/sg, 2)/2); pts.push([x(h), Y1 - v*(Y1 - Y0 - 6)]); }
+  const d = pts.map((q,i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" ");
+  const hardL = lo - 8, hardH = hi + 7;
+  const zone = H < lo ? "Sotto la zona ideale: impasto più sodo e facile da lavorare, mollica più fitta."
+    : H > hardH ? "Molto sopra la zona ideale: impasto difficile da gestire, rischia di non tenere la forma."
+    : H > hi ? "Sopra la zona ideale: più alveoli, ma l'impasto è più difficile da gestire."
+    : "Nella zona ideale per questa farina e questa ricetta.";
+  return `<div class="hchart"><svg viewBox="0 0 340 106" role="img" aria-label="Idratazione ${H}%, zona ideale ${lo}–${hi}%">
+    ${hardL > a ? `<rect class="hc-hard" x="${X0}" y="${Y0}" width="${(x(hardL) - X0).toFixed(1)}" height="${Y1 - Y0}" rx="4"/>` : ""}
+    ${hardH < b ? `<rect class="hc-hard" x="${x(hardH).toFixed(1)}" y="${Y0}" width="${(X1 - x(hardH)).toFixed(1)}" height="${Y1 - Y0}" rx="4"/>` : ""}
+    <rect class="hc-ok" x="${x(lo).toFixed(1)}" y="${Y0}" width="${(x(hi) - x(lo)).toFixed(1)}" height="${Y1 - Y0}" rx="4"/>
+    <path class="hc-area" d="${d} L${X1} ${Y1} L${X0} ${Y1} Z"/><path class="hc-line" d="${d}"/>
+    <line class="hc-ax" x1="${X0}" x2="${X1}" y1="${Y1}" y2="${Y1}"/>
+    ${[50,60,70,80,90].map(v => `<text class="hc-t" x="${x(v).toFixed(1)}" y="${Y1 + 15}" text-anchor="middle">${v}</text>`).join("")}
+    <line class="hc-mark" x1="${x(H).toFixed(1)}" x2="${x(H).toFixed(1)}" y1="${Y0 - 2}" y2="${Y1}"/>
+    <rect class="hc-pill" x="${(x(H) - 20).toFixed(1)}" y="${Y1 + 3}" width="40" height="17" rx="8.5"/><text class="hc-pt" x="${x(H).toFixed(1)}" y="${Y1 + 15}" text-anchor="middle">${H}%</text>
+  </svg>
+  <div class="c-leg"><span><i class="ok"></i>zona ideale ${lo}–${hi}%</span><span><i class="hard"></i>difficile</span></div>
+  <p class="small">${zone}</p></div>`;
+}
+
+/* ===== grafico della fermentazione: sviluppo dell'impasto ora per ora, con il picco =====
+   Ogni ora conta come 1,09^(T-24) ore a 24 °C (lo stesso modello che decide la dose).
+   Il picco è il punto in cui l'impasto ha accumulato la lievitazione prevista dal programma;
+   dopo, la maglia comincia a cedere, tanto prima quanto meno la farina è forte. */
+let whatT = null;
+document.addEventListener("click", e => { const b = e.target.closest("[data-wt]"); if (!b) return;
+  const base = clamp(S.temp || 22, 10, 36); whatT = clamp((whatT ?? base) + Number(b.dataset.wt), 10, 36); if (whatT === base) whatT = null; compute(); });
+function renderFerm(steps, P, yS){
+  const box = $("#ferm-box"); if (!box) return;
+  const bake = steps.find(st => /cottura/i.test(st.h) && !/Accendi/.test(st.h));
+  if (!yS || !bake || yS.real == null){ box.innerHTML = ""; return; }
+  const tY = yS.real, tB = bake.real, cold = steps.find(st => st.cold);
+  const c0 = cold ? cold.real : null, c1 = cold ? cold.real + P.fh*60 : null;
+  const T = P.T, Tw = whatT ?? T, FT = fridgeT();
+  const rateAt = (t, Tr) => { if (c0 != null && t >= c0 && t < c1){ const h = (t - c0)/60; return h < 3 ? fRate((Tr + FT)/2) : fRate(FT); } return fRate(Tr); };
+  const end = tB + Math.max(120, 0.35*(tB - tY));
+  const accum = Tr => { const out = [[tY, 0]]; let sum = 0; for (let t = tY; t < end; t += 5){ sum += rateAt(t, Tr)*5/60; out.push([t + 5, sum]); } return out; };
+  const A0 = accum(T), AW = Tw === T ? A0 : accum(Tw);
+  const valAt = (arr, t) => arr[clamp(Math.round((t - tY)/5), 0, arr.length - 1)][1];
+  let need = valAt(A0, tB); if (P.own && P.ownNeed && P.eq) need *= P.ownNeed / P.eq;
+  if (!(need > 0) || !(tB > tY)){ box.innerHTML = ""; return; }
+  const rT = (P.tol || need*1.5) / (P.eq || need), span = clamp(rT - 1, 0.25, 0.6);
+  const yOf = m => m <= 1 ? (1 - Math.cos(Math.PI*m))/2 : Math.max(0.12, 1 - 0.6*Math.pow((m - 1)/span, 1.3));
+  const tAt = (arr, mm) => { const e = arr.find(q => q[1] >= mm*need); return e ? e[0] : null; };
+  const tPeak = tAt(AW, 1), w0 = tAt(AW, 0.92), w1 = tAt(AW, 1.08), mB = valAt(AW, tB)/need;
+  const X0 = 8, X1 = 332, Y0 = 22, Y1 = 120;
+  const x = t => X0 + (clamp(t, tY, end) - tY)/(end - tY)*(X1 - X0), y = v => Y1 - v*(Y1 - Y0);
+  const line = AW.map(([t,v],i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + y(yOf(v/need)).toFixed(1)).join(" ");
+  const clk = t => { const mm = ((Math.round(t) % 1440) + 1440) % 1440; return String(Math.floor(mm/60)).padStart(2,"0") + ":" + String(mm % 60).padStart(2,"0"); };
+  const bands = [];
+  if (c0 != null){ bands.push([tY, c0, "warm", Tw]); bands.push([c0, Math.min(c1, tB), "cold", FT]); if (c1 < tB) bands.push([c1, tB, "warm", Tw]); }
+  else bands.push([tY, tB, "warm", Tw]);
+  bands.push([tB, end, "after", null]);
+  const spanH = (end - tY)/60, stepH = spanH <= 8 ? 2 : spanH <= 16 ? 3 : spanH <= 30 ? 6 : 12;
+  const ticks = []; for (let t = Math.ceil(tY/(stepH*60))*stepH*60; t <= end; t += stepH*60) ticks.push(t);
+  const nowM = (Date.now() - window._day.M0)/60000, showNow = yS.done && nowM > tY && nowM < end;
+  const mNow = showNow ? valAt(AW, nowM)/need : 0;
+  const good = mB >= 0.92 && mB <= 1.08;
+  const verdict = good ? "al picco" : mB < 0.92 ? (tPeak ? `ancora giovane, il picco arriva verso le ${clk(tPeak)}` : "ancora giovane, il picco arriva più tardi")
+    : `oltre il picco (era verso le ${tPeak ? clk(tPeak) : "?"}): l'impasto rischia di cedere`;
+  const diff = tPeak ? Math.round((tPeak - tB)/5)*5 : null;
+  box.innerHTML = `<section class="ferm" aria-label="Sviluppo dell'impasto">
+    <div class="ferm-h"><h4>Sviluppo dell'impasto</h4><span class="small muted">dal lievito al forno</span></div>
+    <p class="verdict ${good ? "good" : "warn"}">Inforni alle ${clk(tB)}: ${verdict}.</p>
+    <svg viewBox="0 0 340 140" role="img" aria-label="Curva dello sviluppo dell'impasto. Picco alle ${tPeak ? clk(tPeak) : "fuori grafico"}, infornata alle ${clk(tB)}.">
+      ${bands.map(([a,b,k,tt]) => `<rect class="fc-${k}" x="${x(a).toFixed(1)}" y="${Y0 - 4}" width="${Math.max(0, x(b) - x(a)).toFixed(1)}" height="${Y1 - Y0 + 4}"/>${tt != null && x(b) - x(a) > 34 ? `<text class="fc-t" x="${((x(a) + x(b))/2).toFixed(1)}" y="${Y0 + 8}" text-anchor="middle">${k === "cold" ? "frigo " : ""}${fmt(tt)} °C</text>` : ""}`).join("")}
+      ${w0 && w1 ? `<rect class="fc-win" x="${x(w0).toFixed(1)}" y="${Y0 - 4}" width="${Math.max(2, x(w1) - x(w0)).toFixed(1)}" height="${Y1 - Y0 + 4}"/>` : ""}
+      <path class="fc-area" d="${line} L${x(end).toFixed(1)} ${Y1} L${X0} ${Y1} Z"/><path class="fc-line" d="${line}"/>
+      <line class="fc-ax" x1="${X0}" x2="${X1}" y1="${Y1}" y2="${Y1}"/>
+      ${ticks.map(t => `<text class="fc-t" x="${x(t).toFixed(1)}" y="${Y1 + 14}" text-anchor="middle">${clk(t)}</text>`).join("")}
+      <line class="fc-oven" x1="${x(tB).toFixed(1)}" x2="${x(tB).toFixed(1)}" y1="${Y0 - 6}" y2="${Y1}"/>
+      <text class="fc-tb" x="${Math.min(X1 - 2, x(tB) + 4).toFixed(1)}" y="${Y1 - 6}" text-anchor="${x(tB) > X1 - 50 ? "end" : "start"}">forno ${clk(tB)}</text>
+      ${tPeak && tPeak < end ? `<circle class="fc-peak" cx="${x(tPeak).toFixed(1)}" cy="${y(1).toFixed(1)}" r="5"/><text class="fc-tb" x="${x(tPeak).toFixed(1)}" y="${Y0 - 9}" text-anchor="middle">picco</text>` : ""}
+      ${showNow ? `<line class="fc-now" x1="${x(nowM).toFixed(1)}" x2="${x(nowM).toFixed(1)}" y1="${Y0 - 4}" y2="${Y1}"/><circle class="fc-nowd" cx="${x(nowM).toFixed(1)}" cy="${y(yOf(mNow)).toFixed(1)}" r="4"/>` : ""}
+    </svg>
+    <div class="c-leg"><span><i class="warm"></i>cucina</span>${c0 != null ? `<span><i class="cold"></i>frigo</span>` : ""}<span><i class="win"></i>momento giusto</span>${showNow ? `<span><i class="now"></i>adesso</span>` : ""}</div>
+    ${w0 && w1 ? `<p class="small">Il momento giusto per infornare va dalle <b>${clk(w0)}</b> alle <b>${clk(w1)}</b>.${showNow ? ` Adesso l'impasto è ${mNow > 1.08 ? "oltre il picco" : yOf(mNow) < 0.05 ? "appena partito" : `a circa il ${Math.round(Math.min(1, yOf(mNow))*100)}% del suo sviluppo`}.` : ""}</p>` : ""}
+    <div class="wt"><span>E se la cucina fosse a…</span><button type="button" data-wt="-1" aria-label="Un grado in meno">−</button><b class="num">${fmt(Tw)} °C</b><button type="button" data-wt="1" aria-label="Un grado in più">+</button></div>
+    ${Tw !== T ? `<p class="small">Con ${fmt(Tw)} °C invece di ${fmt(T)} °C il picco ${diff == null ? "arriva dopo la fine del grafico" : diff === 0 ? "resta all'ora del forno" : `arriva alle ${clk(tPeak)}, ${hm(Math.abs(diff)/60)} ${diff < 0 ? "prima" : "dopo"}`}. È solo una prova: se la tua cucina è davvero a ${fmt(Tw)} °C scrivilo sopra in Cucina, e ricalcolo dose e orari.</p>` : `<p class="small muted">Prova a cambiare la temperatura per vedere come si sposta il picco: il calcolo resta quello di sopra.</p>`}
+  </section>`;
+}
+
 function ovenInfo(teg){
   const ov = S.oven || "casa";
   if (ov === "pietra") return {pre:60, temp:"250 °C", fire:"Al massimo (250 °C) con la pietra refrattaria sul ripiano più basso, per almeno 60 minuti: la pietra ci mette più del forno a scaldarsi."};
@@ -2112,6 +2277,7 @@ function init(){
   segButtons($("#seg-level"), LEVELS, "level");
   renderEq();
   segButtons($("#seg-endday"), ENDDAYS, "endDay");
+  { const oa = $("#in-ovenat"); if (oa){ oa.addEventListener("change", () => { if (!oa.value) return; S.ovenAt = toMin(oa.value); markEdited(); compute(); }); $("#ovenat-auto").onclick = () => { S.ovenAt = null; markEdited(); compute(); }; } }
   segButtons($("#seg-malt"), MALTS, "malt");
   $("#ex-flag").hidden = !S.example;
   renderRows(); renderFilters(); renderFlourList(); renderGuides(); compute();
