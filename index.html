@@ -451,6 +451,9 @@ body.sheet-open{overflow:hidden}
 .cmp-t td.hi{color:var(--accent);background:var(--accent-soft)}
 .cmp-t tr:last-child th,.cmp-t tr:last-child td{border-bottom:0}
 .cmp-v{background:var(--sunken);border-radius:14px;padding:12px;margin:0}
+
+.fric-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+#fric-info .linkish{font-size:inherit}
 </style>
 <div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
 <div id="cmp-bar" hidden></div>
@@ -518,6 +521,7 @@ body.sheet-open{overflow:hidden}
             <div class="field" id="pieces-field"><label for="in-pieces">Pezzi</label><input id="in-pieces" type="text" data-num min="1" max="30" step="1" inputmode="decimal"></div>
           </div>
           <div class="field"><span class="lbl">Impasto</span><div class="seg" id="seg-mixer"></div></div>
+          <div class="field fric"><label for="in-dtemp">Impasto misurato a fine lavoro</label><div class="fric-row"><div class="unit" data-u="°C"><input id="in-dtemp" type="text" data-num inputmode="decimal" placeholder="es. 26"></div><button type="button" class="btn" id="fric-save">Taratura</button></div><p class="small muted" id="fric-info"></p></div>
           <div class="field"><span class="lbl">Malto d'orzo</span><div class="seg" id="seg-malt"></div></div>
           <div class="nums" id="malt-box" hidden>
             <div class="field"><label for="in-malt">Malto</label><div class="unit" data-u="%"><input id="in-malt" type="text" data-num min="0.1" max="5" step="0.1" inputmode="decimal"></div></div>
@@ -854,6 +858,25 @@ const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["estr","Estratto
 const MALT_DEF = {dia:0.2, estr:0.5, nodia:1};
 const MALT_NAME = {dia:"Malto d'orzo diastasico in polvere", estr:"Estratto di malto diastasico (liquido)", nodia:"Malto d'orzo non diastasico / sciroppo"};
 
+/* attrito dell'impastatrice: stima di partenza, poi tarata da te con la temperatura misurata */
+const FRIC_BASE = {mano:3, planetaria:12, spirale:10};
+let lastFric = {fr:3, k:3};
+const fricOf = () => { const t = (S.fric || {})[S.mixer]; return t != null ? t : FRIC_BASE[S.mixer] ?? 3; };
+function renderFricInfo(){
+  const el = $("#fric-info"); if (!el) return;
+  const tuned = (S.fric || {})[S.mixer] != null;
+  const name = {mano:"le mani", planetaria:"la planetaria", spirale:"la spirale"}[S.mixer] || "l'impastatrice";
+  el.innerHTML = `Attrito usato per ${name}: <b>${fmt(fricOf())} °C</b> ${tuned ? `(tarato da te) <button type="button" class="linkish" id="fric-reset">torna a ${FRIC_BASE[S.mixer]} °C</button>` : "(stima di partenza)"}. Se hai usato l'acqua alla temperatura indicata, scrivi qui quanto misuravi l'impasto a fine lavoro: correggo l'attrito per le prossime volte.`;
+  const r = $("#fric-reset"); if (r) r.onclick = () => { delete S.fric[S.mixer]; save(); compute(); };
+}
+$("#fric-save").onclick = () => {
+  const M = numIn($("#in-dtemp").value);
+  if (isNaN(M) || M < 10 || M > 40){ toast("Scrivi la temperatura dell'impasto, ad esempio 26"); return; }
+  const nf = clamp(Math.round((lastFric.fr + lastFric.k * (M - 25)) * 2) / 2, 0, 30);
+  S.fric = Object.assign({}, S.fric, {[S.mixer]: nf});
+  $("#in-dtemp").value = ""; save(); compute();
+  toast(M > 25.4 ? `Impasto più caldo del previsto: attrito portato a ${fmt(nf)} °C, l'acqua sarà più fredda` : M < 24.6 ? `Impasto più freddo del previsto: attrito portato a ${fmt(nf)} °C, l'acqua sarà più calda` : "Perfetto: l'attrito era già giusto");
+};
 function segButtons(el, list, key, after){
   el.innerHTML = list.map(([v,l]) => `<button type="button" data-v="${v}" aria-pressed="${String(S[key])===String(v)}">${l}</button>`).join("");
   el.onclick = e => { const b = e.target.closest("button"); if (!b) return;
@@ -1124,12 +1147,14 @@ function compute(){
   renderRecipeInfo(A, H, R);
 
   /* temperatura dell'acqua (formula DDT) */
-  const T = P.T, DDT = 25, fr = S.mixer === "planetaria" ? 12 : S.mixer === "spirale" ? 9 : 3;
+  const T = P.T, DDT = 25, fr = fricOf();
+  lastFric = {fr, k: usesStarter ? 4 : 3};
+  renderFricInfo();
   const FT = S.ftemp ?? T;
   $("#in-ftemp").placeholder = String(T);
   const wTraw = Math.round(usesStarter ? 4*DDT - FT - T - T - fr : 3*DDT - FT - T - fr);
   const wT = clamp(wTraw, 2, 45);
-  const wExplain = `${usesStarter?"4":"3"} × 25 °C (impasto finito) = ${usesStarter?100:75}, meno farina ${FT} °C, cucina ${T} °C${usesStarter?`, lievito ${T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":S.mixer==="spirale"?"della spirale (stima, da tarare)":"delle mani"} ${fr} °C = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
+  const wExplain = `${usesStarter?"4":"3"} × 25 °C (impasto finito) = ${usesStarter?100:75}, meno farina ${FT} °C, cucina ${T} °C${usesStarter?`, lievito ${T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":S.mixer==="spirale"?"della spirale":"delle mani"} ${fmt(fr)} °C${(S.fric||{})[S.mixer] != null ? " (tarato da te)" : " (stima, da tarare)"} = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
 
   /* box programma */
   const t0 = P.startMin;
@@ -1982,7 +2007,7 @@ const G_TEC = [
     <p>Impastare serve a formare la maglia glutinica. È pronta quando l'impasto si stacca dalle pareti, è liscio e un pezzetto si allarga in un velo sottile senza strapparsi.</p>
     ${panels(ILL.velo)}
     <ul><li><b>Planetaria:</b> gancio, prima velocità bassa per 3–4 minuti, poi media. Sale dopo i primi minuti, acqua di riserva a filo solo quando l'impasto è già incordato.</li>
-    <li><b>Spirale:</b> lavora tirando e ripiegando l'impasto contro la barra frangipasta, per questo incorda prima e lo scalda meno della planetaria. Prima velocità finché l'acqua è assorbita, poi sale e seconda velocità fino al velo. L'attrito di 9 °C che uso nel calcolo è una stima: misura l'impasto a fine lavoro e, se è più caldo di 25 °C, la volta dopo usa acqua più fredda dello stesso numero di gradi (e viceversa).</li>
+    <li><b>Spirale:</b> lavora tirando e ripiegando l'impasto contro la barra frangipasta, per questo incorda prima e lo scalda meno della planetaria. Prima velocità finché l'acqua è assorbita, poi sale e seconda velocità fino al velo. L'attrito di partenza per la spirale è 10 °C: è una stima. Misura l'impasto a fine lavoro e scrivilo in Altre impostazioni, sotto Impasto: l'app corregge l'attrito della tua macchina e le volte dopo ti dà l'acqua giusta.</li>
     <li><b>A mano:</b> per impasti morbidi usa lo slap & fold, per impasti molto idratati basta mescolare bene e affidarsi alle pieghe durante la puntata.</li>
     <li><b>Non scaldarlo:</b> a fine impasto l'ideale è 24–26 °C. Per questo il calcolatore ti dà la temperatura dell'acqua.</li></ul>` + src("ka_ddt")},
   {id:"slap", t:"Slap & fold", s:"Impastare a mano un impasto morbido", when:"Subito dopo aver unito gli ingredienti, 5–10 minuti. Per impasti fino a circa 75%.", body:() => panels(ILL.slap) + `<p>Non aggiungere farina sul banco: all'inizio l'impasto è appiccicoso, dopo qualche minuto si stacca da solo.</p>` + prat},
