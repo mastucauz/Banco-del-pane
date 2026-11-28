@@ -388,7 +388,72 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
 input,select,textarea{font-size:max(16px,1em)}
 .mk.done input[type="time"]{font-size:16px}
 .new-recipe{display:grid;gap:8px;justify-items:start;margin-top:6px;padding-top:14px;border-top:1px dashed var(--line)}
+
+/* ===== scheda farina a pagina intera e confronto ===== */
+body.sheet-open{overflow:hidden}
+.fcard{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.fcard:active{transform:scale(.99)}
+.fcard-h{position:relative;padding-right:22px}
+.open-hint{position:absolute;right:0;top:2px;font-size:1.6rem;line-height:1;color:var(--accent);font-weight:700}
+#fsheet{position:fixed;inset:0;z-index:60;background:var(--bg);display:grid;grid-template-rows:auto 1fr}
+#fsheet[hidden]{display:none}
+.fs-top{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(120deg,var(--hero-a),var(--hero-b));color:#FFF3E6}
+.fs-top button{border:0;background:rgba(255,243,230,.14);color:inherit;font:inherit;font-weight:700;border-radius:999px;padding:9px 16px;min-height:42px}
+#fsheet-body{grid-auto-rows:max-content;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(32px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;align-content:start;max-width:760px;width:100%;margin:0 auto;grid-template-columns:minmax(0,1fr)}
+.fs-hero{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center}
+.sack{width:96px;height:120px;filter:drop-shadow(0 10px 14px rgba(60,25,5,.25))}
+.fs-brand{color:var(--accent);font-weight:800;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase}
+.fs-hero h2{font-size:1.7rem;line-height:1.1;margin:2px 0 8px}
+.fs-strength{display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,var(--hero-a),var(--hero-b));color:#FFF3E6;border-radius:20px;padding:14px 16px}
+.fs-strength span{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.fs-strength b{font-family:var(--f-display);font-size:1.6rem;flex:1}
+.fs-strength .dots{display:flex;gap:5px}
+.fs-strength .dots i{width:12px;height:12px;border-radius:50%;background:rgba(255,243,230,.22)}
+.fs-strength .dots i.on{background:#FFC58F}
+.fs-card{background:var(--surface);border-radius:var(--r);padding:16px;display:grid;gap:14px;box-shadow:0 1px 0 var(--line),0 12px 28px -18px rgba(70,35,10,.45)}
+.fs-card h3{font-size:1.15rem;margin:0}
+.fbar-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.fbar-h span{color:var(--muted);font-weight:600;font-size:.9rem}
+.fbar-h b{font-family:var(--f-num);font-weight:700;font-size:1.1rem;margin-left:auto}
+.fbar-t{position:relative;height:10px;border-radius:99px;background:var(--sunken);margin-top:8px}
+.fbar-t i{position:absolute;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--crust),var(--accent))}
+.fbar-t i.pt{width:12px}
+.fbar-s{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:4px;font-family:var(--f-num)}
+.fs-win{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fs-win > div{background:var(--sunken);border-radius:16px;padding:12px;display:grid;gap:4px}
+.fs-win span{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fs-win b{font-family:var(--f-num);font-size:1.05rem}
+.fs-win small{font-size:.78rem;color:var(--muted)}
+.fs-uses{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.fs-uses li{padding-left:22px;position:relative}
+.fs-uses li::before{content:"";position:absolute;left:4px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.fs-actions{display:flex;flex-wrap:wrap;gap:8px}
+.fs-sim{display:grid;gap:8px}
+.fs-simb{display:grid;text-align:left;gap:2px;border:0;background:var(--sunken);border-radius:14px;padding:10px 12px;font:inherit;color:var(--ink)}
+.fs-simb span{font-size:.75rem;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.fs-simb small{color:var(--muted);font-family:var(--f-num)}
+.fs-src a{color:var(--accent)}
+#cmp-bar{position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:26;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;border-radius:18px;background:var(--ink);color:var(--bg);box-shadow:0 12px 30px -12px rgba(40,20,5,.6);font-size:.9rem;font-weight:600}
+#cmp-bar[hidden]{display:none}
+#cmp-bar > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#cmp-bar i{font-style:normal;opacity:.7}
+#cmp-bar .icon-btn{background:transparent;color:inherit;height:40px}
+.cmp-title{margin:0}
+.cmp-heads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cmp-head{display:grid;justify-items:center;text-align:center;gap:2px;border:0;background:var(--surface);border-radius:18px;padding:12px 8px;font:inherit;color:var(--ink);box-shadow:0 1px 0 var(--line)}
+.cmp-head .sack{width:64px;height:80px}
+.cmp-head span{font-size:.72rem;color:var(--accent);font-weight:800;text-transform:uppercase}
+.cmp-wrap{background:var(--surface);border-radius:18px;overflow:hidden}
+.cmp-t{width:100%;border-collapse:collapse;table-layout:fixed;display:table}
+.cmp-t th,.cmp-t td{padding:10px 8px;border-bottom:1px solid var(--line);font-size:.9rem;vertical-align:top}
+.cmp-t th{text-align:left;color:var(--muted);font-weight:600;width:34%}
+.cmp-t td{text-align:center;font-family:var(--f-num);font-weight:700}
+.cmp-t td.hi{color:var(--accent);background:var(--accent-soft)}
+.cmp-t tr:last-child th,.cmp-t tr:last-child td{border-bottom:0}
+.cmp-v{background:var(--sunken);border-radius:14px;padding:12px;margin:0}
 </style>
+<div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
+<div id="cmp-bar" hidden></div>
 <div id="rotate" aria-live="polite"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Gira il telefono in verticale<small>Il Banco del Pane funziona solo in verticale.</small></div></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1531,8 +1596,8 @@ function flourCard(f){
   const wTxt = f.w ? (f.w[0]===f.w[1] ? f.w[0] : `${f.w[0]}–${f.w[1]}`) : (f.c==="sg" ? "—" : "≈" + fmt(Math.round(W/10)*10));
   const pTxt = f.p != null ? fmt(p,1) + "%" : "≈" + fmt(p,1) + "%";
   const src = [...new Set([f.wSrc, f.pSrc].filter(k => SOURCES[k]))];
-  return `<article class="fcard">
-    <div class="fcard-h"><div><div class="m">${esc(f.b)}</div><h4>${esc(f.n)}</h4></div>${f.mine?'<span class="chip mine">aggiunta da te</span>':""}</div>
+  return `<article class="fcard" data-open="${f.id}" tabindex="0">
+    <div class="fcard-h"><div><div class="m">${esc(f.b)}</div><h4>${esc(f.n)}</h4></div>${f.mine?'<span class="chip mine">aggiunta da te</span>':""}<span class="open-hint" aria-hidden="true">›</span></div>
     <div class="chips"><span class="chip">${esc(CATS[f.c].l)}</span></div>
     <div class="fstats">
       <div class="fstat"><span>Proteine</span><b>${pTxt}</b>${srcChip(f.pSrc)}</div>
@@ -1545,6 +1610,7 @@ function flourCard(f){
     ${src.length ? `<p class="small">Fonte: ${src.map(k => `<a href="${SOURCES[k].u}" target="_blank" rel="noopener">${esc(SOURCES[k].t)}</a>`).join(" · ")}</p>` : (f.gen ? `<p class="small">Valori tipici della categoria, non di un prodotto: inserisci la tua farina per dati precisi.</p>` : "")}
     <div class="btn-row">
       <button class="btn primary" type="button" data-use="${f.id}">Usa nell'impasto</button>
+      <button class="btn" type="button" data-cmp="${f.id}" aria-pressed="${cmpSel.includes(f.id)}">${cmpSel.includes(f.id) ? "✓ Nel confronto" : "Confronta"}</button>
       <button class="btn" type="button" data-edit="${f.id}">${f.mine?"Modifica":"Correggi i valori"}</button>
       ${f.mine?`<button class="btn" type="button" data-del="${f.id}">Elimina</button>`:""}
     </div>
@@ -1556,10 +1622,163 @@ function renderFlourList(){
   $("#f-list").innerHTML = list.length ? list.map(flourCard).join("") : `<div class="empty">${fFilter==="mie"?"Non hai ancora aggiunto farine. Usa il modulo qui sotto.":"Nessuna farina trovata. Aggiungila tu con il modulo qui sotto."}</div>`;
 }
 $("#f-list").addEventListener("click", e => {
+  const cb = e.target.closest("[data-cmp]"); if (cb){ toggleCmp(cb.dataset.cmp); return; }
+  const op = e.target.closest("[data-open]");
+  if (op && !e.target.closest("button,a")){ openFlour(op.dataset.open); return; }
   const u = e.target.closest("[data-use]"), ed = e.target.closest("[data-edit]"), d = e.target.closest("[data-del]");
   if (u){ const f = flourById(u.dataset.use); if (S.example){ S.rows = []; S.example = false; $("#ex-flag").hidden = true; } S.rows.push({id:f.id, g: S.rows.length ? 200 : 500}); save(); renderRows(); compute(); toast(`${f.n} aggiunta all'impasto`); go("impasto"); }
   if (ed){ fillForm(flourById(ed.dataset.edit)); }
   if (d){ const id = d.dataset.del; custom = custom.filter(f => f.id !== id); store.set("bdp_custom", custom); S.rows = S.rows.filter(r => r.id !== id); if (!S.rows.length) S.rows = DEFAULT.rows.map(r=>({...r})); save(); renderRows(); compute(); renderFlourList(); toast("Farina eliminata"); }
+});
+
+/* ===== scheda della farina e confronto ===== */
+let cmpSel = [];
+const CAT_SHORT = {"00":"00","0":"0","man":"Manitoba","1":"Tipo 1","2":"Tipo 2","int":"Integrale","sem":"Semola","semint":"Semola int.","seg":"Segale","farro":"Farro","mono":"Monococco","antico":"Grani antichi","sg":"Senza glutine"};
+const SACK = {"00":"#F7F0E3","0":"#F1E5CC","man":"#EADBBD","1":"#E6D2AC","2":"#D9BC8E","int":"#B48957","sem":"#EECB6E","semint":"#D9AE55","seg":"#8B6A4D","farro":"#CDAA76","mono":"#D7AF63","antico":"#CBAE86","sg":"#EFE6CB"};
+function sackSvg(f){
+  const c = SACK[f.c] || "#EEE", dark = ["int","seg","semint"].includes(f.c);
+  return `<svg class="sack" viewBox="0 0 120 150" aria-hidden="true">
+    <path d="M30 22 Q60 8 90 22 L98 128 Q60 146 22 128 Z" fill="${c}" stroke="rgba(60,30,10,.35)" stroke-width="2"/>
+    <path d="M36 22 Q60 30 84 22" fill="none" stroke="rgba(60,30,10,.35)" stroke-width="2"/>
+    <path d="M46 14 Q60 4 74 14" fill="none" stroke="rgba(60,30,10,.45)" stroke-width="3" stroke-linecap="round"/>
+    <rect x="30" y="62" width="60" height="38" rx="6" fill="${dark ? "rgba(255,248,236,.92)" : "rgba(120,55,15,.88)"}"/>
+    <text x="60" y="87" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="800" font-size="${CAT_SHORT[f.c].length > 7 ? 11 : 16}" fill="${dark ? "#5A3517" : "#FFF3E6"}">${esc(CAT_SHORT[f.c])}</text>
+    ${[0,1,2,3,4,5].map(i => `<circle cx="${40 + (i*13)%44}" cy="${112 + (i%2)*8}" r="1.6" fill="rgba(60,30,10,.25)"/>`).join("")}
+  </svg>`;
+}
+function strengthOf(f){
+  if (f.c === "sg") return {l:"Nessuna maglia", k:0};
+  const W = wOf(f);
+  if (W < 180) return {l:"Debole", k:1}; if (W < 260) return {l:"Media", k:2};
+  if (W < 320) return {l:"Forte", k:3}; if (W < 360) return {l:"Molto forte", k:4}; return {l:"Fortissima", k:5};
+}
+function usesOf(f){
+  const W = wOf(f);
+  if (f.c === "sg") return ["Solo in piccola parte, in miscela con farine di grano"];
+  if (f.c === "seg") return ["Pane di segale (meglio con lievito madre)", "In miscela al 10–30% per sapore e conservazione"];
+  if (f.c === "sem" || f.c === "semint") return ["Pane di semola", "In miscela per pizza in teglia e focaccia", "Mollica gialla, si conserva bene"];
+  if (f.c === "int" || f.c === "2") return ["Pane rustico", "In miscela al 20–40% per sapore", W >= 260 ? "Regge anche una notte in frigo" : "Meglio lievitazioni in giornata"];
+  if (f.c === "farro" || f.c === "mono" || f.c === "antico") return ["Pane e focacce in giornata", "Impasti poco lavorati e lievitazioni brevi"];
+  if (W < 180) return ["Dolci, biscotti, frolle", "Pane con lievitazione breve"];
+  if (W < 260) return ["Pane e pizza in giornata", "Focaccia con lievitazione breve"];
+  if (W < 320) return ["Pane, pizza e focaccia", "Una notte in frigo", "Impasti idratati fino al 70–75%"];
+  return ["Lievitazioni lunghe e due notti in frigo", "Impasti molto idratati", "Da sola è tenace: spesso si taglia con una farina più debole"];
+}
+function windowOf(f){
+  const W = wOf(f), tol = toleranceOf(W), T = clamp(S.temp || 22, 10, 36), fr = fRate(T);
+  const room = {lo: 2.5 / fr, hi: tol / fr};
+  const left = tol - 2.5;
+  const fridge = left <= 0 ? 0 : Math.min(72, fridgeHoursFor(left));
+  return {T, room, fridge, tol};
+}
+function barHtml(label, txt, pct, opt = {}){
+  const a = clamp(pct[0], 0, 100), b = clamp(pct[1] ?? pct[0], 0, 100);
+  return `<div class="fbar"><div class="fbar-h"><span>${label}</span><b>${txt}</b>${opt.chip || ""}</div>
+    <div class="fbar-t">${b - a > 1 ? `<i style="left:${a}%;width:${b-a}%"></i>` : `<i class="pt" style="left:calc(${a}% - 6px)"></i>`}</div>
+    ${opt.scale ? `<div class="fbar-s">${opt.scale.map(x => `<span>${x}</span>`).join("")}</div>` : ""}</div>`;
+}
+function similarOf(f){
+  const W = wOf(f), g = CATS[f.c].g;
+  return allFlours().filter(x => x.id !== f.id && CATS[x.c].g === g && x.c !== "sg").sort((a, b) => Math.abs(wOf(a) - W) - Math.abs(wOf(b) - W)).slice(0, 3);
+}
+function openSheet(html, label){
+  const sh = $("#fsheet");
+  $("#fsheet-body").innerHTML = html; sh.setAttribute("aria-label", label);
+  sh.hidden = false; document.body.classList.add("sheet-open");
+  $("#fsheet-body").scrollTop = 0;
+}
+function closeSheet(){ $("#fsheet").hidden = true; document.body.classList.remove("sheet-open"); }
+function openFlour(id){
+  const f = flourById(id); if (!f) return;
+  const W = wOf(f), P = protOf(f), h = hydroOf(f), st = strengthOf(f), win = windowOf(f);
+  const wTxt = f.c === "sg" ? "—" : f.w ? (f.w[0] === f.w[1] ? f.w[0] : `${f.w[0]}–${f.w[1]}`) : "≈ " + fmt(Math.round(W/10)*10);
+  const src = [...new Set([f.wSrc, f.pSrc].filter(k => SOURCES[k]))];
+  const sim = similarOf(f);
+  openSheet(`
+    <div class="fs-hero">
+      ${sackSvg(f)}
+      <div><div class="fs-brand">${esc(f.b)}</div><h2>${esc(f.n)}</h2>
+        <div class="chips"><span class="chip">${esc(CATS[f.c].l)}</span>${f.mine ? '<span class="chip mine">aggiunta da te</span>' : ""}</div></div>
+    </div>
+    <div class="fs-strength k${st.k}"><span>Forza</span><b>${st.l}</b><div class="dots">${[1,2,3,4,5].map(i => `<i class="${i <= st.k ? "on" : ""}"></i>`).join("")}</div></div>
+    <section class="fs-card">
+      ${f.c === "sg" ? "" : barHtml("Forza W", wTxt, f.w ? [f.w[0]/4.5, f.w[1]/4.5] : [W/4.5], {chip: srcChip(f.wSrc), scale:["0","150","300","450"]})}
+      ${barHtml("Proteine", (f.p == null ? "≈ " : "") + fmt(P,1) + "%", [(P-6)*10], {chip: srcChip(f.pSrc), scale:["6%","11%","16%"]})}
+      ${f.c === "sg" ? "" : barHtml("Acqua per il pane", fmt(h.min) + "–" + fmt(h.max) + "%", [(h.min-50)/50*100, (h.max-50)/50*100], {chip:'<span class="chip est">stima</span>', scale:["50%","75%","100%"]})}
+      ${f.pl || f.ass ? `<p class="small">${f.pl ? "P/L " + esc(f.pl) + " (equilibrio tra tenacità ed estensibilità). " : ""}${f.ass ? "Assorbimento al farinografo: " + esc(f.ass) + "." : ""}</p>` : ""}
+    </section>
+    ${f.c === "sg" ? "" : `<section class="fs-card">
+      <h3>Quanto lievita</h3>
+      <div class="fs-win"><div><span>In cucina a ${win.T} °C</span><b>${hm(win.room.lo)} – ${hm(win.room.hi)}</b><small>dalla lievitazione più breve al massimo che la farina regge</small></div>
+      <div><span>In frigo a ${fridgeT()} °C</span><b>${win.fridge >= 8 ? "fino a " + hm(win.fridge) : "sconsigliato"}</b><small>${win.fridge >= 8 ? "dopo circa 2 h e mezza di puntata in cucina" : "la farina è troppo debole per una notte in frigo"}</small></div></div>
+      <p class="small muted">Stime del Banco dalla forza W: la prova vera resta l'impasto.</p>
+    </section>`}
+    <section class="fs-card">
+      <h3>Per cosa usarla</h3>
+      <ul class="fs-uses">${usesOf(f).map(u => `<li>${u}</li>`).join("")}</ul>
+      ${f.note ? `<p>${esc(f.note)}</p>` : ""}
+      <p class="small muted">Per legge: ${esc(CATS[f.c].leg)}.</p>
+    </section>
+    <div class="fs-actions">
+      <button class="btn primary" type="button" data-fs-use="${f.id}">Usa nell'impasto</button>
+      <button class="btn" type="button" data-fs-cmp="${f.id}">${cmpSel.includes(f.id) ? "✓ Nel confronto" : "Confronta con un'altra"}</button>
+      <button class="btn" type="button" data-fs-edit="${f.id}">${f.mine ? "Modifica" : "Correggi i valori"}</button>
+    </div>
+    ${sim.length ? `<section class="fs-card"><h3>Farine simili</h3><div class="fs-sim">${sim.map(x => `<button type="button" class="fs-simb" data-fs-open="${x.id}"><span>${esc(x.b)}</span><b>${esc(x.n)}</b><small>W ${x.w ? fmt(wOf(x)) : "≈ " + fmt(Math.round(wOf(x)/10)*10)} · ${fmt(protOf(x),1)}%</small></button>`).join("")}</div></section>` : ""}
+    ${src.length ? `<p class="small fs-src">Fonte: ${src.map(k => `<a href="${SOURCES[k].u}" target="_blank" rel="noopener">${esc(SOURCES[k].t)}</a>`).join(" · ")}</p>` : (f.gen ? `<p class="small fs-src">Valori tipici della categoria, non di un prodotto.</p>` : "")}
+  `, f.b + " " + f.n);
+}
+function toggleCmp(id){
+  cmpSel = cmpSel.includes(id) ? cmpSel.filter(x => x !== id) : [...cmpSel, id].slice(-2);
+  renderCmpBar(); renderFlourList();
+  if (cmpSel.length === 2) openCompare();
+  else if (cmpSel.length === 1) toast("Ora scegli la seconda farina da confrontare");
+}
+function renderCmpBar(){
+  const bar = $("#cmp-bar");
+  if (!cmpSel.length){ bar.hidden = true; return; }
+  const names = cmpSel.map(id => { const f = flourById(id); return f ? esc(f.n) : ""; });
+  bar.hidden = false;
+  bar.innerHTML = `<span>${names.join(" <i>vs</i> ")}${cmpSel.length < 2 ? " <i>· scegline un'altra</i>" : ""}</span>
+    ${cmpSel.length === 2 ? `<button type="button" class="btn primary" id="cmp-open">Confronta</button>` : ""}<button type="button" class="icon-btn" id="cmp-clear" aria-label="Svuota confronto">${ICON.x}</button>`;
+  const o = $("#cmp-open"); if (o) o.onclick = openCompare;
+  $("#cmp-clear").onclick = () => { cmpSel = []; renderCmpBar(); renderFlourList(); };
+}
+function openCompare(){
+  const [a, b] = cmpSel.map(flourById); if (!a || !b) return;
+  const wa = windowOf(a), wb = windowOf(b);
+  const rows = [
+    ["Tipo", CAT_SHORT[a.c], CAT_SHORT[b.c]],
+    ["Forza", strengthOf(a).l, strengthOf(b).l, strengthOf(a).k, strengthOf(b).k],
+    ["W", a.c === "sg" ? "—" : (a.w ? "" : "≈ ") + fmt(wOf(a)), b.c === "sg" ? "—" : (b.w ? "" : "≈ ") + fmt(wOf(b)), wOf(a), wOf(b)],
+    ["Proteine", (a.p == null ? "≈ " : "") + fmt(protOf(a),1) + "%", (b.p == null ? "≈ " : "") + fmt(protOf(b),1) + "%", protOf(a), protOf(b)],
+    ["Acqua pane", fmt(hydroOf(a).min) + "–" + fmt(hydroOf(a).max) + "%", fmt(hydroOf(b).min) + "–" + fmt(hydroOf(b).max) + "%", hydroOf(a).mid, hydroOf(b).mid],
+    [`Max in cucina a ${wa.T} °C`, hm(wa.room.hi), hm(wb.room.hi), wa.room.hi, wb.room.hi],
+    [`Max in frigo a ${fridgeT()} °C`, wa.fridge >= 8 ? hm(wa.fridge) : "no", wb.fridge >= 8 ? hm(wb.fridge) : "no", wa.fridge, wb.fridge],
+    ["P/L", a.pl ? esc(a.pl) : "—", b.pl ? esc(b.pl) : "—"]
+  ];
+  const cell = (v, me, other) => `<td class="${me != null && other != null && Math.abs(me - other) > 0.01 && me > other ? "hi" : ""}">${v}</td>`;
+  const dW = wOf(b) - wOf(a), dP = protOf(b) - protOf(a);
+  const verdict = Math.abs(dW) < 20 && Math.abs(dP) < 0.6 ? "Sono molto simili: puoi scambiarle quasi senza cambiare la ricetta."
+    : `${esc(dW > 0 ? b.n : a.n)} è più forte (W più alta di ${fmt(Math.abs(dW))}): regge lievitazioni più lunghe. ${["00","0","man","1"].includes(a.c) && ["00","0","man","1"].includes(b.c) ? `${esc(dW > 0 ? a.n : b.n)} è più facile da lavorare e dà una mollica più tenera.` : `Sono farine di tipo diverso: oltre alla forza cambiano sapore, colore e acqua che assorbono (vedi "Per cosa usarla" nelle schede).`}`;
+  openSheet(`
+    <h2 class="cmp-title">Confronto</h2>
+    <div class="cmp-heads">${[a, b].map(f => `<button type="button" class="cmp-head" data-fs-open="${f.id}">${sackSvg(f)}<span>${esc(f.b)}</span><b>${esc(f.n)}</b></button>`).join("")}</div>
+    <div class="cmp-wrap"><table class="cmp-t">${rows.map(r => `<tr><th>${r[0]}</th>${cell(r[1], r[3], r[4])}${cell(r[2], r[4], r[3])}</tr>`).join("")}</table></div>
+    <p class="cmp-v">${verdict}</p>
+    <p class="small muted">In evidenza il valore più alto. Valori con ≈ e acqua e tempi sono stime del Banco.</p>
+    <div class="fs-actions"><button class="btn" type="button" id="cmp-reset">Nuovo confronto</button></div>
+  `, "Confronto farine");
+  $("#cmp-reset").onclick = () => { cmpSel = []; renderCmpBar(); renderFlourList(); closeSheet(); };
+}
+$("#fsheet-close").onclick = closeSheet;
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#fsheet").hidden) closeSheet(); });
+$("#fsheet-body").addEventListener("click", e => {
+  const o = e.target.closest("[data-fs-open]"); if (o){ openFlour(o.dataset.fsOpen); return; }
+  const u = e.target.closest("[data-fs-use]");
+  if (u){ const f = flourById(u.dataset.fsUse); if (S.example){ S.rows = []; S.example = false; $("#ex-flag").hidden = true; } S.rows.push({id:f.id, g: S.rows.length ? 200 : 500}); save(); renderRows(); compute(); closeSheet(); toast(`${f.n} aggiunta all'impasto`); go("impasto"); return; }
+  const c = e.target.closest("[data-fs-cmp]"); if (c){ const id = c.dataset.fsCmp; closeSheet(); if (!cmpSel.includes(id)) toggleCmp(id); return; }
+  const ed = e.target.closest("[data-fs-edit]"); if (ed){ closeSheet(); go("farine"); fillForm(flourById(ed.dataset.fsEdit)); }
 });
 
 /* modulo farina personalizzata */
