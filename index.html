@@ -636,6 +636,34 @@ body.sheet-open{overflow:hidden}
 /* v7: prefermenti */
 .pf-opts{display:grid;gap:8px;margin-top:10px}
 .recipe tr.pf-h td{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);padding-top:12px}
+
+/* v8: avvisi in cima e diario */
+.alerts{display:grid;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+.al-h{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.al summary{list-style:none;display:grid;grid-template-columns:12px minmax(0,1fr) 18px;gap:8px;align-items:center;cursor:pointer;font-weight:600;font-size:.93rem;min-height:32px}
+.al summary::-webkit-details-marker{display:none}
+.al summary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
+.al[open] summary svg{transform:rotate(180deg)}
+.al summary i{width:10px;height:10px;border-radius:50%;background:#D9822B}
+.al.bad summary i{background:#C0392B}
+.al p{margin:4px 0 6px 20px;font-size:.9rem;color:var(--ink)}
+.stars{display:flex;gap:4px}
+.stars button{appearance:none;border:0;background:none;font-size:2rem;line-height:1;color:color-mix(in srgb,var(--muted) 45%,transparent);cursor:pointer;padding:2px 4px;min-width:44px;min-height:44px}
+.stars button.on{color:#E0A526}
+.dy textarea,#dy-note{width:100%;font-size:16px}
+.dy-done{display:grid;gap:8px;background:var(--accent-soft);border-radius:14px;padding:12px;margin-top:6px}
+.dy-done p{margin:0}
+.diary{display:grid;gap:10px}
+.dy-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:grid;gap:8px}
+.dy-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+.dy-top small{display:block;color:var(--muted);font-size:.8rem}
+.dy-stars{color:#E0A526;font-size:1.05rem;letter-spacing:1px;white-space:nowrap}
+.dy-stars span{color:var(--line)}
+.dy-chips{display:flex;flex-wrap:wrap;gap:6px}
+.dy-chips span{font-size:.8rem;background:var(--sunken);border-radius:999px;padding:4px 10px}
+.dy-note{margin:0;font-style:italic}
+.dy-btns{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media print{ .alerts,#diary-box{display:none!important} }
 </style>
 <div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
 <div id="cmp-bar" hidden></div>
@@ -681,6 +709,7 @@ body.sheet-open{overflow:hidden}
     <div class="live" id="home-live"></div>
     <section aria-labelledby="h-form"><div class="sec-h"><h3 id="h-form">Formule</h3></div><div class="formulas" id="home-formulas"></div></section>
     <section id="home-saved-sec" aria-labelledby="h-saved" hidden><div class="sec-h"><h3 id="h-saved">Le mie ricette</h3></div><div class="saved" id="home-saved"></div></section>
+    <section id="home-diary-sec" aria-labelledby="h-diary" hidden><div class="sec-h"><h3 id="h-diary">Diario delle cotture</h3></div><div class="diary" id="home-diary"></div></section>
     <section aria-labelledby="h-pan"><div class="sec-h"><h3 id="h-pan">La tua dispensa</h3><button type="button" class="linkish" data-goto="farine">Farine e confronto</button></div><div class="pantry" id="home-pantry"></div></section>
     <section aria-labelledby="h-tips"><div class="sec-h"><h3 id="h-tips">Prima di iniziare</h3></div><div class="notes" id="home-tips"></div></section>
   </section>
@@ -691,6 +720,7 @@ body.sheet-open{overflow:hidden}
       <p class="lede">Farine e grammi: al resto penso io.</p>
     </div>
     <nav class="ptabs" aria-label="Parti dell'impasto"><button type="button" data-pt="impasto" aria-pressed="true"><b>1</b>Impasto</button><button type="button" data-pt="lievitazione" aria-pressed="false"><b>2</b>Lievitazione</button><button type="button" data-pt="riepilogo" aria-pressed="false"><b>3</b>Riepilogo</button></nav>
+    <div class="alerts" id="top-alerts" hidden></div>
 
     <div class="card" data-p="impasto">
       <div class="sect-h"><h3>Farine</h3><span class="eyebrow" id="ex-flag">Esempio, cambialo</span></div>
@@ -759,6 +789,7 @@ body.sheet-open{overflow:hidden}
 
     <div id="sum-box" data-p="riepilogo"></div>
     <div id="out"></div>
+    <div id="diary-box" data-p="riepilogo"></div>
     <div class="pnext" data-p="impasto"><button type="button" class="btn primary" data-pane-go="lievitazione">Avanti: lievitazione →</button></div>
     <div class="pnext" data-p="lievitazione"><button type="button" class="btn primary" data-pane-go="riepilogo">Avanti: riepilogo e istruzioni →</button></div>
   </section>
@@ -1782,6 +1813,18 @@ function compute(){
   }
   window._day = {M0, started: !!(yS && yS.done), steps: steps.filter(s => s.t >= 0).map(s => ({h:s.h, real:s.real, done:s.done})), notes: notes.filter(n => n[0] === "bad" || n[0] === "warn").slice(0, 2), style: S.style};
   renderFerm(steps, P, yS);
+  { const al = $("#top-alerts"); if (al){
+      const list = [];
+      if (P.why) list.push(["warn", `<b>Orari.</b> ${P.why}`]);
+      if (P.ownMsg) list.push(["warn", `<b>La tua dose.</b> ${P.ownMsg}`]);
+      const oiw = ovenInfo(teg).warn; if (oiw) list.push(["warn", `<b>Forno.</b> ${oiw}`]);
+      notes.filter(n => n[0] === "bad").forEach(n => list.push(n));
+      notes.filter(n => n[0] === "warn").forEach(n => list.push(n));
+      const split = h => { const m = /^<b>(.*?)<\/b>\s*(.*)$/s.exec(h); return m ? [m[1], m[2]] : [h, ""]; };
+      al.hidden = !list.length;
+      al.innerHTML = list.length ? `<div class="al-h">${list.length === 1 ? "Un avviso" : list.length + " avvisi"} per questo impasto</div>` + list.slice(0, 4).map(([k,h]) => { const [t, b] = split(h);
+        return `<details class="al ${k}"><summary><i></i><span>${t}</span>${b ? ICON.chev : ""}</summary>${b ? `<p>${b}</p>` : ""}</details>`; }).join("") + (list.length > 4 ? `<p class="small muted">e altri ${list.length - 4} più sotto, in "Come verrà il tuo pane".</p>` : "") : "";
+  } }
   { const pff = $("#pf-field"); if (pff){ pff.hidden = !yeastLev; $("#pf-opts").hidden = !PF;
       if (PFc){ const d = PF_DEF[PFc.k]; $("#in-pfq").placeholder = d.q; $("#in-pfh").placeholder = d.h; $("#in-pft").placeholder = S.temp || 22; }
       const ps = steps.find(st => st.pf);
@@ -2416,6 +2459,80 @@ function checkShared(){
   $("#si-no").onclick = () => { box.hidden = true; };
 }
 
+/* ===== diario delle cotture ===== */
+let diary = store.get("bdp_diary", []);
+const DY = {
+  rise:[["piatto","Piatto"],["giusto","Giusto"],["esploso","Si è strappato"]],
+  crumb:[["fitta","Fitta"],["giusta","Giusta"],["aperta","Molto aperta"]],
+  crust:[["morbida","Morbida"],["giusta","Giusta"],["dura","Troppo dura"]]
+};
+const dyForm = {r:0, rise:"giusto", crumb:"giusta", crust:"giusta"};
+function diaryTips(e){
+  const t = [];
+  if (e.rise === "piatto") t.push(["water", `Pane piatto: con questa farina l'acqua al ${e.H}% era forse troppa, oppure è lievitato oltre il picco. La prossima volta prova al ${e.H - 3}% e inforna nella prima metà della fascia verde.`]);
+  if (e.rise === "esploso") t.push(["", "Si è strappato: l'appretto era corto. La prossima volta lascialo 20–30 minuti in più, o taglia più profondo."]);
+  if (e.crumb === "fitta" && e.rise !== "piatto") t.push(["water+", `Mollica fitta: prova con un po' più d'acqua (${e.H + 3}%) e aspetta che l'impasto arrivi al picco prima di infornare.`]);
+  if (e.crust === "morbida") t.push(["", "Crosta morbida: cuoci 5–10 minuti in più senza vapore, oppure scegli la crosta Spessa (con i 10 minuti a forno spento)."]);
+  if (e.crust === "dura") t.push(["", "Crosta troppo dura: scegli la crosta Sottile, o togli il pane qualche minuto prima."]);
+  if (!t.length && e.r >= 4) t.push(["", "Venuto bene: salvalo tra le tue ricette per rifarlo uguale."]);
+  return t;
+}
+function renderDiaryForm(){
+  const box = $("#diary-box"); if (!box) return;
+  const seg = (k) => `<div class="seg dy-seg" data-dk="${k}">${DY[k].map(([v,l]) => `<button type="button" data-dv="${v}" aria-pressed="${dyForm[k] === v}">${l}</button>`).join("")}</div>`;
+  box.innerHTML = `<section class="card dy" aria-labelledby="h-dy">
+    <div class="sect-h"><h3 id="h-dy">Com'è venuto?</h3><span class="muted small">diario delle cotture</span></div>
+    <p class="small muted">Dopo averlo assaggiato segna com'è venuto: lo ritrovi in Home, con la ricetta da rifare e un consiglio per la volta dopo.</p>
+    <div class="field"><span class="lbl">Voto</span><div class="stars" role="radiogroup" aria-label="Voto">${[1,2,3,4,5].map(i => `<button type="button" role="radio" aria-checked="${dyForm.r === i}" aria-label="${i} su 5" data-star="${i}" class="${i <= dyForm.r ? "on" : ""}">★</button>`).join("")}</div></div>
+    <div class="field"><span class="lbl">Sviluppo</span>${seg("rise")}</div>
+    <div class="field"><span class="lbl">Mollica</span>${seg("crumb")}</div>
+    <div class="field"><span class="lbl">Crosta</span>${seg("crust")}</div>
+    <div class="field"><label for="dy-note">Note</label><textarea id="dy-note" rows="3" placeholder="Es. un po' acido, ottimo il giorno dopo"></textarea></div>
+    <button type="button" class="btn primary" id="dy-save">Salva nel diario</button>
+    <div id="dy-out"></div>
+  </section>`;
+}
+document.addEventListener("click", e => {
+  const st = e.target.closest("[data-star]"); if (st){ dyForm.r = +st.dataset.star; $$(".stars [data-star]").forEach(b => { const on = +b.dataset.star <= dyForm.r; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(+b.dataset.star === dyForm.r)); }); return; }
+  const dv = e.target.closest(".dy-seg [data-dv]"); if (dv){ const k = dv.parentElement.dataset.dk; dyForm[k] = dv.dataset.dv; dv.parentElement.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === dv))); return; }
+  if (e.target.closest("#dy-save")){
+    if (!lastSum){ return; }
+    if (!dyForm.r){ toast("Dai un voto da 1 a 5 stelle"); return; }
+    const o = snap(), cust = custom.filter(f => o.rows.some(r => r.id === f.id));
+    const H = S.hOver ?? lastSum.H;
+    const ent = {id:"d" + Date.now().toString(36), d: Date.now(), n: lastSum.R.l, s: o, c: cust, r: dyForm.r, rise: dyForm.rise, crumb: dyForm.crumb, crust: dyForm.crust, note: $("#dy-note").value.trim(), H: lastSum.H, W: Math.round(lastSum.A.W), F: Math.round(lastSum.A.F)};
+    ent.tips = diaryTips(ent).map(x => x[1]);
+    diary = [ent, ...diary].slice(0, 100); store.set("bdp_diary", diary);
+    const tips = diaryTips(ent);
+    $("#dy-out").innerHTML = `<div class="dy-done"><b>Salvato nel diario.</b>${tips.map(([k,t]) => `<p>${t}</p>${k === "water" || k === "water+" ? `<button type="button" class="btn" data-dy-h="${k === "water" ? ent.H - 3 : ent.H + 3}">Imposta l'acqua al ${k === "water" ? ent.H - 3 : ent.H + 3}%</button>` : ""}`).join("")}</div>`;
+    Object.assign(dyForm, {r:0, rise:"giusto", crumb:"giusta", crust:"giusta"}); $("#dy-note").value = "";
+    $$(".stars [data-star]").forEach(b => { b.classList.remove("on"); b.setAttribute("aria-checked", "false"); });
+    $$(".dy-seg").forEach(sg => sg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.dv === dyForm[sg.dataset.dk]))));
+    renderDiary(); toast("Cottura salvata nel diario"); return;
+  }
+  const dh = e.target.closest("[data-dy-h]"); if (dh){ S.hOver = +dh.dataset.dyH; markEdited(); compute(); setPane("impasto", true); toast(`Acqua impostata al ${dh.dataset.dyH}%`); return; }
+  const rf = e.target.closest("[data-dy-redo]"); if (rf){ const en = diary.find(x => x.id === rf.dataset.dyRedo); if (en) applyRecipe(en.s, en.c); return; }
+  const dd = e.target.closest("[data-dy-del]"); if (dd){
+    if (dd.dataset.sure !== "1"){ dd.dataset.sure = "1"; dd.textContent = "Tocca ancora per eliminare"; setTimeout(() => { dd.dataset.sure = ""; dd.textContent = "Elimina"; }, 3000); return; }
+    diary = diary.filter(x => x.id !== dd.dataset.dyDel); store.set("bdp_diary", diary); renderDiary(); return; }
+  if (e.target.closest("#dy-all")){ dyAll = !dyAll; renderDiary(); }
+});
+let dyAll = false;
+function renderDiary(){
+  const sec = $("#home-diary-sec"), box = $("#home-diary"); if (!sec || !box) return;
+  sec.hidden = !diary.length;
+  const lab = (k, v) => (DY[k].find(x => x[0] === v) || [, v])[1];
+  const list = dyAll ? diary : diary.slice(0, 3);
+  box.innerHTML = list.map(en => { const d = new Date(en.d);
+    return `<article class="dy-card">
+      <div class="dy-top"><div><b>${esc(en.n)}</b><small>${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} · ${fmt(en.F)} g di farina · acqua ${en.H}% · W ≈ ${en.W}</small></div><span class="dy-stars" aria-label="${en.r} su 5">${"★".repeat(en.r)}<span>${"★".repeat(5 - en.r)}</span></span></div>
+      <div class="dy-chips"><span>Sviluppo: ${lab("rise", en.rise)}</span><span>Mollica: ${lab("crumb", en.crumb)}</span><span>Crosta: ${lab("crust", en.crust)}</span></div>
+      ${en.note ? `<p class="dy-note">${esc(en.note)}</p>` : ""}
+      ${en.tips && en.tips.length ? `<p class="small muted">Per la volta dopo: ${esc(en.tips[0])}</p>` : ""}
+      <div class="dy-btns"><button type="button" class="btn" data-dy-redo="${en.id}">Rifai questa ricetta</button><button type="button" class="linkish" data-dy-del="${en.id}">Elimina</button></div>
+    </article>`; }).join("") + (diary.length > 3 ? `<button type="button" class="linkish" id="dy-all">${dyAll ? "Mostra solo le ultime" : `Vedi tutte (${diary.length})`}</button>` : "");
+}
+
 /* ===== home ===== */
 const FORMULAS = [
   ["pagnotta","crosta e alveoli","peach"],["filone","lungo e croccante","wheat"],["ciabatta","molto idratata","sand"],["cassetta","morbido, a fette","sky"],
@@ -2439,7 +2556,7 @@ function formulaSvg(k){
   return `<svg viewBox="0 0 160 120" aria-hidden="true">${map[k] || map.pagnotta}</svg>`;
 }
 function renderHome(){
-  renderSaved();
+  renderSaved(); renderDiary();
   const live = $("#home-live"), fm = $("#home-formulas"), pa = $("#home-pantry"), ti = $("#home-tips");
   if (!live) return;
   const d = window._day;
@@ -2508,6 +2625,7 @@ function init(){
   $("#ex-flag").hidden = !S.example;
   renderRows(); renderFilters(); renderFlourList(); renderGuides(); compute();
   setPane(S.pane);
+  renderDiaryForm();
   checkShared();
   go(location.hash.slice(1) || "home", true);
 }
