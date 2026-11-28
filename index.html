@@ -632,6 +632,10 @@ body.sheet-open{overflow:hidden}
   .card{box-shadow:none!important;border:1px solid #bbb!important;break-inside:auto;margin-bottom:12px}
   .tl{break-inside:avoid}
 }
+
+/* v7: prefermenti */
+.pf-opts{display:grid;gap:8px;margin-top:10px}
+.recipe tr.pf-h td{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);padding-top:12px}
 </style>
 <div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
 <div id="cmp-bar" hidden></div>
@@ -719,6 +723,16 @@ body.sheet-open{overflow:hidden}
     <div class="card" data-p="lievitazione">
       <h3>Lievito e tempi</h3>
       <div class="field"><span class="lbl">Lievito</span><div class="seg lev-seg" id="seg-lev"></div></div>
+      <div class="field" id="pf-field"><span class="lbl">Prefermento</span><div class="seg" id="seg-pf"></div>
+        <div class="pf-opts" id="pf-opts" hidden>
+          <div class="nums">
+            <div class="field"><label for="in-pfq">Farina nel pref.</label><div class="unit" data-u="%"><input id="in-pfq" type="text" data-num inputmode="decimal"></div></div>
+            <div class="field"><label for="in-pfh">Ore</label><div class="unit" data-u="h"><input id="in-pfh" type="text" data-num inputmode="decimal"></div></div>
+            <div class="field"><label for="in-pft">Temperatura</label><div class="unit" data-u="°C"><input id="in-pft" type="text" data-num inputmode="decimal"></div></div>
+          </div>
+          <p class="small" id="pf-info"></p>
+        </div>
+      </div>
       <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
       <div class="field"><label for="in-ovenat">Voglio infornare alle</label><div class="ovenat-row"><input id="in-ovenat" type="time"><button type="button" class="linkish" id="ovenat-auto" hidden>lo decidi tu</button></div><p class="small muted" id="ovenat-info"></p></div>
       <div class="nums">
@@ -1070,7 +1084,7 @@ const DEFAULT = {
   rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
   style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
   start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
-  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", crust:"classica", ovenAt:null, pane:"impasto", chk:{}, example:true, panW:30, panL:40, panN:1
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", crust:"classica", ovenAt:null, pane:"impasto", chk:{}, pf:"no", pfQ:null, pfH:null, pfT:null, example:true, panW:30, panL:40, panN:1
 };
 let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
 if (!RECIPES[S.style]) S.style = "pagnotta";
@@ -1083,6 +1097,15 @@ const LEVS = [["fresco","Birra fresco"],["secco","Birra secco"],["essic","Madre 
 /* lievito madre essiccato con lievito secco (es. Molino Rossetto): 35 g = 1 cubetto da 25 g di fresco */
 const ESSIC_K = 35/25;
 const MIXERS = [["mano","A mano"],["planetaria","Planetaria"],["spirale","Spirale"]];
+/* prefermenti: poolish (100% acqua) e biga (45%). La dose di lievito viene dallo stesso modello del programma;
+   per la biga, che è asciutta e deve solo gonfiarsi, il modello è tarato sulla biga classica (1% di lievito, 16 ore a 18 °C). */
+const PFS = [["no","Nessuno"],["poolish","Poolish"],["biga","Biga"]];
+const PF_DEF = {poolish:{q:30, h:12, hy:100, k:1}, biga:{q:40, h:16, hy:45, k:0.45}};
+function pfConf(){
+  if (!["fresco","secco","essic"].includes(S.lev) || !PF_DEF[S.pf]) return null;
+  const d = PF_DEF[S.pf];
+  return {k:S.pf, name: S.pf === "poolish" ? "il poolish" : "la biga", q: clamp(S.pfQ ?? d.q, 10, 60), h: clamp(S.pfH ?? d.h, 4, 48), T: clamp(S.pfT ?? (S.temp || 22), 4, 30), hy: d.hy, ek: d.k};
+}
 const ENDDAYS = [[0,"Oggi"],[1,"Domani (notte in frigo)"],[2,"Dopodomani (2 notti in frigo)"]];
 const MALTS = [["no","Niente"],["dia","Diastasico in polvere"],["estr","Estratto diastasico (liquido)"],["nodia","Non diastasico o sciroppo"]];
 const MALT_DEF = {dia:0.2, estr:0.5, nodia:1};
@@ -1356,7 +1379,8 @@ function compute(){
   const share = A.sh(["sem","semint"]), wh = A.wholeShare;
   const aut = share >= 0.3 ? 60 : wh >= 0.3 ? 45 : 30;
   const kneadMin = S.mixer === "planetaria" || S.mixer === "spirale" ? 10 : 15;
-  const overheadH = ((doAut ? aut : 0) + (teg ? 15 : 30)) / 60; /* l'impasto è già dentro la puntata, che parte dal lievito */
+  const PFc = pfConf();
+  const overheadH = ((doAut ? aut : 0) + (teg ? 15 : 30)) / 60 + (PFc ? PFc.h : 0); /* l'impasto è già dentro la puntata, che parte dal lievito */
 
   /* programma per ogni lievito (per i numeri sui pulsanti) */
   const plans = {}; LEVS.forEach(([k]) => plans[k] = makePlan(k, A, overheadH));
@@ -1379,27 +1403,31 @@ function compute(){
   if (S.lev === "lm"){ starter = A.F * P.lmPct/100; stFlour = starter/1.5; stWater = starter - stFlour; }
   if (S.lev === "licoli"){ starter = A.F * P.lmPct/100; stFlour = starter/2; stWater = starter/2; }
   const flourTot = A.F + stFlour;
-  const water = Math.max(0, flourTot * H/100 - stWater);
+  const PF = PFc ? (() => { const f = A.F * PFc.q/100, w = f * PFc.hy/100, eq = PFc.h * fRate(PFc.T) * PFc.ek;
+    const pct = clamp(freshFor(eq), 0.05, 3), k = S.lev === "secco" ? 0.35 : S.lev === "essic" ? ESSIC_K : 1;
+    return Object.assign({}, PFc, {f, w, y: f*pct/100*k, pct: pct*k}); })() : null;
+  const water = Math.max(0, flourTot * H/100 - stWater - (PF ? PF.w : 0));
   const salt = flourTot * saltPct / 100;
-  const yG = yeastLev ? levDose(S.lev, P, A.F) : 0;
+  const yG = yeastLev ? levDose(S.lev, P, A.F - (PF ? PF.f : 0)) : 0;
   const extras = teg && R.extra ? R.extra(A.F).filter(x => !(S.malt !== "no" && /[Mm]alto/.test(x[0]))) : [];
   const maltPct = S.malt === "no" ? 0 : (S.maltPct ?? MALT_DEF[S.malt]);
   $("#malt-box").hidden = S.malt === "no"; if (S.malt !== "no" && document.activeElement !== $("#in-malt")) $("#in-malt").value = showIn(maltPct);
   if (maltPct) extras.push([MALT_NAME[S.malt], A.F*maltPct/100, fmt(maltPct,1)+"%"]);
   const extraIn = extras.filter(x => !/superficie|teglia/.test(x[0])).reduce((a,x) => a + x[1], 0);
-  const total = A.F + water + salt + yG + starter + extraIn;
+  const total = A.F + water + salt + yG + starter + extraIn + (PF ? PF.w + PF.y : 0);
   const hold = H >= 70 ? Math.round(A.F * 0.05 / 5) * 5 : 0;
   renderRecipeInfo(A, H, R);
 
   /* temperatura dell'acqua (formula DDT) */
   const T = P.T, DDT = 25, fr = fricOf();
-  lastFric = {fr, k: usesStarter ? 4 : 3};
+  const four = usesStarter || !!PF;
+  lastFric = {fr, k: four ? 4 : 3};
   renderFricInfo();
   const FT = S.ftemp ?? T;
   $("#in-ftemp").placeholder = String(T);
-  const wTraw = Math.round(usesStarter ? 4*DDT - FT - T - T - fr : 3*DDT - FT - T - fr);
+  const wTraw = Math.round(four ? 4*DDT - FT - T - (PF ? PF.T : T) - fr : 3*DDT - FT - T - fr);
   const wT = clamp(wTraw, 2, 45);
-  const wExplain = `${usesStarter?"4":"3"} × 25 °C (impasto finito) = ${usesStarter?100:75}, meno farina ${FT} °C, cucina ${T} °C${usesStarter?`, lievito ${T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":S.mixer==="spirale"?"della spirale":"delle mani"} ${fmt(fr)} °C${(S.fric||{})[S.mixer] != null ? " (tarato da te)" : " (stima, da tarare)"} = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
+  const wExplain = `${four?"4":"3"} × 25 °C (impasto finito) = ${four?100:75}, meno farina ${FT} °C, cucina ${T} °C${four?`, ${PF ? (PF.k === "poolish" ? "poolish" : "biga") : "lievito"} ${PF ? PF.T : T} °C`:""} e attrito ${S.mixer==="planetaria"?"della planetaria":S.mixer==="spirale"?"della spirale":"delle mani"} ${fmt(fr)} °C${(S.fric||{})[S.mixer] != null ? " (tarato da te)" : " (stima, da tarare)"} = <b>${wTraw} °C</b>${wTraw<4?" (usa acqua di frigo con qualche cubetto di ghiaccio)":wTraw>40?" (non superare i 40 °C: scendi a 38–40 e accetta un impasto un po' più freddo)":""}.`;
 
   /* box programma */
   const t0 = P.startMin;
@@ -1635,8 +1663,17 @@ function compute(){
   const levName = S.lev==="fresco" ? fmt(yG,1)+" g di lievito fresco sbriciolato" : S.lev==="secco" ? fmt(yG,1)+" g di lievito secco" : S.lev==="essic" ? fmt(yG,1)+" g di lievito madre essiccato (mescolato alla farina)" : fmt(starter)+" g di "+(S.lev==="licoli"?"licoli":"lievito madre");
   const extraTxt = extras.filter(x => !/superficie|teglia/.test(x[0])).map(x => `${x[0].toLowerCase().replace(/ \(.*\)/,"")} (${fmt(x[1])} g)`);
   if (usesStarter) steps.push({t:-1, h:"Prima: rinfresca il lievito", p: S.lev==="licoli" ? "Licoli 1:1:1 (lievito:farina:acqua). Usalo quando è raddoppiato e pieno di bolle, di solito in 4–8 ore a 24–26 °C. Rinfrescalo in modo che sia al raddoppio all'ora d'inizio." : "Lievito madre solido 1:1:0,5. Usalo quando è raddoppiato, circa 3–4 ore a 26–28 °C.", g: S.lev==="licoli" ? "licoli" : "lm"});
+  if (PF){
+    const ln = S.lev === "fresco" ? "lievito di birra fresco" : S.lev === "secco" ? "lievito secco" : "lievito madre essiccato";
+    steps.push({t, pf:true, h: PF.k === "poolish" ? "Prepara il poolish" : "Prepara la biga", g:null,
+      p: PF.k === "poolish"
+        ? `Sciogli ${fmt(PF.y,2)} g di ${ln} in ${fmt(PF.w)} g di acqua, aggiungi ${fmt(PF.f)} g di farina (presa dalle tue farine, in proporzione) e mescola fino a una pastella liscia. Copri e tieni a ${PF.T} °C per ${hm(PF.h)}. È al picco quando la superficie è piena di bollicine e la cupola comincia appena ad abbassarsi; profuma di yogurt con una nota alcolica leggera.`
+        : `Sbriciola ${fmt(PF.y,2)} g di ${ln} in ${fmt(PF.f)} g di farina (presa dalle tue farine, in proporzione), aggiungi ${fmt(PF.w)} g di acqua fresca e mescola appena: devono restare grumi slegati, non un impasto. Copri e tieni a ${PF.T} °C per ${hm(PF.h)}. È pronta quando è gonfia e profuma di yogurt; se è raddoppiata o sa di alcol è andata oltre.`});
+    t += PF.h*60;
+  }
   if (doAut){ steps.push({t, h:`Autolisi (${aut} min)`, p:`Mescola le farine con ${fmt(water - hold)} g di acqua a ${wT} °C${hold?`, tieni da parte ${hold} g`:""}. Copri e lascia riposare senza sale e senza lievito.`, g:"autolisi"}); t += aut; }
   steps.push({t, h:"Impasto", p:`${doAut?"Aggiungi":"Mescola farine, acqua a "+wT+" °C e"} ${levName}${extraTxt.find(x=>/malto|zucchero/.test(x)) ? " e "+extraTxt.filter(x=>/malto|zucchero/.test(x)).join(", ") : ""}. Lavora ${kneadMin} min, poi il sale (${fmt(salt,1)} g)${hold?" e a filo l'acqua tenuta da parte":""}${extraTxt.find(x=>/olio/.test(x)) ? ", per ultimo l'olio a filo ("+extraTxt.filter(x=>/olio/.test(x)).join(", ")+")" : ""}. ${S.mixer==="planetaria"?"Gancio a velocità bassa, poi media fino a incordatura.":S.mixer==="spirale"?"Spirale: prima velocità 4–5 min finché la farina ha assorbito l'acqua, poi il sale e seconda velocità fino a incordatura (di solito 5–7 min). A fine impasto misura la temperatura: l'obiettivo è 24–26 °C.":S.style==="teglia"||S.style==="lingue"?"Con un cucchiaio o a mano: basta che sia omogeneo, la forza arriva con le pieghe.":"Slap & fold o in ciotola fino a pasta liscia."}`, g: (S.mixer==="planetaria"||S.mixer==="spirale") ? "impasto" : "slap"});
+  if (PF) steps[steps.length - 1].p = `Unisci ${PF.name} matur${PF.k === "poolish" ? "o" : "a"}. ` + steps[steps.length - 1].p;
   const yeastT = t;
   t += kneadMin;
   const bulkStart = t;
@@ -1733,7 +1770,7 @@ function compute(){
     s.done = S.marks[s.k] != null;
   });
   const lastMarked = markedIdx.length ? markedIdx[markedIdx.length-1] : -1;
-  const nextIdx = steps.findIndex((s,i) => i > lastMarked && s.t >= 0 && !s.done && !s.nomark && (lastMarked >= 0 || s.k === "lievito"));
+  const nextIdx = steps.findIndex((s,i) => i > lastMarked && s.t >= 0 && !s.done && !s.nomark && (lastMarked >= 0 || s.k === "lievito" || s.pf));
   const yS = steps.find(s => s.k === "lievito");
   const hhmm = ms => { const d = new Date(ms); return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); };
   if (markedIdx.length){
@@ -1745,7 +1782,12 @@ function compute(){
   }
   window._day = {M0, started: !!(yS && yS.done), steps: steps.filter(s => s.t >= 0).map(s => ({h:s.h, real:s.real, done:s.done})), notes: notes.filter(n => n[0] === "bad" || n[0] === "warn").slice(0, 2), style: S.style};
   renderFerm(steps, P, yS);
-  { const ing = A.rows.map(r => ({k:"f-" + r.f.id, n:r.f.n, s:r.f.b, g:fmt(r.g) + " g"}));
+  { const pff = $("#pf-field"); if (pff){ pff.hidden = !yeastLev; $("#pf-opts").hidden = !PF;
+      if (PFc){ const d = PF_DEF[PFc.k]; $("#in-pfq").placeholder = d.q; $("#in-pfh").placeholder = d.h; $("#in-pft").placeholder = S.temp || 22; }
+      const ps = steps.find(st => st.pf);
+      $("#pf-info").innerHTML = PF && ps ? `${PF.k === "poolish" ? "Poolish" : "Biga"}: <b>${fmt(PF.f)} g</b> di farina, <b>${fmt(PF.w)} g</b> di acqua e <b>${fmt(PF.y,2)} g</b> di lievito. ${PF.k === "poolish" ? "Lo" : "La"} prepari alle <b>${clock("00:00", ps.real).s}</b> ed è al punto giusto verso le <b>${clock("00:00", ps.real + PF.h*60).s}</b>, quando fai l'impasto. Farina e acqua del prefermento sono già tolte dall'impasto finale.` : ""; } }
+  { const ing = PF ? [{k:"pf-f", n:`${PF.k === "poolish" ? "Poolish" : "Biga"}: farina`, s:"dalle tue farine, in proporzione", g:fmt(PF.f) + " g"}, {k:"pf-w", n:`${PF.k === "poolish" ? "Poolish" : "Biga"}: acqua`, s:"", g:fmt(PF.w) + " g"}, {k:"pf-y", n:`${PF.k === "poolish" ? "Poolish" : "Biga"}: lievito`, s:"", g:fmt(PF.y,2) + " g"}] : [];
+    A.rows.forEach(r => ing.push({k:"f-" + r.f.id, n:r.f.n, s:r.f.b, g:fmt(r.g * (PF ? 1 - PF.q/100 : 1)) + " g"}));
     ing.push({k:"acqua", n:`Acqua a ${wT} °C`, s: hold ? `tieni da parte ${hold} g da aggiungere dopo il sale` : "", g:fmt(water) + " g"});
     ing.push({k:"sale", n:"Sale fino", s:"", g:fmt(salt,1) + " g"});
     if (yeastLev) ing.push({k:"lievito", n:({fresco:"Lievito di birra fresco", secco:"Lievito di birra secco istantaneo", essic:"Lievito madre essiccato"})[S.lev], s:"", g:fmt(yG,1) + " g"});
@@ -1772,7 +1814,7 @@ function compute(){
   out.innerHTML = `
   <section class="hero" aria-label="Idratazione consigliata">
     <div class="eyebrow">Acqua consigliata · ${esc(R.l)}</div>
-    <div class="big"><span class="num">${H}%</span><span class="sub">${fmt(water)} g di acqua${usesStarter?` (+${fmt(stWater)} g nel ${S.lev==="licoli"?"licoli":"lievito madre"})`:""} su ${fmt(flourTot)} g di farina</span></div>
+    <div class="big"><span class="num">${H}%</span><span class="sub">${fmt(water + (PF ? PF.w : 0))} g di acqua${PF ? ` (di cui ${fmt(PF.w)} g nel${PF.k === "poolish" ? " poolish" : "la biga"})` : ""}${usesStarter?` (+${fmt(stWater)} g nel ${S.lev==="licoli"?"licoli":"lievito madre"})`:""} su ${fmt(flourTot)} g di farina</span></div>
     ${hydroChart(lo, hi, H)}
     <div class="ovr"><label for="in-hover">Vuoi provare un'altra idratazione? ${S.hOver!=null?`<button class="linkish" id="reset-h" style="color:inherit">torna a ${rec}%</button>`:""}</label><input id="in-hover" type="range" min="50" max="95" step="1" value="${H}"></div>
   </section>
@@ -1780,8 +1822,14 @@ function compute(){
   <section class="card" aria-labelledby="h-ric">
     <div class="sect-h"><h3 id="h-ric">La ricetta</h3><span class="muted small">${!teg && S.pieces>1?`${S.pieces} pezzi da ~${fmt(total/S.pieces)} g`:`impasto totale ${fmt(total)} g`}</span></div>
     <table class="recipe">
-      ${A.rows.map(r => `<tr><td>${esc(r.f.n)}<small>${esc(r.f.b)}</small></td><td class="pct">${fmt(r.k*100)}%</td><td class="g">${fmt(r.g)} g</td></tr>`).join("")}
-      <tr><td>Acqua${hold?`<small>di cui ${hold} g da aggiungere dopo il sale</small>`:""}<small>a ${wT} °C per un impasto a ~25 °C</small></td><td class="pct">${H}%</td><td class="g">${fmt(water)} g</td></tr>
+      ${PF ? `<tr class="pf-h"><td colspan="3">${PF.k === "poolish" ? "Poolish" : "Biga"} · ${hm(PF.h)} prima, a ${PF.T} °C</td></tr>
+      <tr><td>Farina<small>dalle tue farine, in proporzione</small></td><td class="pct">${fmt(PF.q)}%</td><td class="g">${fmt(PF.f)} g</td></tr>
+      <tr><td>Acqua</td><td class="pct">${PF.hy}%</td><td class="g">${fmt(PF.w)} g</td></tr>
+      <tr><td>${S.lev === "fresco" ? "Lievito di birra fresco" : S.lev === "secco" ? "Lievito secco istantaneo" : "Lievito madre essiccato"}</td><td class="pct">${fmt(PF.pct,2)}%</td><td class="g">${fmt(PF.y,2)} g</td></tr>
+      <tr class="pf-h"><td colspan="3">Impasto finale</td></tr>` : ""}
+      ${A.rows.map(r => `<tr><td>${esc(r.f.n)}<small>${esc(r.f.b)}</small></td><td class="pct">${fmt(r.k*100)}%</td><td class="g">${fmt(r.g * (PF ? 1 - PF.q/100 : 1))} g</td></tr>`).join("")}
+      ${PF ? `<tr><td>${PF.k === "poolish" ? "Poolish" : "Biga"} matur${PF.k === "poolish" ? "o" : "a"}<small>tutto quello preparato</small></td><td class="pct"></td><td class="g">${fmt(PF.f + PF.w + PF.y)} g</td></tr>` : ""}
+      <tr><td>Acqua${PF ? `<small>oltre a quella già nel${PF.k === "poolish" ? " poolish" : "la biga"}</small>` : ""}${hold?`<small>di cui ${hold} g da aggiungere dopo il sale</small>`:""}<small>a ${wT} °C per un impasto a ~25 °C</small></td><td class="pct">${H}%</td><td class="g">${fmt(water)} g</td></tr>
       <tr><td>Sale fino</td><td class="pct">${fmt(saltPct,1)}%</td><td class="g">${fmt(salt,1)} g</td></tr>
       ${levRow}
       ${extras.map(x => `<tr><td>${x[0]}</td><td class="pct">${x[2]}</td><td class="g">${fmt(x[1])} g</td></tr>`).join("")}
@@ -2452,6 +2500,9 @@ function init(){
   segButtons($("#seg-level"), LEVELS, "level");
   renderEq();
   segButtons($("#seg-endday"), ENDDAYS, "endDay");
+  segButtons($("#seg-pf"), PFS, "pf", () => { S.pfQ = S.pfH = S.pfT = null; ["#in-pfq","#in-pfh","#in-pft"].forEach(id => $(id).value = ""); });
+  [["#in-pfq","pfQ"],["#in-pfh","pfH"],["#in-pft","pfT"]].forEach(([id,k]) => { const el = $(id); el.value = showIn(S[k]);
+    el.addEventListener("input", () => { const v = numIn(el.value); S[k] = isNaN(v) ? null : v; markEdited(); compute(); }); });
   { const oa = $("#in-ovenat"); if (oa){ oa.addEventListener("change", () => { if (!oa.value) return; S.ovenAt = toMin(oa.value); markEdited(); compute(); }); $("#ovenat-auto").onclick = () => { S.ovenAt = null; markEdited(); compute(); }; } }
   segButtons($("#seg-malt"), MALTS, "malt");
   $("#ex-flag").hidden = !S.example;
