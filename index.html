@@ -579,6 +579,59 @@ body.sheet-open{overflow:hidden}
 .ovenat-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
 #in-ovenat{font-size:16px}
 .crust-seg button small{display:block;font-weight:500;font-size:.75rem;opacity:.8}
+
+/* v6: schede dell'impasto, riepilogo, ricette salvate, stampa */
+#v-impasto[data-pane="impasto"] [data-p]:not([data-p="impasto"]),
+#v-impasto[data-pane="lievitazione"] [data-p]:not([data-p="lievitazione"]),
+#v-impasto[data-pane="riepilogo"] [data-p]:not([data-p="riepilogo"]){display:none}
+#v-impasto[data-pane="lievitazione"] #out > :not([data-p]),#v-impasto[data-pane="riepilogo"] #out > :not([data-p]){display:none}
+#out{display:grid;gap:18px}
+.ptabs{position:sticky;top:0;z-index:6;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 0 10px;background:var(--bg)}
+.ptabs button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;min-height:44px;font:600 .88rem/1.1 var(--f-body);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px;cursor:pointer}
+.ptabs button b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--sunken);font-size:.75rem}
+.ptabs button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.ptabs button[aria-pressed="true"] b{background:var(--on-accent);color:var(--accent)}
+.pnext{display:grid}
+.sum{gap:14px}
+.sum h3{margin:2px 0}
+.sum-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sv-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:6px}
+.sh-out textarea{width:100%;font-size:14px}
+.sum-sec h4{margin:0 0 6px;font-size:1rem}
+.ing{list-style:none;margin:0;padding:0;display:grid}
+.ing li{border-bottom:1px dashed var(--line)}
+.ing label{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;cursor:pointer}
+.ing input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+.ing small{display:block;color:var(--muted);font-size:.8rem}
+.ing input:checked ~ span{text-decoration:line-through;color:var(--muted)}
+.ing input:checked ~ b{color:var(--muted)}
+.sum-peak{margin:0;font-weight:700}
+.sum-peak::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;background:#2E9E5B}
+.sum-peak.warn::before{background:#D9822B}
+.sum-bake{margin:0;background:var(--sunken);border-radius:12px;padding:10px 12px;font-weight:600}
+.sched{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.sched li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;padding:5px 0;font-size:.93rem}
+.sched li small{display:block;color:var(--muted);font-size:.72rem}
+.sched li b{font-weight:600}
+.sched li.done{color:var(--muted)}
+.sched li.done b::after{content:" ✓"}
+.saved{display:grid;gap:10px}
+.sv-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.sv-card small{display:block;color:var(--muted);font-size:.8rem}
+.sv-btns{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.shared-in{border:2px solid var(--accent)}
+@media print{
+  .tabs,.ptabs,.pnext,header.top,.sum-act,.sv-form,.sh-out,.mk,.mk-info,.fold-ctl,.new-recipe,.toast,#go-steps,#chk-reset,details.g{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .view{display:none!important}
+  #v-impasto{display:block!important}
+  #v-impasto > *{display:none!important}
+  #v-impasto > #sum-box,#v-impasto > #out{display:block!important}
+  #out > *{display:none!important}
+  #out > section[data-p="riepilogo"]{display:block!important}
+  .card{box-shadow:none!important;border:1px solid #bbb!important;break-inside:auto;margin-bottom:12px}
+  .tl{break-inside:avoid}
+}
 </style>
 <div id="fsheet" role="dialog" aria-modal="true" hidden><div class="fs-top"><button type="button" id="fsheet-close">‹ Indietro</button></div><div id="fsheet-body"></div></div>
 <div id="cmp-bar" hidden></div>
@@ -608,6 +661,7 @@ body.sheet-open{overflow:hidden}
 <main id="main">
   <!-- IMPASTO -->
   <section class="view" id="v-home" aria-labelledby="h-home" hidden>
+    <div class="card shared-in" id="shared-in" hidden></div>
     <div class="home-hero">
       <h2 id="h-home">Che cosa inforni oggi?</h2>
       <p>Scegli una formula: farine, acqua, lievito e orari li calcolo io.</p>
@@ -622,6 +676,7 @@ body.sheet-open{overflow:hidden}
     </div>
     <div class="live" id="home-live"></div>
     <section aria-labelledby="h-form"><div class="sec-h"><h3 id="h-form">Formule</h3></div><div class="formulas" id="home-formulas"></div></section>
+    <section id="home-saved-sec" aria-labelledby="h-saved" hidden><div class="sec-h"><h3 id="h-saved">Le mie ricette</h3></div><div class="saved" id="home-saved"></div></section>
     <section aria-labelledby="h-pan"><div class="sec-h"><h3 id="h-pan">La tua dispensa</h3><button type="button" class="linkish" data-goto="farine">Farine e confronto</button></div><div class="pantry" id="home-pantry"></div></section>
     <section aria-labelledby="h-tips"><div class="sec-h"><h3 id="h-tips">Prima di iniziare</h3></div><div class="notes" id="home-tips"></div></section>
   </section>
@@ -631,8 +686,9 @@ body.sheet-open{overflow:hidden}
       <h2 id="h-impasto">Il tuo impasto</h2>
       <p class="lede">Farine e grammi: al resto penso io.</p>
     </div>
+    <nav class="ptabs" aria-label="Parti dell'impasto"><button type="button" data-pt="impasto" aria-pressed="true"><b>1</b>Impasto</button><button type="button" data-pt="lievitazione" aria-pressed="false"><b>2</b>Lievitazione</button><button type="button" data-pt="riepilogo" aria-pressed="false"><b>3</b>Riepilogo</button></nav>
 
-    <div class="card">
+    <div class="card" data-p="impasto">
       <div class="sect-h"><h3>Farine</h3><span class="eyebrow" id="ex-flag">Esempio, cambialo</span></div>
       <div id="flour-rows"></div>
       <div class="btn-row">
@@ -643,7 +699,7 @@ body.sheet-open{overflow:hidden}
       <div id="mix-box" class="mix-box"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-p="impasto">
       <h3>Cosa vuoi fare</h3>
       <div class="field"><span class="lbl">Pane</span><div class="seg" id="seg-style-pane"></div></div>
       <div class="field"><span class="lbl">Focacce e pizze</span><div class="seg" id="seg-style-teglia"></div></div>
@@ -651,7 +707,7 @@ body.sheet-open{overflow:hidden}
       <div class="field"><span class="lbl">La tua esperienza con impasti umidi</span><div class="seg" id="seg-level"></div></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-p="impasto">
       <h3>Attrezzatura</h3>
       <div class="field"><span class="lbl">Forno</span><div class="eq" id="eq-oven"></div></div>
       <div class="ovenline" id="oven-line"></div>
@@ -660,7 +716,7 @@ body.sheet-open{overflow:hidden}
       <div class="field fric"><label for="in-dtemp">Impasto misurato a fine lavoro</label><div class="fric-row"><div class="unit" data-u="°C"><input id="in-dtemp" type="text" data-num inputmode="decimal" placeholder="es. 26"></div><button type="button" class="btn" id="fric-save">Taratura</button></div><p class="small muted" id="fric-info"></p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-p="lievitazione">
       <h3>Lievito e tempi</h3>
       <div class="field"><span class="lbl">Lievito</span><div class="seg lev-seg" id="seg-lev"></div></div>
       <div class="field"><span class="lbl">Voglio il pane</span><div class="seg" id="seg-endday"></div></div>
@@ -687,7 +743,10 @@ body.sheet-open{overflow:hidden}
       <div id="plan-box"></div>
     </div>
 
+    <div id="sum-box" data-p="riepilogo"></div>
     <div id="out"></div>
+    <div class="pnext" data-p="impasto"><button type="button" class="btn primary" data-pane-go="lievitazione">Avanti: lievitazione →</button></div>
+    <div class="pnext" data-p="lievitazione"><button type="button" class="btn primary" data-pane-go="riepilogo">Avanti: riepilogo e istruzioni →</button></div>
   </section>
 
   <!-- FARINE -->
@@ -1011,7 +1070,7 @@ const DEFAULT = {
   rows:[{id:"petra-1111", g:700},{id:"cap-integrale", g:300}],
   style:"pagnotta", level:"intermedio", lev:"fresco", temp:22,
   start:"08:00", endDay:0, ftemp:null, malt:"no", maltPct:null,
-  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", crust:"classica", ovenAt:null, example:true, panW:30, panL:40, panN:1
+  pieces:1, salt:2.0, mixer:"mano", hOver:null, fridgeT:4, myDose:null, crumb:"regolare", oven:"casa", crust:"classica", ovenAt:null, pane:"impasto", chk:{}, example:true, panW:30, panL:40, panN:1
 };
 let S = Object.assign({}, DEFAULT, store.get("bdp_state", {}));
 if (!RECIPES[S.style]) S.style = "pagnotta";
@@ -1686,6 +1745,13 @@ function compute(){
   }
   window._day = {M0, started: !!(yS && yS.done), steps: steps.filter(s => s.t >= 0).map(s => ({h:s.h, real:s.real, done:s.done})), notes: notes.filter(n => n[0] === "bad" || n[0] === "warn").slice(0, 2), style: S.style};
   renderFerm(steps, P, yS);
+  { const ing = A.rows.map(r => ({k:"f-" + r.f.id, n:r.f.n, s:r.f.b, g:fmt(r.g) + " g"}));
+    ing.push({k:"acqua", n:`Acqua a ${wT} °C`, s: hold ? `tieni da parte ${hold} g da aggiungere dopo il sale` : "", g:fmt(water) + " g"});
+    ing.push({k:"sale", n:"Sale fino", s:"", g:fmt(salt,1) + " g"});
+    if (yeastLev) ing.push({k:"lievito", n:({fresco:"Lievito di birra fresco", secco:"Lievito di birra secco istantaneo", essic:"Lievito madre essiccato"})[S.lev], s:"", g:fmt(yG,1) + " g"});
+    else ing.push({k:"madre", n:S.lev === "licoli" ? "Licoli" : "Lievito madre", s:"rinfrescato e al raddoppio", g:fmt(starter) + " g"});
+    extras.forEach((x,i) => ing.push({k:"x" + i, n:x[0], s:"", g:fmt(x[1]) + " g"}));
+    renderSummary({R, teg, A, H, total, ing, steps}); }
   { const bk = steps.find(st => /cottura/i.test(st.h) && !/Accendi/.test(st.h)); window._bakeOff = bk ? bk.t - endMin : 0; }
   const markUI = (s, i) => {
     if (s.t < 0 || s.nomark) return "";
@@ -1741,8 +1807,8 @@ function compute(){
 
 
 
-  <section class="card" aria-labelledby="h-prog">
-    <div class="sect-h"><h3 id="h-prog">La tua giornata</h3><span class="muted small">a ${T} °C${P.mode==="fridge"?` + ${hm(P.fh)} in frigo`:""}</span></div>
+  <section class="card" aria-labelledby="h-prog" data-p="riepilogo">
+    <div class="sect-h"><h3 id="h-prog">Istruzioni passo passo</h3><span class="muted small">a ${T} °C${P.mode==="fridge"?` + ${hm(P.fh)} in frigo`:""}</span></div>
     ${markedIdx.length
       ? `<div class="mk-info">${yS && yS.done ? `Orari ricalcolati da quando hai messo il lievito, alle <b>${hhmm(S.marks.lievito)}</b>.` : "Orari ricalcolati dai passi che hai segnato."} Se un orario è sbagliato, toccalo e correggilo. <button type="button" class="linkish" id="mk-reset">Ricomincia</button></div>`
       : `<div class="mk-info">Quando metti il lievito tocca <b>Ho messo il lievito adesso</b>: da quel momento parte la puntata e ricalcolo tutti gli orari. Puoi segnare anche gli altri passi quando li fai.</div>`}
@@ -1754,7 +1820,7 @@ function compute(){
     <div class="new-recipe"><button type="button" class="btn primary" id="new-recipe">Nuova ricetta</button><p class="small muted">Azzera tutto: farine, grammi, dose, orari segnati e pieghe aggiunte. Restano solo temperatura della cucina e del frigo, planetaria, malto e tipo di lievito.</p></div>
   </section>
 
-  <details class="g">
+  <details class="g" data-p="riepilogo">
     <summary><span><span class="s1">Fonti e metodo</span><span class="s2">Da dove vengono i numeri</span></span>${ICON.chev}</summary>
     <div class="g-body">
       <p><b>Dati delle farine.</b> Proteine e W vengono dalle schede dei mulini, dalle etichette o dai loro distributori (vedi la scheda di ogni farina). Dove manca il W lo stimo dalle proteine.</p>
@@ -1781,7 +1847,7 @@ function compute(){
   const nr = $("#new-recipe"); if (nr) nr.onclick = () => {
     /* azzera la ricetta: farine, dose, orari, pieghe. Restano solo le cose della tua cucina (temperature, planetaria, malto, livello, lievito) */
     const keep = {temp:S.temp, fridgeT:S.fridgeT, mixer:S.mixer, malt:S.malt, level:S.level, lev:S.lev, oven:S.oven, crust:S.crust, fric:S.fric};
-    Object.assign(S, JSON.parse(JSON.stringify(DEFAULT)), keep, {rows:[{id:(S.rows[0]||DEFAULT.rows[0]).id, g:0}], example:false, marks:{}, foldAdj:0, myDose:null, hOver:null, maltPct:null, ftemp:null});
+    Object.assign(S, JSON.parse(JSON.stringify(DEFAULT)), keep, {rows:[{id:(S.rows[0]||DEFAULT.rows[0]).id, g:0}], example:false, marks:{}, chk:{}, foldAdj:0, myDose:null, hOver:null, maltPct:null, ftemp:null, pane:"impasto"});
     save(); scrollTo(0, 0); location.hash = "impasto"; location.reload(); };
   const mr = $("#mk-reset"); if (mr) mr.onclick = () => keepY(() => { S.marks = {}; S.foldAdj = 0; });
   const fa = $("#fold-add"); if (fa) fa.onclick = () => keepY(() => { S.foldAdj = (S.foldAdj || 0) + 1; });
@@ -1963,6 +2029,7 @@ function renderFerm(steps, P, yS){
   const yOf = m => m <= 1 ? (1 - Math.cos(Math.PI*m))/2 : Math.max(0.12, 1 - 0.6*Math.pow((m - 1)/span, 1.3));
   const tAt = (arr, mm) => { const e = arr.find(q => q[1] >= mm*need); return e ? e[0] : null; };
   const tPeak = tAt(AW, 1), w0 = tAt(AW, 0.92), w1 = tAt(AW, 1.08), mB = valAt(AW, tB)/need;
+  window._fermV = {tB, mB, tPeak};
   const X0 = 8, X1 = 332, Y0 = 22, Y1 = 120;
   const x = t => X0 + (clamp(t, tY, end) - tY)/(end - tY)*(X1 - X0), y = v => Y1 - v*(Y1 - Y0);
   const line = AW.map(([t,v],i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + y(yOf(v/need)).toFixed(1)).join(" ");
@@ -2194,6 +2261,113 @@ $("#custom-form").addEventListener("submit", e => {
   $("#f-list").scrollIntoView({behavior:"smooth"});
 });
 
+/* ===== schede dell'impasto: Impasto, Lievitazione, Riepilogo ===== */
+const PANES = ["impasto","lievitazione","riepilogo"];
+function setPane(pn, scroll){
+  if (!PANES.includes(pn)) pn = "impasto";
+  S.pane = pn; save();
+  const v = $("#v-impasto"); if (v) v.dataset.pane = pn;
+  $$(".ptabs [data-pt]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pt === pn)));
+  if (scroll){ const t = $(".ptabs"); window.scrollTo(0, 0); }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-pt],[data-pane-go]"); if (!b) return; setPane(b.dataset.pt || b.dataset.paneGo, true); });
+
+/* ===== riepilogo: ingredienti da spuntare, programma, picco, cottura, salva / condividi / stampa ===== */
+let lastSum = null;
+function renderSummary(o){
+  const box = $("#sum-box"); if (!box) return;
+  const {R, teg, A, H, total, ing, steps} = o;
+  lastSum = o;
+  if (!S.chk || typeof S.chk !== "object") S.chk = {};
+  const done = ing.filter(i => S.chk[i.k]).length;
+  const clk = t => clock("00:00", t);
+  const sched = steps.filter(st => st.t >= 0 && !st.fold).map(st => { const c = clk(st.real); return `<li class="${st.done ? "done" : ""}"><span class="num">${c.s}${c.day ? `<small>${dayW(c.day)}</small>` : ""}</span><b>${st.h.split(" · ")[0]}</b></li>`; }).join("");
+  const fv = window._fermV, oi = ovenInfo(teg);
+  const peak = fv ? (fv.mB >= 0.92 && fv.mB <= 1.08 ? `Alle ${clk(fv.tB).s}: al picco` : fv.mB < 0.92 ? `Alle ${clk(fv.tB).s}: l'impasto è ancora giovane` : `Alle ${clk(fv.tB).s}: oltre il picco`) : "";
+  const bakeLine = teg ? (oi.bake ? oi.bake.split(":")[0] : `Forno a ${oi.temp}: tempi nei passaggi`) : `Cuoci ${crustBake().line} a ${oi.temp}, crosta ${({sottile:"sottile",classica:"classica",rustica:"spessa"})[S.crust || "classica"]}`;
+  box.innerHTML = `<section class="card sum" aria-labelledby="h-sum">
+    <div class="sum-h"><div><div class="eyebrow">Riepilogo</div><h3 id="h-sum">${esc(R.l)}</h3><p class="small muted">${fmt(total)} g di impasto · acqua ${H}% · W ≈ ${fmt(A.W)}</p></div></div>
+    <div class="sum-act"><button type="button" class="btn primary" id="sv-open">Salva ricetta</button><button type="button" class="btn" id="sh-btn">Condividi</button><button type="button" class="btn" id="pr-btn">Stampa</button></div>
+    <form id="sv-form" class="sv-form" hidden><label for="sv-name" class="lbl">Nome della ricetta</label><div class="sv-row"><input id="sv-name" type="text" maxlength="40" autocomplete="off"><button type="submit" class="btn primary">Salva</button></div></form>
+    <div class="sh-out" id="sh-out" hidden><p class="small">Copia questo testo e mandalo a chi vuoi: il link apre la ricetta nell'app.</p><textarea id="sh-text" rows="6" readonly></textarea></div>
+    <div class="sum-sec"><h4>Ingredienti <span class="muted small" id="chk-n">${done}/${ing.length}</span></h4>
+      <ul class="ing">${ing.map(i => `<li><label><input type="checkbox" data-chk="${i.k}" ${S.chk[i.k] ? "checked" : ""}><span>${esc(i.n)}${i.s ? `<small>${esc(i.s)}</small>` : ""}</span><b class="num">${i.g}</b></label></li>`).join("")}</ul>
+      ${done ? `<button type="button" class="linkish" id="chk-reset">Togli le spunte</button>` : ""}</div>
+    ${peak ? `<p class="sum-peak ${fv.mB >= 0.92 && fv.mB <= 1.08 ? "good" : "warn"}">${peak}</p>` : ""}
+    <p class="sum-bake">${bakeLine}</p>
+    <div class="sum-sec"><h4>Programma</h4><ol class="sched">${sched}</ol></div>
+    <button type="button" class="btn" id="go-steps">Istruzioni passo passo ↓</button>
+  </section>`;
+  $("#go-steps").onclick = () => { const h = $("#h-prog"); if (h) h.scrollIntoView({behavior:"smooth"}); };
+  $("#sv-open").onclick = () => { const f = $("#sv-form"); f.hidden = !f.hidden; if (!f.hidden){ const d = new Date(); $("#sv-name").value = `${R.l} ${d.getDate()}/${d.getMonth()+1}`; $("#sv-name").focus(); } };
+  $("#sv-form").onsubmit = e => { e.preventDefault(); const n = $("#sv-name").value.trim() || R.l; saveRecipe(n); $("#sv-form").hidden = true; };
+  $("#sh-btn").onclick = () => shareRecipe();
+  $("#pr-btn").onclick = () => { setPane("riepilogo"); setTimeout(() => window.print(), 50); };
+  const cr = $("#chk-reset"); if (cr) cr.onclick = () => { S.chk = {}; save(); renderSummary(lastSum); };
+}
+document.addEventListener("change", e => { const c = e.target.closest && e.target.closest("[data-chk]"); if (!c) return;
+  if (!S.chk || typeof S.chk !== "object") S.chk = {};
+  if (c.checked) S.chk[c.dataset.chk] = true; else delete S.chk[c.dataset.chk];
+  save(); const n = $("#chk-n"); if (n && lastSum) n.textContent = `${lastSum.ing.filter(i => S.chk[i.k]).length}/${lastSum.ing.length}`; });
+
+/* ===== le mie ricette e ricette condivise ===== */
+const SNAP_SKIP = ["example","start","marks","chk","fric","pane"];
+function snap(){ const o = {}; for (const k in DEFAULT) if (!SNAP_SKIP.includes(k)) o[k] = S[k]; o.foldAdj = S.foldAdj || 0; return JSON.parse(JSON.stringify(o)); }
+let savedR = store.get("bdp_saved", []);
+function saveRecipe(name){
+  const o = snap(), cust = custom.filter(f => o.rows.some(r => r.id === f.id));
+  savedR = [{id: "r" + Date.now().toString(36), n: name, d: Date.now(), s: o, c: cust}, ...savedR].slice(0, 40);
+  store.set("bdp_saved", savedR); renderSaved(); toast(`Salvata in "Le mie ricette": ${name}`);
+}
+function applyRecipe(o, cust){
+  (cust || []).forEach(f => { if (!flourById(f.id)) custom.push(f); });
+  store.set("bdp_custom", custom);
+  const keep = {fric: S.fric};
+  Object.assign(S, JSON.parse(JSON.stringify(DEFAULT)), o, keep, {example:false, marks:{}, chk:{}, pane:"impasto"});
+  S.rows = (S.rows || []).filter(r => flourById(r.id)); if (!S.rows.length) S.rows = DEFAULT.rows.map(r => ({...r}));
+  save(); try { history.replaceState(null, "", "#impasto"); } catch(_) { location.hash = "impasto"; } location.reload();
+}
+function renderSaved(){
+  const sec = $("#home-saved-sec"), box = $("#home-saved"); if (!sec || !box) return;
+  sec.hidden = !savedR.length;
+  box.innerHTML = savedR.map(r => { const R = RECIPES[r.s.style] || RECIPES.pagnotta, F = (r.s.rows || []).reduce((a,x) => a + (x.g || 0), 0), d = new Date(r.d);
+    return `<div class="sv-card"><div><b>${esc(r.n)}</b><small>${esc(R.l)} · ${fmt(F)} g di farina · ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}</small></div>
+      <div class="sv-btns"><button type="button" class="btn primary" data-sv-open="${r.id}">Apri</button><button type="button" class="linkish" data-sv-del="${r.id}">Elimina</button></div></div>`; }).join("");
+}
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-sv-open]"); if (o){ const r = savedR.find(x => x.id === o.dataset.svOpen); if (r) applyRecipe(r.s, r.c); return; }
+  const d = e.target.closest("[data-sv-del]"); if (d){
+    if (d.dataset.sure !== "1"){ d.dataset.sure = "1"; d.textContent = "Tocca ancora per eliminare"; setTimeout(() => { d.dataset.sure = ""; d.textContent = "Elimina"; }, 3000); return; }
+    savedR = savedR.filter(x => x.id !== d.dataset.svDel); store.set("bdp_saved", savedR); renderSaved(); toast("Ricetta eliminata"); }
+});
+const b64e = str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64d = str => decodeURIComponent(escape(atob(str.replace(/-/g, "+").replace(/_/g, "/"))));
+function shareRecipe(){
+  if (!lastSum) return;
+  const o = snap(), cust = custom.filter(f => o.rows.some(r => r.id === f.id));
+  const url = location.href.split("#")[0] + "#r=" + b64e(JSON.stringify({v:1, n: lastSum.R.l, s: o, c: cust}));
+  const text = `${lastSum.R.l} · Banco del Pane\n` + lastSum.ing.map(i => `- ${i.n}: ${i.g}`).join("\n") + `\n\nApri la ricetta con tutti gli orari:\n${url}`;
+  const fallback = () => { const out = $("#sh-out"), ta = $("#sh-text"); out.hidden = false; ta.value = text; ta.focus(); ta.select(); };
+  if (navigator.share){ navigator.share({title: lastSum.R.l, text}).catch(err => { if (err && err.name !== "AbortError") fallback(); }); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(() => toast("Ricetta copiata: incollala dove vuoi"), fallback); return; }
+  fallback();
+}
+function checkShared(){
+  const h = location.hash; if (!h.startsWith("#r=")) return;
+  let data = null; try { data = JSON.parse(b64d(h.slice(3))); } catch(_) {}
+  try { history.replaceState(null, "", "#home"); } catch(_) {}
+  const box = $("#shared-in"); if (!box) return;
+  if (!data || !data.s || !Array.isArray(data.s.rows)){ box.hidden = false; box.innerHTML = `<p>Il link della ricetta non è valido.</p>`; return; }
+  const R = RECIPES[data.s.style] || RECIPES.pagnotta, F = data.s.rows.reduce((a,x) => a + (x.g || 0), 0);
+  box.hidden = false;
+  box.innerHTML = `<div class="eyebrow">Ricetta ricevuta</div><h3>${esc(data.n || R.l)}</h3><p class="small">${esc(R.l)} con ${fmt(F)} g di farina. Aprendola sostituisci la ricetta che hai adesso (puoi prima salvarla in "Le mie ricette").</p>
+    <div class="sum-act"><button type="button" class="btn primary" id="si-open">Apri</button><button type="button" class="btn" id="si-save">Salva tra le mie</button><button type="button" class="linkish" id="si-no">Ignora</button></div>`;
+  $("#si-open").onclick = () => applyRecipe(data.s, data.c);
+  $("#si-save").onclick = () => { (data.c || []).forEach(f => { if (!flourById(f.id)) custom.push(f); }); store.set("bdp_custom", custom);
+    savedR = [{id:"r" + Date.now().toString(36), n: data.n || R.l, d: Date.now(), s: data.s, c: data.c || []}, ...savedR]; store.set("bdp_saved", savedR); renderSaved(); box.hidden = true; toast("Salvata in \"Le mie ricette\""); };
+  $("#si-no").onclick = () => { box.hidden = true; };
+}
+
 /* ===== home ===== */
 const FORMULAS = [
   ["pagnotta","crosta e alveoli","peach"],["filone","lungo e croccante","wheat"],["ciabatta","molto idratata","sand"],["cassetta","morbido, a fette","sky"],
@@ -2217,6 +2391,7 @@ function formulaSvg(k){
   return `<svg viewBox="0 0 160 120" aria-hidden="true">${map[k] || map.pagnotta}</svg>`;
 }
 function renderHome(){
+  renderSaved();
   const live = $("#home-live"), fm = $("#home-formulas"), pa = $("#home-pantry"), ti = $("#home-tips");
   if (!live) return;
   const d = window._day;
@@ -2231,7 +2406,7 @@ function renderHome(){
       ${next ? `<div class="live-main"><div class="clock">${c.s}<small>${mins > 0 ? (mins >= 60 ? "tra " + hm(mins/60) : `tra ${mins} min`) : mins > -20 ? "adesso" : "in ritardo"}</small></div><div><b>${next.h}</b><span>${bake ? "inforni alle " + clock("00:00", bake.real).s : ""}</span></div></div>` : `<div class="live-main"><div><b>Tutti i passi sono fatti. Buon pane!</b></div></div>`}
       <div class="prog" aria-label="Passi fatti: ${doneN} di ${all.length}">${all.map((s,i) => `<i class="${s.done ? "d" : s === next ? "n" : ""}"></i>`).join("")}</div>
       <button class="btn primary" type="button" id="home-open">Apri la giornata</button>`;
-    $("#home-open").onclick = () => { go("impasto"); setTimeout(() => { const h = $("#h-prog"); if (h) h.scrollIntoView({behavior:"smooth"}); }, 60); };
+    $("#home-open").onclick = () => { go("impasto"); setPane("riepilogo"); setTimeout(() => { const h = $("#h-prog"); if (h) h.scrollIntoView({behavior:"smooth"}); }, 60); };
   } else {
     live.hidden = false;
     live.innerHTML = `<div class="live-h idle"><i></i>Nessun pane in corso</div><div class="live-main"><div><b>Scegli una formula qui sotto</b><span>Quando metti il lievito, qui vedi il prossimo passo e l'ora.</span></div></div>`;
@@ -2244,7 +2419,7 @@ function renderHome(){
   ti.innerHTML = tips.map(([k,t]) => `<div class="note ${k}">${ICON[k]}<p>${t}</p></div>`).join("");
 }
 $("#home-formulas").addEventListener("click", e => { const b = e.target.closest("[data-formula]"); if (!b) return;
-  S.style = b.dataset.formula; S.hOver = null; markEdited(); renderStyleSegs(); compute(); go("impasto"); toast(`${RECIPES[S.style].l}: ora scegli le farine`); });
+  S.style = b.dataset.formula; S.hOver = null; markEdited(); renderStyleSegs(); compute(); go("impasto"); setPane("impasto"); toast(`${RECIPES[S.style].l}: ora scegli le farine`); });
 $("#home-pantry").addEventListener("click", e => { const b = e.target.closest("[data-fs-home]"); if (b){ openFlour(b.dataset.fsHome); return; }
   if (e.target.closest("#home-addflour")){ go("farine"); setTimeout(() => $("#custom-card").scrollIntoView({behavior:"smooth"}), 60); } });
 setInterval(() => { if (!$("#v-home").hidden) renderHome(); }, 60000);
@@ -2260,7 +2435,7 @@ function go(v, noHash){
 }
 $$(".tab").forEach(t => t.onclick = () => go(t.dataset.view));
 document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g) go(g.dataset.goto); });
-window.addEventListener("hashchange", () => go(location.hash.slice(1), true));
+window.addEventListener("hashchange", () => { checkShared(); go(location.hash.slice(1), true); });
 
 function openGuide(key){
   const target = document.getElementById("g-" + key);
@@ -2281,6 +2456,8 @@ function init(){
   segButtons($("#seg-malt"), MALTS, "malt");
   $("#ex-flag").hidden = !S.example;
   renderRows(); renderFilters(); renderFlourList(); renderGuides(); compute();
+  setPane(S.pane);
+  checkShared();
   go(location.hash.slice(1) || "home", true);
 }
 
